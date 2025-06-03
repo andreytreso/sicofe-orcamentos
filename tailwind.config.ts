@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// SICOFE Brand Colors
+				// SICOFE Brand Colors - apenas azul e branco
 				sicofe: {
 					blue: '#2563eb',
 					'blue-dark': '#1d4ed8',
@@ -74,7 +74,6 @@ export default {
 					'gray-dark': '#334155',
 					green: '#059669',
 					'green-light': '#10b981',
-					orange: '#ea580c',
 					red: '#dc2626',
 					white: 'rgba(255, 255, 255, 0.95)'
 				}
