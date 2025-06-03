@@ -62,7 +62,7 @@ export default function Empresas() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-sicofe-blue/10 rounded-lg flex items-center justify-center">
@@ -76,7 +76,7 @@ export default function Empresas() {
           </CardContent>
         </Card>
 
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-sicofe-green/10 rounded-lg flex items-center justify-center">
@@ -90,11 +90,11 @@ export default function Empresas() {
           </CardContent>
         </Card>
 
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-sicofe-orange/10 rounded-lg flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-sicofe-orange" />
+              <div className="w-12 h-12 bg-sicofe-blue/10 rounded-lg flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-sicofe-blue" />
               </div>
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Orçamentos Ativos</p>
@@ -106,7 +106,7 @@ export default function Empresas() {
       </div>
 
       {/* Companies List */}
-      <Card className="sicofe-card-shadow">
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader>
           <CardTitle className="text-sicofe-navy">Lista de Empresas</CardTitle>
         </CardHeader>

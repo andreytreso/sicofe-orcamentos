@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +106,7 @@ export default function PlanoContas() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="sicofe-card-shadow">
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -128,7 +127,7 @@ export default function PlanoContas() {
       </Card>
 
       {/* Chart of Accounts */}
-      <Card className="sicofe-card-shadow">
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader>
           <CardTitle className="text-sicofe-navy">Estrutura de Contas</CardTitle>
         </CardHeader>

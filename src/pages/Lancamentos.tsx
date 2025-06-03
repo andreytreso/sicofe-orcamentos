@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -31,7 +30,7 @@ export default function Lancamentos() {
 
       {/* Formulário de Lançamento */}
       {showForm && (
-        <Card>
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardHeader>
             <CardTitle className="text-sicofe-navy">Novo Lançamento Orçamentário</CardTitle>
           </CardHeader>
@@ -176,7 +175,7 @@ export default function Lancamentos() {
       )}
 
       {/* Filtros e Busca */}
-      <Card>
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1">
@@ -223,7 +222,7 @@ export default function Lancamentos() {
       </Card>
 
       {/* Lista de Lançamentos */}
-      <Card>
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader>
           <CardTitle className="text-sicofe-navy">Histórico de Lançamentos</CardTitle>
         </CardHeader>

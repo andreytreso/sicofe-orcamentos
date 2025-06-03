@@ -71,7 +71,7 @@ export default function Orcamentos() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -83,7 +83,7 @@ export default function Orcamentos() {
           </CardContent>
         </Card>
 
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -95,7 +95,7 @@ export default function Orcamentos() {
           </CardContent>
         </Card>
 
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -107,21 +107,21 @@ export default function Orcamentos() {
           </CardContent>
         </Card>
 
-        <Card className="sicofe-card-shadow">
+        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Orçamentos Ativos</p>
                 <p className="text-2xl font-bold text-sicofe-navy">3</p>
               </div>
-              <Calendar className="h-8 w-8 text-sicofe-orange" />
+              <Calendar className="h-8 w-8 text-sicofe-blue" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Budgets List */}
-      <Card className="sicofe-card-shadow">
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader>
           <CardTitle className="text-sicofe-navy">Lista de Orçamentos</CardTitle>
         </CardHeader>
