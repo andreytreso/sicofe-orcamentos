@@ -47,7 +47,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-gray-200 bg-white">
-      <SidebarHeader className="border-b border-gray-200 p-6">
+      <SidebarHeader className="border-b border-gray-200 p-6 bg-white">
         <div className="flex items-center justify-center">
           <img 
             src="/lovable-uploads/aeb6e43a-0df5-4317-b487-2cf292d5bf0a.png" 
@@ -57,7 +57,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-4 bg-white">
         <SidebarGroup>
           <SidebarGroupLabel className="text-sicofe-gray text-xs uppercase tracking-wider mb-2">
             Menu Principal
@@ -89,7 +89,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-gray-200 p-4">
+      <SidebarFooter className="border-t border-gray-200 p-4 bg-white">
         <div className="flex items-center space-x-3 text-sm text-sicofe-gray">
           <Settings className="h-4 w-4" />
           <span>Configurações</span>

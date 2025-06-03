@@ -15,7 +15,7 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon: Icon, trend, className = "" }: StatsCardProps) {
   return (
-    <Card className={`sicofe-card-shadow hover:shadow-lg transition-shadow duration-200 ${className}`}>
+    <Card className={`bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-sicofe-gray">{title}</CardTitle>
         <Icon className="h-5 w-5 text-sicofe-blue" />
