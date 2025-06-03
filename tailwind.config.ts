@@ -70,12 +70,13 @@ export default {
 					'blue-light': '#3b82f6',
 					navy: '#1e3a8a',
 					gray: '#64748b',
-					'gray-light': '#f1f5f9',
+					'gray-light': 'rgba(255, 255, 255, 0.9)',
 					'gray-dark': '#334155',
 					green: '#059669',
 					'green-light': '#10b981',
 					orange: '#ea580c',
-					red: '#dc2626'
+					red: '#dc2626',
+					white: 'rgba(255, 255, 255, 0.95)'
 				}
 			},
 			borderRadius: {

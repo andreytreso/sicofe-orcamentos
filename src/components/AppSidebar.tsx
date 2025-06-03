@@ -1,5 +1,5 @@
 
-import { Building2, LayoutDashboard, Calculator, FileText, Settings, ChevronRight } from "lucide-react";
+import { Building2, LayoutDashboard, Calculator, FileText, Settings, ChevronRight, Plus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -35,6 +35,11 @@ const menuItems = [
     url: "/plano-contas",
     icon: FileText,
   },
+  {
+    title: "Lançamentos",
+    url: "/lancamentos",
+    icon: Plus,
+  },
 ];
 
 export function AppSidebar() {
@@ -43,14 +48,12 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarHeader className="border-b border-gray-200 p-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 sicofe-gradient rounded-lg flex items-center justify-center">
-            <Calculator className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-sicofe-navy">SICOFE</h2>
-            <p className="text-xs text-sicofe-gray">Controle Orçamentário</p>
-          </div>
+        <div className="flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/aeb6e43a-0df5-4317-b487-2cf292d5bf0a.png" 
+            alt="SICOFE" 
+            className="h-12 w-auto"
+          />
         </div>
       </SidebarHeader>
       
