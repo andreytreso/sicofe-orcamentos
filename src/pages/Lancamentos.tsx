@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -6,9 +7,24 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Filter, Search } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function Lancamentos() {
   const [showForm, setShowForm] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aqui você pode adicionar a lógica de salvamento
+    console.log("Lançamento salvo!");
+    setShowForm(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -20,159 +36,13 @@ export default function Lancamentos() {
           </p>
         </div>
         <Button 
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => setShowForm(true)}
           className="bg-sicofe-blue hover:bg-sicofe-blue-dark text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Lançamento
         </Button>
       </div>
-
-      {/* Formulário de Lançamento */}
-      {showForm && (
-        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
-          <CardHeader>
-            <CardTitle className="text-sicofe-navy">Novo Lançamento Orçamentário</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="empresa">Empresa *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="empresa1">SICOFE LTDA</SelectItem>
-                    <SelectItem value="empresa2">Consultoria ABC</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orcamento">Orçamento *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o orçamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="orcamento1">Orçamento 2024</SelectItem>
-                    <SelectItem value="orcamento2">Orçamento Q1 2024</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="data_lancamento">Data do Lançamento *</Label>
-                <Input 
-                  id="data_lancamento"
-                  type="date"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="conta_s1">Conta Resultado S1 *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a conta S1" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 - Receitas</SelectItem>
-                    <SelectItem value="2">2 - Despesas</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="conta_s2">Conta Resultado S2 *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a conta S2" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="11">1.1 - Receita de Vendas</SelectItem>
-                    <SelectItem value="21">2.1 - Despesas Operacionais</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="conta_a1">Conta Análise A1 *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a conta A1" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="111">1.1.1 - Vendas Produtos</SelectItem>
-                    <SelectItem value="211">2.1.1 - Salários</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="conta_contabil">Código Contábil *</Label>
-                <Input 
-                  id="conta_contabil"
-                  placeholder="Ex: 3.01.01.001"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tipo_lancamento">Tipo de Lançamento *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="planejado">Valor Planejado</SelectItem>
-                    <SelectItem value="realizado">Valor Realizado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valor">Valor *</Label>
-                <Input 
-                  id="valor"
-                  type="number"
-                  step="0.01"
-                  placeholder="0,00"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição</Label>
-              <Textarea 
-                id="descricao"
-                placeholder="Descrição detalhada do lançamento..."
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button className="bg-sicofe-blue hover:bg-sicofe-blue-dark text-white">
-                Salvar Lançamento
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowForm(false)}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Filtros e Busca */}
       <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -185,17 +55,17 @@ export default function Lancamentos() {
                 <Input 
                   id="search"
                   placeholder="Buscar por descrição, conta..."
-                  className="pl-10"
+                  className="pl-10 bg-white border border-gray-300"
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="filter-empresa">Empresa</Label>
               <Select>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 bg-white border border-gray-300">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="all">Todas as empresas</SelectItem>
                   <SelectItem value="empresa1">SICOFE LTDA</SelectItem>
                 </SelectContent>
@@ -204,16 +74,16 @@ export default function Lancamentos() {
             <div>
               <Label htmlFor="filter-periodo">Período</Label>
               <Select>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 bg-white border border-gray-300">
                   <SelectValue placeholder="Selecionar período" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="mes">Este mês</SelectItem>
                   <SelectItem value="trimestre">Este trimestre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" className="bg-white border border-gray-300 hover:bg-gray-50">
               <Filter className="h-4 w-4 mr-2" />
               Filtrar
             </Button>
@@ -273,6 +143,165 @@ export default function Lancamentos() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Novo Lançamento */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-sicofe-navy">Novo Lançamento Orçamentário</DialogTitle>
+            <DialogDescription>
+              Preencha os dados abaixo para criar um novo lançamento
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="empresa">Empresa *</Label>
+                <Select>
+                  <SelectTrigger className="bg-white border border-gray-300">
+                    <SelectValue placeholder="Selecione a empresa" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="empresa1">SICOFE LTDA</SelectItem>
+                    <SelectItem value="empresa2">Consultoria ABC</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="orcamento">Orçamento *</Label>
+                <Select>
+                  <SelectTrigger className="bg-white border border-gray-300">
+                    <SelectValue placeholder="Selecione o orçamento" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="orcamento1">Orçamento 2024</SelectItem>
+                    <SelectItem value="orcamento2">Orçamento Q1 2024</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="data_lancamento">Data do Lançamento *</Label>
+                <Input 
+                  id="data_lancamento"
+                  type="date"
+                  required
+                  className="bg-white border border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="conta_s1">Conta Resultado S1 *</Label>
+                <Select>
+                  <SelectTrigger className="bg-white border border-gray-300">
+                    <SelectValue placeholder="Selecione a conta S1" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="1">1 - Receitas</SelectItem>
+                    <SelectItem value="2">2 - Despesas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="conta_s2">Conta Resultado S2 *</Label>
+                <Select>
+                  <SelectTrigger className="bg-white border border-gray-300">
+                    <SelectValue placeholder="Selecione a conta S2" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="11">1.1 - Receita de Vendas</SelectItem>
+                    <SelectItem value="21">2.1 - Despesas Operacionais</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="conta_a1">Conta Análise A1 *</Label>
+                <Select>
+                  <SelectTrigger className="bg-white border border-gray-300">
+                    <SelectValue placeholder="Selecione a conta A1" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="111">1.1.1 - Vendas Produtos</SelectItem>
+                    <SelectItem value="211">2.1.1 - Salários</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="conta_contabil">Código Contábil *</Label>
+                <Input 
+                  id="conta_contabil"
+                  placeholder="Ex: 3.01.01.001"
+                  required
+                  className="bg-white border border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tipo_lancamento">Tipo de Lançamento *</Label>
+                <Select>
+                  <SelectTrigger className="bg-white border border-gray-300">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="planejado">Valor Planejado</SelectItem>
+                    <SelectItem value="realizado">Valor Realizado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="valor">Valor *</Label>
+                <Input 
+                  id="valor"
+                  type="number"
+                  step="0.01"
+                  placeholder="0,00"
+                  required
+                  className="bg-white border border-gray-300"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="descricao">Descrição</Label>
+              <Textarea 
+                id="descricao"
+                placeholder="Descrição detalhada do lançamento..."
+                rows={3}
+                className="bg-white border border-gray-300"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={() => setShowForm(false)}
+                className="bg-white border border-gray-300 hover:bg-gray-50"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit"
+                className="bg-sicofe-blue hover:bg-sicofe-blue-dark text-white"
+              >
+                Salvar Lançamento
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
