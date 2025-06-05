@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -17,8 +16,45 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+interface Lancamento {
+  id: string;
+  data: string;
+  empresa: string;
+  conta: string;
+  descricao: string;
+  tipo: string;
+  valor: number;
+  observacoes: string;
+  competencia: string[];
+}
+
 export default function Lancamentos() {
   const [showForm, setShowForm] = useState(false);
+  const [lancamentos, setLancamentos] = useState<Lancamento[]>([
+    {
+      id: "1",
+      data: "15/12/2024",
+      empresa: "SICOFE LTDA",
+      conta: "1.1.1 - Vendas Produtos",
+      descricao: "Vendas dezembro",
+      tipo: "Planejado",
+      valor: 25000.00,
+      observacoes: "",
+      competencia: ["dez"]
+    },
+    {
+      id: "2",
+      data: "14/12/2024",
+      empresa: "SICOFE LTDA",
+      conta: "2.1.1 - Salários",
+      descricao: "Folha de pagamento",
+      tipo: "Realizado",
+      valor: -15500.00,
+      observacoes: "",
+      competencia: ["dez"]
+    }
+  ]);
+  
   const [formData, setFormData] = useState({
     empresa: "",
     grupoContas1: "",
@@ -117,10 +153,51 @@ export default function Lancamentos() {
     }));
   };
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Remove caracteres não numéricos exceto vírgula e ponto
+    const numericValue = value.replace(/[^\d.,-]/g, '');
+    
+    setFormData(prev => ({ ...prev, valor: numericValue }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Lançamento salvo!", formData);
+    
+    // Formatar valor com duas casas decimais
+    const valorFormatado = parseFloat(formData.valor.replace(',', '.')) || 0;
+    
+    // Obter meses selecionados
+    const mesesSelecionados = Object.entries(formData.competencia)
+      .filter(([_, selected]) => selected)
+      .map(([mes, _]) => mes);
+
+    // Criar novo lançamento
+    const novoLancamento: Lancamento = {
+      id: Date.now().toString(),
+      data: new Date().toLocaleDateString('pt-BR'),
+      empresa: formData.empresa,
+      conta: formData.contaAnalitica,
+      descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
+      tipo: "Planejado",
+      valor: valorFormatado,
+      observacoes: formData.observacoes,
+      competencia: mesesSelecionados
+    };
+
+    // Adicionar ao histórico
+    setLancamentos(prev => [novoLancamento, ...prev]);
+    
+    console.log("Lançamento salvo!", novoLancamento);
     setShowForm(false);
+    
     // Reset form
     setFormData({
       empresa: "",
@@ -186,8 +263,8 @@ export default function Lancamentos() {
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-sicofe-blue z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-blue-50 focus:bg-blue-50">Todas as empresas</SelectItem>
-                  <SelectItem value="empresa1" className="bg-white hover:bg-blue-50 focus:bg-blue-50">SICOFE LTDA</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Todas as empresas</SelectItem>
+                  <SelectItem value="empresa1" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">SICOFE LTDA</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -198,8 +275,8 @@ export default function Lancamentos() {
                   <SelectValue placeholder="Selecionar período" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-sicofe-blue z-50">
-                  <SelectItem value="mes" className="bg-white hover:bg-blue-50 focus:bg-blue-50">Este mês</SelectItem>
-                  <SelectItem value="trimestre" className="bg-white hover:bg-blue-50 focus:bg-blue-50">Este trimestre</SelectItem>
+                  <SelectItem value="mes" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Este mês</SelectItem>
+                  <SelectItem value="trimestre" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Este trimestre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -230,34 +307,28 @@ export default function Lancamentos() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b hover:bg-gray-50">
-                  <td className="p-3 text-sm">15/12/2024</td>
-                  <td className="p-3 text-sm">SICOFE LTDA</td>
-                  <td className="p-3 text-sm">1.1.1 - Vendas Produtos</td>
-                  <td className="p-3 text-sm">Vendas dezembro</td>
-                  <td className="p-3 text-sm">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                      Planejado
-                    </span>
-                  </td>
-                  <td className="p-3 text-sm text-right font-medium text-sicofe-green">
-                    R$ 25.000,00
-                  </td>
-                </tr>
-                <tr className="border-b hover:bg-gray-50">
-                  <td className="p-3 text-sm">14/12/2024</td>
-                  <td className="p-3 text-sm">SICOFE LTDA</td>
-                  <td className="p-3 text-sm">2.1.1 - Salários</td>
-                  <td className="p-3 text-sm">Folha de pagamento</td>
-                  <td className="p-3 text-sm">
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                      Realizado
-                    </span>
-                  </td>
-                  <td className="p-3 text-sm text-right font-medium text-sicofe-red">
-                    -R$ 15.500,00
-                  </td>
-                </tr>
+                {lancamentos.map((lancamento) => (
+                  <tr key={lancamento.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3 text-sm">{lancamento.data}</td>
+                    <td className="p-3 text-sm">{lancamento.empresa}</td>
+                    <td className="p-3 text-sm">{lancamento.conta}</td>
+                    <td className="p-3 text-sm">{lancamento.descricao}</td>
+                    <td className="p-3 text-sm">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        lancamento.tipo === 'Planejado' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {lancamento.tipo}
+                      </span>
+                    </td>
+                    <td className={`p-3 text-sm text-right font-medium ${
+                      lancamento.valor >= 0 ? 'text-sicofe-green' : 'text-sicofe-red'
+                    }`}>
+                      {formatCurrency(lancamento.valor)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -284,7 +355,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-sicofe-blue z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-50 focus:bg-blue-50">{empresa}</SelectItem>
+                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{empresa}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -328,7 +399,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-sicofe-blue z-50">
                     {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-50 focus:bg-blue-50">{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{grupo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -342,7 +413,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-sicofe-blue z-50">
                     {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-50 focus:bg-blue-50">{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{grupo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -357,9 +428,9 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-sicofe-blue z-50">
-                    <SelectItem value="conta1" className="bg-white hover:bg-blue-50 focus:bg-blue-50">1.1.1 - Vendas Produtos</SelectItem>
-                    <SelectItem value="conta2" className="bg-white hover:bg-blue-50 focus:bg-blue-50">2.1.1 - Salários</SelectItem>
-                    <SelectItem value="conta3" className="bg-white hover:bg-blue-50 focus:bg-blue-50">3.1.1 - Outras Receitas</SelectItem>
+                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">1.1.1 - Vendas Produtos</SelectItem>
+                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">2.1.1 - Salários</SelectItem>
+                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">3.1.1 - Outras Receitas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -368,11 +439,10 @@ export default function Lancamentos() {
                 <Label htmlFor="valor">Valor *</Label>
                 <Input 
                   id="valor"
-                  type="number"
-                  step="0.01"
+                  type="text"
                   placeholder="0,00"
                   value={formData.valor}
-                  onChange={(e) => setFormData(prev => ({ ...prev, valor: e.target.value }))}
+                  onChange={handleValueChange}
                   required
                   className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue"
                 />
