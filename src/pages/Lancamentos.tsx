@@ -185,9 +185,9 @@ export default function Lancamentos() {
                 <SelectTrigger className="w-48 bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-sicofe-blue">
-                  <SelectItem value="all">Todas as empresas</SelectItem>
-                  <SelectItem value="empresa1">SICOFE LTDA</SelectItem>
+                <SelectContent className="bg-white border-sicofe-blue z-50">
+                  <SelectItem value="all" className="bg-white hover:bg-blue-50 focus:bg-blue-50">Todas as empresas</SelectItem>
+                  <SelectItem value="empresa1" className="bg-white hover:bg-blue-50 focus:bg-blue-50">SICOFE LTDA</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -197,9 +197,9 @@ export default function Lancamentos() {
                 <SelectTrigger className="w-48 bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
                   <SelectValue placeholder="Selecionar período" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-sicofe-blue">
-                  <SelectItem value="mes">Este mês</SelectItem>
-                  <SelectItem value="trimestre">Este trimestre</SelectItem>
+                <SelectContent className="bg-white border-sicofe-blue z-50">
+                  <SelectItem value="mes" className="bg-white hover:bg-blue-50 focus:bg-blue-50">Este mês</SelectItem>
+                  <SelectItem value="trimestre" className="bg-white hover:bg-blue-50 focus:bg-blue-50">Este trimestre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -282,9 +282,9 @@ export default function Lancamentos() {
                   <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue">
+                  <SelectContent className="bg-white border-sicofe-blue z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa}>{empresa}</SelectItem>
+                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-50 focus:bg-blue-50">{empresa}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -326,9 +326,9 @@ export default function Lancamentos() {
                   <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
                     <SelectValue placeholder="Selecione o Grupo S1" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue">
+                  <SelectContent className="bg-white border-sicofe-blue z-50">
                     {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo}>{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-50 focus:bg-blue-50">{grupo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -340,9 +340,9 @@ export default function Lancamentos() {
                   <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
                     <SelectValue placeholder="Selecione o Grupo S2" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue">
+                  <SelectContent className="bg-white border-sicofe-blue z-50">
                     {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo}>{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-50 focus:bg-blue-50">{grupo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -356,10 +356,10 @@ export default function Lancamentos() {
                   <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue">
-                    <SelectItem value="conta1">1.1.1 - Vendas Produtos</SelectItem>
-                    <SelectItem value="conta2">2.1.1 - Salários</SelectItem>
-                    <SelectItem value="conta3">3.1.1 - Outras Receitas</SelectItem>
+                  <SelectContent className="bg-white border-sicofe-blue z-50">
+                    <SelectItem value="conta1" className="bg-white hover:bg-blue-50 focus:bg-blue-50">1.1.1 - Vendas Produtos</SelectItem>
+                    <SelectItem value="conta2" className="bg-white hover:bg-blue-50 focus:bg-blue-50">2.1.1 - Salários</SelectItem>
+                    <SelectItem value="conta3" className="bg-white hover:bg-blue-50 focus:bg-blue-50">3.1.1 - Outras Receitas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
