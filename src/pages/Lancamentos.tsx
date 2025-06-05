@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Filter, Search } from "lucide-react";
 import {
   Dialog,
@@ -18,12 +19,131 @@ import {
 
 export default function Lancamentos() {
   const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    empresa: "",
+    grupoContas1: "",
+    grupoContas2: "",
+    contaAnalitica: "",
+    valor: "",
+    observacoes: "",
+    competencia: {
+      jan: false,
+      fev: false,
+      mar: false,
+      abr: false,
+      mai: false,
+      jun: false,
+      jul: false,
+      ago: false,
+      set: false,
+      out: false,
+      nov: false,
+      dez: false,
+    }
+  });
+
+  const empresas = [
+    "Examine Loja 1",
+    "Examine Loja 2", 
+    "Examine Loja 3",
+    "Examine Loja 4",
+    "Examine Loja 6",
+    "Examine Loja 7"
+  ];
+
+  const gruposContas1 = [
+    "Receita Bruta",
+    "Deduções Sobre as Vendas",
+    "Resultado Não Operacional",
+    "Custo das Mercadorias para Revenda",
+    "SG&A"
+  ];
+
+  const gruposContas2 = [
+    "Impostos Indiretos",
+    "Cancelamentos e Devoluções",
+    "Outras Receitas",
+    "Outras Receitas/ (Despesas) Não Operacionais",
+    "Custo das Mercadorias para Revenda",
+    "Utilidades",
+    "Folha de Pagamentos",
+    "Outras Despesas",
+    "Ocupação",
+    "Aluguel de Equipamentos",
+    "Marketing",
+    "Contratação de Terceiros",
+    "TI/Software",
+    "Despesas de Veículos",
+    "Manutenção",
+    "Material de Uso e Consumo",
+    "Deságio de Cartões",
+    "Impostos e Taxas"
+  ];
+
+  const meses = [
+    { key: "jan", label: "Jan" },
+    { key: "fev", label: "Fev" },
+    { key: "mar", label: "Mar" },
+    { key: "abr", label: "Abr" },
+    { key: "mai", label: "Mai" },
+    { key: "jun", label: "Jun" },
+    { key: "jul", label: "Jul" },
+    { key: "ago", label: "Ago" },
+    { key: "set", label: "Set" },
+    { key: "out", label: "Out" },
+    { key: "nov", label: "Nov" },
+    { key: "dez", label: "Dez" }
+  ];
+
+  const handleCompetenciaChange = (mes: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      competencia: {
+        ...prev.competencia,
+        [mes]: checked
+      }
+    }));
+  };
+
+  const handleSelectAllCompetencia = (checked: boolean) => {
+    const newCompetencia = Object.keys(formData.competencia).reduce((acc, mes) => {
+      acc[mes] = checked;
+      return acc;
+    }, {} as typeof formData.competencia);
+    
+    setFormData(prev => ({
+      ...prev,
+      competencia: newCompetencia
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você pode adicionar a lógica de salvamento
-    console.log("Lançamento salvo!");
+    console.log("Lançamento salvo!", formData);
     setShowForm(false);
+    // Reset form
+    setFormData({
+      empresa: "",
+      grupoContas1: "",
+      grupoContas2: "",
+      contaAnalitica: "",
+      valor: "",
+      observacoes: "",
+      competencia: {
+        jan: false,
+        fev: false,
+        mar: false,
+        abr: false,
+        mai: false,
+        jun: false,
+        jul: false,
+        ago: false,
+        set: false,
+        out: false,
+        nov: false,
+        dez: false,
+      }
+    });
   };
 
   return (
@@ -155,107 +275,89 @@ export default function Lancamentos() {
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="empresa">Empresa *</Label>
-                <Select>
+                <Select value={formData.empresa} onValueChange={(value) => setFormData(prev => ({ ...prev, empresa: value }))}>
                   <SelectTrigger className="bg-white border border-gray-300">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="empresa1">SICOFE LTDA</SelectItem>
-                    <SelectItem value="empresa2">Consultoria ABC</SelectItem>
+                    {empresas.map((empresa) => (
+                      <SelectItem key={empresa} value={empresa}>{empresa}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="orcamento">Orçamento *</Label>
-                <Select>
-                  <SelectTrigger className="bg-white border border-gray-300">
-                    <SelectValue placeholder="Selecione o orçamento" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="orcamento1">Orçamento 2024</SelectItem>
-                    <SelectItem value="orcamento2">Orçamento Q1 2024</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="data_lancamento">Data do Lançamento *</Label>
-                <Input 
-                  id="data_lancamento"
-                  type="date"
-                  required
-                  className="bg-white border border-gray-300"
-                />
+                <Label htmlFor="competencia">Competência *</Label>
+                <div className="border border-gray-300 rounded-md p-3 bg-white">
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {meses.map(({ key, label }) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={key}
+                          checked={formData.competencia[key as keyof typeof formData.competencia]}
+                          onCheckedChange={(checked) => handleCompetenciaChange(key, checked as boolean)}
+                        />
+                        <Label htmlFor={key} className="text-sm font-normal">{label}</Label>
+                      </div>
+                    ))}
+                    <div className="flex items-center space-x-2 ml-4">
+                      <Checkbox
+                        id="selecionar-todos"
+                        checked={Object.values(formData.competencia).every(Boolean)}
+                        onCheckedChange={(checked) => handleSelectAllCompetencia(checked as boolean)}
+                      />
+                      <Label htmlFor="selecionar-todos" className="text-sm font-medium">Selecionar Todos</Label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="conta_s1">Conta Resultado S1 *</Label>
-                <Select>
+                <Label htmlFor="grupo-contas-1">Grupo de Contas 1º Nível *</Label>
+                <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
                   <SelectTrigger className="bg-white border border-gray-300">
-                    <SelectValue placeholder="Selecione a conta S1" />
+                    <SelectValue placeholder="Selecione o Grupo S1" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="1">1 - Receitas</SelectItem>
-                    <SelectItem value="2">2 - Despesas</SelectItem>
+                    {gruposContas1.map((grupo) => (
+                      <SelectItem key={grupo} value={grupo}>{grupo}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="conta_s2">Conta Resultado S2 *</Label>
-                <Select>
+                <Label htmlFor="grupo-contas-2">Grupo de Contas 2º Nível *</Label>
+                <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
                   <SelectTrigger className="bg-white border border-gray-300">
-                    <SelectValue placeholder="Selecione a conta S2" />
+                    <SelectValue placeholder="Selecione o Grupo S2" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="11">1.1 - Receita de Vendas</SelectItem>
-                    <SelectItem value="21">2.1 - Despesas Operacionais</SelectItem>
+                    {gruposContas2.map((grupo) => (
+                      <SelectItem key={grupo} value={grupo}>{grupo}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="conta_a1">Conta Análise A1 *</Label>
-                <Select>
+                <Label htmlFor="conta-analitica">Conta Analítica *</Label>
+                <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
                   <SelectTrigger className="bg-white border border-gray-300">
-                    <SelectValue placeholder="Selecione a conta A1" />
+                    <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="111">1.1.1 - Vendas Produtos</SelectItem>
-                    <SelectItem value="211">2.1.1 - Salários</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="conta_contabil">Código Contábil *</Label>
-                <Input 
-                  id="conta_contabil"
-                  placeholder="Ex: 3.01.01.001"
-                  required
-                  className="bg-white border border-gray-300"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tipo_lancamento">Tipo de Lançamento *</Label>
-                <Select>
-                  <SelectTrigger className="bg-white border border-gray-300">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="planejado">Valor Planejado</SelectItem>
-                    <SelectItem value="realizado">Valor Realizado</SelectItem>
+                    <SelectItem value="conta1">1.1.1 - Vendas Produtos</SelectItem>
+                    <SelectItem value="conta2">2.1.1 - Salários</SelectItem>
+                    <SelectItem value="conta3">3.1.1 - Outras Receitas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -267,6 +369,8 @@ export default function Lancamentos() {
                   type="number"
                   step="0.01"
                   placeholder="0,00"
+                  value={formData.valor}
+                  onChange={(e) => setFormData(prev => ({ ...prev, valor: e.target.value }))}
                   required
                   className="bg-white border border-gray-300"
                 />
@@ -274,11 +378,13 @@ export default function Lancamentos() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição</Label>
+              <Label htmlFor="observacoes">Observações</Label>
               <Textarea 
-                id="descricao"
-                placeholder="Descrição detalhada do lançamento..."
+                id="observacoes"
+                placeholder="Observações adicionais..."
                 rows={3}
+                value={formData.observacoes}
+                onChange={(e) => setFormData(prev => ({ ...prev, observacoes: e.target.value }))}
                 className="bg-white border border-gray-300"
               />
             </div>
