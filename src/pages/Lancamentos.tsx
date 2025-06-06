@@ -15,6 +15,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Lancamento {
   id: string;
@@ -117,18 +125,8 @@ export default function Lancamentos() {
   ];
 
   const meses = [
-    { key: "jan", label: "Jan" },
-    { key: "fev", label: "Fev" },
-    { key: "mar", label: "Mar" },
-    { key: "abr", label: "Abr" },
-    { key: "mai", label: "Mai" },
-    { key: "jun", label: "Jun" },
-    { key: "jul", label: "Jul" },
-    { key: "ago", label: "Ago" },
-    { key: "set", label: "Set" },
-    { key: "out", label: "Out" },
-    { key: "nov", label: "Nov" },
-    { key: "dez", label: "Dez" }
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
   ];
 
   const handleCompetenciaChange = (mes: string, checked: boolean) => {
@@ -224,7 +222,7 @@ export default function Lancamentos() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white min-h-screen">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-sicofe-navy">Lançamentos Orçamentários</h1>
@@ -272,11 +270,14 @@ export default function Lancamentos() {
               <Label htmlFor="filter-periodo">Período</Label>
               <Select>
                 <SelectTrigger className="w-48 bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
-                  <SelectValue placeholder="Selecionar período" />
+                  <SelectValue placeholder="Selecionar mês" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-sicofe-blue z-50">
-                  <SelectItem value="mes" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Este mês</SelectItem>
-                  <SelectItem value="trimestre" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Este trimestre</SelectItem>
+                  {meses.map((mes, index) => (
+                    <SelectItem key={index} value={mes.toLowerCase()} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">
+                      {mes}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -294,44 +295,32 @@ export default function Lancamentos() {
           <CardTitle className="text-sicofe-navy">Histórico de Lançamentos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3 text-sicofe-navy">Data</th>
-                  <th className="text-left p-3 text-sicofe-navy">Empresa</th>
-                  <th className="text-left p-3 text-sicofe-navy">Conta</th>
-                  <th className="text-left p-3 text-sicofe-navy">Descrição</th>
-                  <th className="text-left p-3 text-sicofe-navy">Tipo</th>
-                  <th className="text-right p-3 text-sicofe-navy">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lancamentos.map((lancamento) => (
-                  <tr key={lancamento.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 text-sm">{lancamento.data}</td>
-                    <td className="p-3 text-sm">{lancamento.empresa}</td>
-                    <td className="p-3 text-sm">{lancamento.conta}</td>
-                    <td className="p-3 text-sm">{lancamento.descricao}</td>
-                    <td className="p-3 text-sm">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        lancamento.tipo === 'Planejado' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {lancamento.tipo}
-                      </span>
-                    </td>
-                    <td className={`p-3 text-sm text-right font-medium ${
-                      lancamento.valor >= 0 ? 'text-sicofe-green' : 'text-sicofe-red'
-                    }`}>
-                      {formatCurrency(lancamento.valor)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-gray-300">
+                <TableHead className="text-sicofe-navy">Data</TableHead>
+                <TableHead className="text-sicofe-navy">Empresa</TableHead>
+                <TableHead className="text-sicofe-navy">Conta</TableHead>
+                <TableHead className="text-sicofe-navy">Descrição</TableHead>
+                <TableHead className="text-right text-sicofe-navy">Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lancamentos.map((lancamento) => (
+                <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50">
+                  <TableCell className="text-sm">{lancamento.data}</TableCell>
+                  <TableCell className="text-sm">{lancamento.empresa}</TableCell>
+                  <TableCell className="text-sm">{lancamento.conta}</TableCell>
+                  <TableCell className="text-sm">{lancamento.descricao}</TableCell>
+                  <TableCell className={`text-sm text-right font-medium ${
+                    lancamento.valor >= 0 ? 'text-sicofe-green' : 'text-sicofe-red'
+                  }`}>
+                    {formatCurrency(lancamento.valor)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
