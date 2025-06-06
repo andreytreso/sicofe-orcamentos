@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -125,8 +126,18 @@ export default function Lancamentos() {
   ];
 
   const meses = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    { key: "jan", label: "Janeiro" },
+    { key: "fev", label: "Fevereiro" },
+    { key: "mar", label: "Março" },
+    { key: "abr", label: "Abril" },
+    { key: "mai", label: "Maio" },
+    { key: "jun", label: "Junho" },
+    { key: "jul", label: "Julho" },
+    { key: "ago", label: "Agosto" },
+    { key: "set", label: "Setembro" },
+    { key: "out", label: "Outubro" },
+    { key: "nov", label: "Novembro" },
+    { key: "dez", label: "Dezembro" }
   ];
 
   const handleCompetenciaChange = (mes: string, checked: boolean) => {
@@ -185,7 +196,7 @@ export default function Lancamentos() {
       conta: formData.contaAnalitica,
       descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
       tipo: "Planejado",
-      valor: valorFormatado,
+      valor: parseFloat(valorFormatado.toFixed(2)),
       observacoes: formData.observacoes,
       competencia: mesesSelecionados
     };
@@ -250,17 +261,17 @@ export default function Lancamentos() {
                 <Input 
                   id="search"
                   placeholder="Buscar por descrição, conta..."
-                  className="pl-10 bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue"
+                  className="pl-10 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="filter-empresa">Empresa</Label>
               <Select>
-                <SelectTrigger className="w-48 bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
+                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-sicofe-blue z-50">
+                <SelectContent className="bg-white border-gray-300 z-50">
                   <SelectItem value="all" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Todas as empresas</SelectItem>
                   <SelectItem value="empresa1" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">SICOFE LTDA</SelectItem>
                 </SelectContent>
@@ -269,19 +280,19 @@ export default function Lancamentos() {
             <div>
               <Label htmlFor="filter-periodo">Período</Label>
               <Select>
-                <SelectTrigger className="w-48 bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
+                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                   <SelectValue placeholder="Selecionar mês" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-sicofe-blue z-50">
-                  {meses.map((mes, index) => (
-                    <SelectItem key={index} value={mes.toLowerCase()} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">
-                      {mes}
+                <SelectContent className="bg-white border-gray-300 z-50">
+                  {meses.map((mes) => (
+                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">
+                      {mes.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" className="bg-white border-sicofe-blue text-sicofe-blue hover:bg-sicofe-blue hover:text-white">
+            <Button variant="outline" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
               <Filter className="h-4 w-4 mr-2" />
               Filtrar
             </Button>
@@ -290,7 +301,7 @@ export default function Lancamentos() {
       </Card>
 
       {/* Lista de Lançamentos */}
-      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <Card className="bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader>
           <CardTitle className="text-sicofe-navy">Histórico de Lançamentos</CardTitle>
         </CardHeader>
@@ -339,10 +350,10 @@ export default function Lancamentos() {
               <div className="space-y-2">
                 <Label htmlFor="empresa">Empresa *</Label>
                 <Select value={formData.empresa} onValueChange={(value) => setFormData(prev => ({ ...prev, empresa: value }))}>
-                  <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue z-50">
+                  <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
                       <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{empresa}</SelectItem>
                     ))}
@@ -352,17 +363,17 @@ export default function Lancamentos() {
 
               <div className="space-y-2">
                 <Label htmlFor="competencia">Competência *</Label>
-                <div className="border border-sicofe-blue rounded-md p-4 bg-white">
+                <div className="border border-gray-300 rounded-md p-4 bg-white">
                   <div className="grid grid-cols-4 gap-3">
-                    {meses.map(({ key, label }) => (
-                      <div key={key} className="flex items-center space-x-2">
+                    {meses.map((mes) => (
+                      <div key={mes.key} className="flex items-center space-x-2">
                         <Checkbox
-                          id={key}
-                          checked={formData.competencia[key as keyof typeof formData.competencia]}
-                          onCheckedChange={(checked) => handleCompetenciaChange(key, checked as boolean)}
+                          id={mes.key}
+                          checked={formData.competencia[mes.key as keyof typeof formData.competencia]}
+                          onCheckedChange={(checked) => handleCompetenciaChange(mes.key, checked as boolean)}
                           className="border-sicofe-blue data-[state=checked]:bg-sicofe-blue data-[state=checked]:border-sicofe-blue"
                         />
-                        <Label htmlFor={key} className="text-sm font-normal cursor-pointer">{label}</Label>
+                        <Label htmlFor={mes.key} className="text-sm font-normal cursor-pointer">{mes.label}</Label>
                       </div>
                     ))}
                   </div>
@@ -383,10 +394,10 @@ export default function Lancamentos() {
               <div className="space-y-2">
                 <Label htmlFor="grupo-contas-1">Grupo de Contas 1º Nível *</Label>
                 <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
-                  <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                     <SelectValue placeholder="Selecione o Grupo S1" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue z-50">
+                  <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
                       <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{grupo}</SelectItem>
                     ))}
@@ -397,10 +408,10 @@ export default function Lancamentos() {
               <div className="space-y-2">
                 <Label htmlFor="grupo-contas-2">Grupo de Contas 2º Nível *</Label>
                 <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
-                  <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                     <SelectValue placeholder="Selecione o Grupo S2" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue z-50">
+                  <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
                       <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{grupo}</SelectItem>
                     ))}
@@ -413,10 +424,10 @@ export default function Lancamentos() {
               <div className="space-y-2">
                 <Label htmlFor="conta-analitica">Conta Analítica *</Label>
                 <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
-                  <SelectTrigger className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue">
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-sicofe-blue z-50">
+                  <SelectContent className="bg-white border-gray-300 z-50">
                     <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">1.1.1 - Vendas Produtos</SelectItem>
                     <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">2.1.1 - Salários</SelectItem>
                     <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">3.1.1 - Outras Receitas</SelectItem>
@@ -433,7 +444,7 @@ export default function Lancamentos() {
                   value={formData.valor}
                   onChange={handleValueChange}
                   required
-                  className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue"
+                  className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
                 />
               </div>
             </div>
@@ -446,7 +457,7 @@ export default function Lancamentos() {
                 rows={3}
                 value={formData.observacoes}
                 onChange={(e) => setFormData(prev => ({ ...prev, observacoes: e.target.value }))}
-                className="bg-white border-sicofe-blue focus:border-sicofe-blue focus:ring-sicofe-blue"
+                className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
               />
             </div>
 
@@ -455,7 +466,7 @@ export default function Lancamentos() {
                 type="button"
                 variant="outline" 
                 onClick={() => setShowForm(false)}
-                className="bg-white border-sicofe-blue text-sicofe-blue hover:bg-sicofe-blue hover:text-white"
+                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
               >
                 Cancelar
               </Button>
