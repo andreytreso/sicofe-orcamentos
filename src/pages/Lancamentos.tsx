@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -349,13 +347,13 @@ export default function Lancamentos() {
             <div>
               <Label htmlFor="filter-empresa">Empresa</Label>
               <Select value={selectedEmpresa} onValueChange={setSelectedEmpresa}>
-                <SelectTrigger className="w-48 bg-white border-gray-300">
+                <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-gray-100">Todas as empresas</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-[#EEF4FF] text-black">Todas as empresas</SelectItem>
                   {empresas.map((empresa) => (
-                    <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-gray-100">
+                    <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-[#EEF4FF] text-black">
                       {empresa}
                     </SelectItem>
                   ))}
@@ -365,13 +363,13 @@ export default function Lancamentos() {
             <div>
               <Label htmlFor="filter-periodo">Período</Label>
               <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
-                <SelectTrigger className="w-48 bg-white border-gray-300">
+                <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
                   <SelectValue placeholder="Buscar por mês" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-gray-100">Buscar por mês</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-[#EEF4FF] text-black">Buscar por mês</SelectItem>
                   {meses.map((mes) => (
-                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-gray-100">
+                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-[#EEF4FF] text-black">
                       {mes.label}
                     </SelectItem>
                   ))}
@@ -397,7 +395,7 @@ export default function Lancamentos() {
 
       {/* Lista de Lançamentos */}
       <Card className="bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <CardHeader style={{ backgroundColor: '#E6F0FF' }}>
+        <CardHeader className="bg-white">
           <CardTitle className="text-lg font-semibold" style={{ color: '#1F2937' }}>Histórico de Lançamentos</CardTitle>
         </CardHeader>
         <CardContent className="bg-white">
@@ -408,7 +406,7 @@ export default function Lancamentos() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-gray-300 bg-white">
+                <TableRow className="border-b border-gray-300 bg-white hover:bg-white">
                   <TableHead className="text-gray-700">Data</TableHead>
                   <TableHead className="text-gray-700">Empresa</TableHead>
                   <TableHead className="text-gray-700">Conta</TableHead>
@@ -438,7 +436,7 @@ export default function Lancamentos() {
 
       {/* Modal de Novo Lançamento */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-gray-700">Novo Lançamento Orçamentário</DialogTitle>
             <DialogDescription className="text-gray-700">
@@ -456,7 +454,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa} className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-[#EEF4FF] text-black">
                         {empresa}
                       </SelectItem>
                     ))}
@@ -502,7 +500,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-[#EEF4FF] text-black">
                         {grupo}
                       </SelectItem>
                     ))}
@@ -518,7 +516,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-[#EEF4FF] text-black">
                         {grupo}
                       </SelectItem>
                     ))}
@@ -535,13 +533,13 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    <SelectItem value="1.1.1 - Vendas Produtos" className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-[#EEF4FF] text-black">
                       1.1.1 - Vendas Produtos
                     </SelectItem>
-                    <SelectItem value="2.1.1 - Salários" className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-[#EEF4FF] text-black">
                       2.1.1 - Salários
                     </SelectItem>
-                    <SelectItem value="3.1.1 - Outras Receitas" className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-[#EEF4FF] text-black">
                       3.1.1 - Outras Receitas
                     </SelectItem>
                   </SelectContent>
