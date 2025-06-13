@@ -45,7 +45,13 @@ export default function Login() {
       const success = await login(username, password);
       
       if (success) {
-        toast.success('Login realizado com sucesso!');
+        toast.success('Login realizado com sucesso!', {
+          style: {
+            backgroundColor: '#0047FF',
+            color: 'white',
+            border: 'none'
+          },
+        });
         navigate('/', { replace: true });
       } else {
         toast.error('Usuário ou senha incorretos');
@@ -60,7 +66,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-lg rounded-xl border-0 bg-white">
+        <Card className="shadow-lg rounded-xl border-0" style={{ backgroundColor: '#EEF4FF' }}>
           <CardHeader className="text-center pb-4">
             <div className="flex justify-center mb-4">
               <img 
@@ -90,7 +96,8 @@ export default function Login() {
                     setUsername(e.target.value);
                     if (errors.username) setErrors(prev => ({ ...prev, username: '' }));
                   }}
-                  className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-500`}
+                  className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-300`}
+                  style={{ backgroundColor: username ? '#EEF4FF' : '#EEF4FF' }}
                   placeholder="Digite seu usuário"
                 />
                 {errors.username && (
@@ -109,7 +116,8 @@ export default function Login() {
                     setPassword(e.target.value);
                     if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                   }}
-                  className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-500`}
+                  className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-300`}
+                  style={{ backgroundColor: password ? '#EEF4FF' : '#EEF4FF' }}
                   placeholder="Digite sua senha"
                 />
                 {errors.password && (

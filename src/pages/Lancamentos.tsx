@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -340,7 +341,7 @@ export default function Lancamentos() {
                   placeholder="Buscar por descrição, conta..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white border-gray-300 placeholder-gray-500"
+                  className="pl-10 bg-white border-gray-300 placeholder:text-gray-500"
                 />
               </div>
             </div>
@@ -396,7 +397,7 @@ export default function Lancamentos() {
       {/* Lista de Lançamentos */}
       <Card className="bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader style={{ backgroundColor: '#E6F0FF' }}>
-          <CardTitle style={{ color: '#1F2937' }}>Histórico de Lançamentos</CardTitle>
+          <CardTitle className="text-lg font-semibold" style={{ color: '#1F2937' }}>Histórico de Lançamentos</CardTitle>
         </CardHeader>
         <CardContent className="bg-white">
           {isLoadingFilters ? (
@@ -406,7 +407,7 @@ export default function Lancamentos() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-gray-300">
+                <TableRow className="border-b border-gray-300" style={{ backgroundColor: '#E6F0FF' }}>
                   <TableHead style={{ color: '#1F2937' }}>Data</TableHead>
                   <TableHead style={{ color: '#1F2937' }}>Empresa</TableHead>
                   <TableHead style={{ color: '#1F2937' }}>Conta</TableHead>
