@@ -63,11 +63,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// SICOFE Brand Colors - apenas azul e branco
+				// SICOFE Brand Colors - com nova cor primária
 				sicofe: {
-					blue: '#2563eb',
-					'blue-dark': '#1d4ed8',
-					'blue-light': '#3b82f6',
+					blue: '#0047FF',
+					'blue-dark': '#0039CC',
+					'blue-light': '#3366FF',
 					navy: '#1e3a8a',
 					gray: '#64748b',
 					'gray-light': 'rgba(255, 255, 255, 0.9)',
@@ -75,7 +75,7 @@ export default {
 					green: '#059669',
 					'green-light': '#10b981',
 					red: '#dc2626',
-					white: 'rgba(255, 255, 255, 0.95)'
+					white: '#FFFFFF'
 				}
 			},
 			borderRadius: {

@@ -1,5 +1,5 @@
 
-import { Building2, LayoutDashboard, Calculator, FileText, Settings, ChevronRight, Plus } from "lucide-react";
+import { Building2, LayoutDashboard, Calculator, FileText, Plus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -46,13 +46,13 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white">
-      <SidebarHeader className="border-b border-gray-200 p-6 bg-white">
+    <Sidebar className="bg-white">
+      <SidebarHeader className="p-6 bg-white">
         <div className="flex items-center justify-center">
           <img 
             src="/lovable-uploads/aeb6e43a-0df5-4317-b487-2cf292d5bf0a.png" 
             alt="SICOFE" 
-            className="h-12 w-auto"
+            className="h-16 w-auto"
           />
         </div>
       </SidebarHeader>
@@ -77,9 +77,6 @@ export function AppSidebar() {
                     <Link to={item.url} className="flex items-center space-x-3 px-3 py-2 rounded-lg">
                       <item.icon className="h-5 w-5" />
                       <span className="font-medium">{item.title}</span>
-                      <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-200 ${
-                        location.pathname === item.url ? 'rotate-90' : 'group-hover:translate-x-1'
-                      }`} />
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -89,10 +86,9 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-gray-200 p-4 bg-white">
+      <SidebarFooter className="p-4 bg-white">
         <div className="flex items-center space-x-3 text-sm text-sicofe-gray">
-          <Settings className="h-4 w-4" />
-          <span>Configurações</span>
+          <span>Sistema SICOFE</span>
         </div>
       </SidebarFooter>
     </Sidebar>

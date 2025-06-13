@@ -261,14 +261,14 @@ export default function Lancamentos() {
                 <Input 
                   id="search"
                   placeholder="Buscar por descrição, conta..."
-                  className="pl-10 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
+                  className="pl-10 bg-white border-gray-300 focus:border-sicofe-blue focus:ring-sicofe-blue"
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="filter-empresa">Empresa</Label>
               <Select>
-                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
+                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-sicofe-blue focus:ring-sicofe-blue">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
@@ -280,8 +280,8 @@ export default function Lancamentos() {
             <div>
               <Label htmlFor="filter-periodo">Período</Label>
               <Select>
-                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
-                  <SelectValue placeholder="Selecionar mês" />
+                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-sicofe-blue focus:ring-sicofe-blue">
+                  <SelectValue placeholder="Buscar por mês" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
                   {meses.map((mes) => (
@@ -305,7 +305,7 @@ export default function Lancamentos() {
         <CardHeader>
           <CardTitle className="text-sicofe-navy">Histórico de Lançamentos</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-white">
           <Table>
             <TableHeader>
               <TableRow className="border-b border-gray-300">
@@ -316,9 +316,9 @@ export default function Lancamentos() {
                 <TableHead className="text-right text-sicofe-navy">Valor</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="bg-white">
               {lancamentos.map((lancamento) => (
-                <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50">
+                <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
                   <TableCell className="text-sm">{lancamento.data}</TableCell>
                   <TableCell className="text-sm">{lancamento.empresa}</TableCell>
                   <TableCell className="text-sm">{lancamento.conta}</TableCell>
