@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -407,12 +408,12 @@ export default function Lancamentos() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-gray-300" style={{ backgroundColor: '#E6F0FF' }}>
-                  <TableHead style={{ color: '#1F2937' }}>Data</TableHead>
-                  <TableHead style={{ color: '#1F2937' }}>Empresa</TableHead>
-                  <TableHead style={{ color: '#1F2937' }}>Conta</TableHead>
-                  <TableHead style={{ color: '#1F2937' }}>Descrição</TableHead>
-                  <TableHead className="text-right" style={{ color: '#1F2937' }}>Valor</TableHead>
+                <TableRow className="border-b border-gray-300 bg-white">
+                  <TableHead className="text-gray-700">Data</TableHead>
+                  <TableHead className="text-gray-700">Empresa</TableHead>
+                  <TableHead className="text-gray-700">Conta</TableHead>
+                  <TableHead className="text-gray-700">Descrição</TableHead>
+                  <TableHead className="text-right text-gray-700">Valor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
@@ -439,8 +440,8 @@ export default function Lancamentos() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle style={{ color: '#1F2937' }}>Novo Lançamento Orçamentário</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-700">Novo Lançamento Orçamentário</DialogTitle>
+            <DialogDescription className="text-gray-700">
               Preencha os dados abaixo para criar um novo lançamento
             </DialogDescription>
           </DialogHeader>
@@ -448,21 +449,23 @@ export default function Lancamentos() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="empresa">Empresa *</Label>
+                <Label htmlFor="empresa" className="text-gray-700">Empresa *</Label>
                 <Select value={formData.empresa} onValueChange={(value) => setFormData(prev => ({ ...prev, empresa: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-gray-100">{empresa}</SelectItem>
+                      <SelectItem key={empresa} value={empresa} className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                        {empresa}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="competencia">Competência *</Label>
+                <Label htmlFor="competencia" className="text-gray-700">Competência *</Label>
                 <div className="border border-gray-300 rounded-md p-4 bg-white">
                   <div className="grid grid-cols-4 gap-3">
                     {meses.map((mes) => (
@@ -473,7 +476,7 @@ export default function Lancamentos() {
                           onCheckedChange={(checked) => handleCompetenciaChange(mes.key, checked as boolean)}
                           className="border-gray-400"
                         />
-                        <Label htmlFor={mes.key} className="text-sm font-normal cursor-pointer">{mes.label}</Label>
+                        <Label htmlFor={mes.key} className="text-sm font-normal cursor-pointer text-gray-700">{mes.label}</Label>
                       </div>
                     ))}
                   </div>
@@ -484,7 +487,7 @@ export default function Lancamentos() {
                       onCheckedChange={(checked) => handleSelectAllCompetencia(checked as boolean)}
                       className="border-gray-400"
                     />
-                    <Label htmlFor="selecionar-todos" className="text-sm font-medium cursor-pointer">Selecionar Todos</Label>
+                    <Label htmlFor="selecionar-todos" className="text-sm font-medium cursor-pointer text-gray-700">Selecionar Todos</Label>
                   </div>
                 </div>
               </div>
@@ -492,28 +495,32 @@ export default function Lancamentos() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-1">Grupo de Contas 1º Nível *</Label>
+                <Label htmlFor="grupo-contas-1" className="text-gray-700">Grupo de Contas 1º Nível *</Label>
                 <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
                     <SelectValue placeholder="Selecione o Grupo S1" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-gray-100">{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                        {grupo}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-2">Grupo de Contas 2º Nível *</Label>
+                <Label htmlFor="grupo-contas-2" className="text-gray-700">Grupo de Contas 2º Nível *</Label>
                 <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
                     <SelectValue placeholder="Selecione o Grupo S2" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-gray-100">{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                        {grupo}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -522,21 +529,27 @@ export default function Lancamentos() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="conta-analitica">Conta Analítica *</Label>
+                <Label htmlFor="conta-analitica" className="text-gray-700">Conta Analítica *</Label>
                 <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-gray-100">1.1.1 - Vendas Produtos</SelectItem>
-                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-gray-100">2.1.1 - Salários</SelectItem>
-                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-gray-100">3.1.1 - Outras Receitas</SelectItem>
+                    <SelectItem value="1.1.1 - Vendas Produtos" className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                      1.1.1 - Vendas Produtos
+                    </SelectItem>
+                    <SelectItem value="2.1.1 - Salários" className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                      2.1.1 - Salários
+                    </SelectItem>
+                    <SelectItem value="3.1.1 - Outras Receitas" className="text-black" style={{ backgroundColor: '#EEF4FF' }}>
+                      3.1.1 - Outras Receitas
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="valor">Valor *</Label>
+                <Label htmlFor="valor" className="text-gray-700">Valor *</Label>
                 <Input 
                   id="valor"
                   type="text"
@@ -544,20 +557,20 @@ export default function Lancamentos() {
                   value={formData.valor}
                   onChange={handleValueChange}
                   required
-                  className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
+                  className="bg-white border-gray-300 focus:ring-blue-300"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="observacoes">Observações</Label>
+              <Label htmlFor="observacoes" className="text-gray-700">Observações</Label>
               <Textarea 
                 id="observacoes"
                 placeholder="Observações adicionais..."
                 rows={3}
                 value={formData.observacoes}
                 onChange={(e) => setFormData(prev => ({ ...prev, observacoes: e.target.value }))}
-                className="bg-white border-gray-300 focus:border-gray-400 focus:ring-gray-400"
+                className="bg-white border-gray-300 focus:ring-blue-300"
               />
             </div>
 

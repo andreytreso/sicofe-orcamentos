@@ -66,13 +66,13 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-lg rounded-xl border-0" style={{ backgroundColor: '#EEF4FF' }}>
+        <Card className="shadow-lg rounded-xl border-0 bg-white">
           <CardHeader className="text-center pb-4">
             <div className="flex justify-center mb-4">
               <img 
                 src="/lovable-uploads/aeb6e43a-0df5-4317-b487-2cf292d5bf0a.png" 
                 alt="SICOFE" 
-                className="h-12 w-auto"
+                className="h-14 w-auto"
               />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-800">
@@ -97,7 +97,7 @@ export default function Login() {
                     if (errors.username) setErrors(prev => ({ ...prev, username: '' }));
                   }}
                   className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-300`}
-                  style={{ backgroundColor: username ? '#EEF4FF' : '#EEF4FF' }}
+                  style={{ backgroundColor: '#EEF4FF' }}
                   placeholder="Digite seu usuário"
                 />
                 {errors.username && (
@@ -117,7 +117,7 @@ export default function Login() {
                     if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                   }}
                   className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-300`}
-                  style={{ backgroundColor: password ? '#EEF4FF' : '#EEF4FF' }}
+                  style={{ backgroundColor: '#EEF4FF' }}
                   placeholder="Digite sua senha"
                 />
                 {errors.password && (
