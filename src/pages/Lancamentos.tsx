@@ -187,7 +187,7 @@ export default function Lancamentos() {
       filtered = filtered.filter(lancamento => lancamento.empresa === filters.companyId);
     }
     
-    if (filters.period) {
+    if (filters.period && filters.period !== "all") {
       filtered = filtered.filter(lancamento => lancamento.competencia.includes(filters.period));
     }
     
@@ -211,7 +211,7 @@ export default function Lancamentos() {
       filters.companyId = selectedEmpresa;
     }
     
-    if (selectedPeriodo) {
+    if (selectedPeriodo && selectedPeriodo !== "all") {
       filters.period = selectedPeriodo;
     }
     
@@ -341,7 +341,6 @@ export default function Lancamentos() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-white border-gray-300 placeholder-gray-500"
-                  style={{ '--placeholder-color': '#6B7280' } as React.CSSProperties}
                 />
               </div>
             </div>
@@ -368,7 +367,7 @@ export default function Lancamentos() {
                   <SelectValue placeholder="Buscar por mês" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="" className="bg-white hover:bg-gray-100">Buscar por mês</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-gray-100">Buscar por mês</SelectItem>
                   {meses.map((mes) => (
                     <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-gray-100">
                       {mes.label}
