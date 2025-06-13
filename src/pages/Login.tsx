@@ -58,9 +58,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-lg rounded-xl border-0">
+        <Card className="shadow-lg rounded-xl border-0 bg-white">
           <CardHeader className="text-center pb-4">
             <div className="flex justify-center mb-4">
               <img 
@@ -69,8 +69,8 @@ export default function Login() {
                 className="h-12 w-auto"
               />
             </div>
-            <CardTitle className="text-2xl font-bold text-sicofe-navy">
-              Entrar no Sistema
+            <CardTitle className="text-2xl font-bold text-gray-800">
+              Sicofe Orçamentos
             </CardTitle>
             <CardDescription className="text-gray-600">
               Digite suas credenciais para acessar o sistema
@@ -90,7 +90,7 @@ export default function Login() {
                     setUsername(e.target.value);
                     if (errors.username) setErrors(prev => ({ ...prev, username: '' }));
                   }}
-                  className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-sicofe-blue'} focus:ring-sicofe-blue`}
+                  className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-500`}
                   placeholder="Digite seu usuário"
                 />
                 {errors.username && (
@@ -109,7 +109,7 @@ export default function Login() {
                     setPassword(e.target.value);
                     if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                   }}
-                  className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-sicofe-blue'} focus:ring-sicofe-blue`}
+                  className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-500`}
                   placeholder="Digite sua senha"
                 />
                 {errors.password && (
@@ -121,7 +121,8 @@ export default function Login() {
             <CardFooter className="flex flex-col space-y-4">
               <Button 
                 type="submit" 
-                className="w-full bg-sicofe-blue hover:bg-sicofe-blue-dark text-white"
+                className="w-full text-white"
+                style={{ backgroundColor: '#0047FF' }}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -136,7 +137,8 @@ export default function Login() {
 
               <Link 
                 to="/forgot-password" 
-                className="text-sm text-sicofe-blue hover:text-sicofe-blue-dark text-center"
+                className="text-sm hover:underline text-center"
+                style={{ color: '#0047FF' }}
               >
                 Esqueci minha senha
               </Link>

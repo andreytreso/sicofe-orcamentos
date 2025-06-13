@@ -16,7 +16,6 @@ export function Layout({ children }: LayoutProps) {
           <header className="bg-white px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <SidebarTrigger className="lg:hidden" />
-              <h1 className="text-xl font-semibold text-sicofe-navy">Sistema de Controle Orçamentário</h1>
             </div>
           </header>
           

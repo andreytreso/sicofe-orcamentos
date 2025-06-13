@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Filter, Search } from "lucide-react";
+import { Plus, Filter, Search, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +30,6 @@ interface Lancamento {
   empresa: string;
   conta: string;
   descricao: string;
-  tipo: string;
   valor: number;
   observacoes: string;
   competencia: string[];
@@ -39,6 +37,11 @@ interface Lancamento {
 
 export default function Lancamentos() {
   const [showForm, setShowForm] = useState(false);
+  const [isLoadingFilters, setIsLoadingFilters] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedEmpresa, setSelectedEmpresa] = useState("");
+  const [selectedPeriodo, setSelectedPeriodo] = useState("");
+  
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([
     {
       id: "1",
@@ -46,7 +49,6 @@ export default function Lancamentos() {
       empresa: "SICOFE LTDA",
       conta: "1.1.1 - Vendas Produtos",
       descricao: "Vendas dezembro",
-      tipo: "Planejado",
       valor: 25000.00,
       observacoes: "",
       competencia: ["dez"]
@@ -57,10 +59,42 @@ export default function Lancamentos() {
       empresa: "SICOFE LTDA",
       conta: "2.1.1 - Salários",
       descricao: "Folha de pagamento",
-      tipo: "Realizado",
       valor: -15500.00,
       observacoes: "",
       competencia: ["dez"]
+    }
+  ]);
+  
+  const [allLancamentos] = useState<Lancamento[]>([
+    {
+      id: "1",
+      data: "15/12/2024",
+      empresa: "SICOFE LTDA",
+      conta: "1.1.1 - Vendas Produtos",
+      descricao: "Vendas dezembro",
+      valor: 25000.00,
+      observacoes: "",
+      competencia: ["dez"]
+    },
+    {
+      id: "2",
+      data: "14/12/2024",
+      empresa: "SICOFE LTDA",
+      conta: "2.1.1 - Salários",
+      descricao: "Folha de pagamento",
+      valor: -15500.00,
+      observacoes: "",
+      competencia: ["dez"]
+    },
+    {
+      id: "3",
+      data: "13/11/2024",
+      empresa: "Examine Loja 1",
+      conta: "1.1.1 - Vendas Produtos",
+      descricao: "Vendas novembro",
+      valor: 18000.00,
+      observacoes: "",
+      competencia: ["nov"]
     }
   ]);
   
@@ -93,7 +127,8 @@ export default function Lancamentos() {
     "Examine Loja 3",
     "Examine Loja 4",
     "Examine Loja 6",
-    "Examine Loja 7"
+    "Examine Loja 7",
+    "SICOFE LTDA"
   ];
 
   const gruposContas1 = [
@@ -140,6 +175,53 @@ export default function Lancamentos() {
     { key: "dez", label: "Dezembro" }
   ];
 
+  const fetchTransactions = async (filters: { companyId?: string; period?: string; search?: string }) => {
+    setIsLoadingFilters(true);
+    
+    // Simula delay de API
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    let filtered = [...allLancamentos];
+    
+    if (filters.companyId && filters.companyId !== "all") {
+      filtered = filtered.filter(lancamento => lancamento.empresa === filters.companyId);
+    }
+    
+    if (filters.period) {
+      filtered = filtered.filter(lancamento => lancamento.competencia.includes(filters.period));
+    }
+    
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(lancamento => 
+        lancamento.descricao.toLowerCase().includes(searchLower) ||
+        lancamento.conta.toLowerCase().includes(searchLower) ||
+        lancamento.empresa.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    setLancamentos(filtered);
+    setIsLoadingFilters(false);
+  };
+
+  const handleFilter = () => {
+    const filters: { companyId?: string; period?: string; search?: string } = {};
+    
+    if (selectedEmpresa && selectedEmpresa !== "all") {
+      filters.companyId = selectedEmpresa;
+    }
+    
+    if (selectedPeriodo) {
+      filters.period = selectedPeriodo;
+    }
+    
+    if (searchTerm.trim()) {
+      filters.search = searchTerm.trim();
+    }
+    
+    fetchTransactions(filters);
+  };
+
   const handleCompetenciaChange = (mes: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -171,7 +253,6 @@ export default function Lancamentos() {
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Remove caracteres não numéricos exceto vírgula e ponto
     const numericValue = value.replace(/[^\d.,-]/g, '');
     
     setFormData(prev => ({ ...prev, valor: numericValue }));
@@ -180,28 +261,23 @@ export default function Lancamentos() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Formatar valor com duas casas decimais
     const valorFormatado = parseFloat(formData.valor.replace(',', '.')) || 0;
     
-    // Obter meses selecionados
     const mesesSelecionados = Object.entries(formData.competencia)
       .filter(([_, selected]) => selected)
       .map(([mes, _]) => mes);
 
-    // Criar novo lançamento
     const novoLancamento: Lancamento = {
       id: Date.now().toString(),
       data: new Date().toLocaleDateString('pt-BR'),
       empresa: formData.empresa,
       conta: formData.contaAnalitica,
       descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
-      tipo: "Planejado",
       valor: parseFloat(valorFormatado.toFixed(2)),
       observacoes: formData.observacoes,
       competencia: mesesSelecionados
     };
 
-    // Adicionar ao histórico
     setLancamentos(prev => [novoLancamento, ...prev]);
     
     console.log("Lançamento salvo!", novoLancamento);
@@ -236,14 +312,15 @@ export default function Lancamentos() {
     <div className="space-y-6 bg-white min-h-screen">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-sicofe-navy">Lançamentos Orçamentários</h1>
-          <p className="text-sicofe-gray mt-2">
+          <h1 className="text-3xl font-bold" style={{ color: '#1F2937' }}>Lançamentos Orçamentários</h1>
+          <p className="text-gray-500 mt-2">
             Registre e acompanhe os lançamentos do orçamento por conta
           </p>
         </div>
         <Button 
           onClick={() => setShowForm(true)}
-          className="bg-sicofe-blue hover:bg-sicofe-blue-dark text-white"
+          className="text-white"
+          style={{ backgroundColor: '#0047FF' }}
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Lançamento
@@ -261,39 +338,56 @@ export default function Lancamentos() {
                 <Input 
                   id="search"
                   placeholder="Buscar por descrição, conta..."
-                  className="pl-10 bg-white border-gray-300 focus:border-sicofe-blue focus:ring-sicofe-blue"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-white border-gray-300 placeholder-gray-500"
+                  style={{ '--placeholder-color': '#6B7280' } as React.CSSProperties}
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="filter-empresa">Empresa</Label>
-              <Select>
-                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-sicofe-blue focus:ring-sicofe-blue">
+              <Select value={selectedEmpresa} onValueChange={setSelectedEmpresa}>
+                <SelectTrigger className="w-48 bg-white border-gray-300">
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">Todas as empresas</SelectItem>
-                  <SelectItem value="empresa1" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">SICOFE LTDA</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-gray-100">Todas as empresas</SelectItem>
+                  {empresas.map((empresa) => (
+                    <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-gray-100">
+                      {empresa}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label htmlFor="filter-periodo">Período</Label>
-              <Select>
-                <SelectTrigger className="w-48 bg-white border-gray-300 focus:border-sicofe-blue focus:ring-sicofe-blue">
+              <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
+                <SelectTrigger className="w-48 bg-white border-gray-300">
                   <SelectValue placeholder="Buscar por mês" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
+                  <SelectItem value="" className="bg-white hover:bg-gray-100">Buscar por mês</SelectItem>
                   {meses.map((mes) => (
-                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">
+                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-gray-100">
                       {mes.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-              <Filter className="h-4 w-4 mr-2" />
+            <Button 
+              variant="outline" 
+              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              onClick={handleFilter}
+              disabled={isLoadingFilters}
+            >
+              {isLoadingFilters ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Filter className="h-4 w-4 mr-2" />
+              )}
               Filtrar
             </Button>
           </div>
@@ -302,36 +396,42 @@ export default function Lancamentos() {
 
       {/* Lista de Lançamentos */}
       <Card className="bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <CardHeader>
-          <CardTitle className="text-sicofe-navy">Histórico de Lançamentos</CardTitle>
+        <CardHeader style={{ backgroundColor: '#E6F0FF' }}>
+          <CardTitle style={{ color: '#1F2937' }}>Histórico de Lançamentos</CardTitle>
         </CardHeader>
         <CardContent className="bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-gray-300">
-                <TableHead className="text-sicofe-navy">Data</TableHead>
-                <TableHead className="text-sicofe-navy">Empresa</TableHead>
-                <TableHead className="text-sicofe-navy">Conta</TableHead>
-                <TableHead className="text-sicofe-navy">Descrição</TableHead>
-                <TableHead className="text-right text-sicofe-navy">Valor</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="bg-white">
-              {lancamentos.map((lancamento) => (
-                <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
-                  <TableCell className="text-sm">{lancamento.data}</TableCell>
-                  <TableCell className="text-sm">{lancamento.empresa}</TableCell>
-                  <TableCell className="text-sm">{lancamento.conta}</TableCell>
-                  <TableCell className="text-sm">{lancamento.descricao}</TableCell>
-                  <TableCell className={`text-sm text-right font-medium ${
-                    lancamento.valor >= 0 ? 'text-sicofe-green' : 'text-sicofe-red'
-                  }`}>
-                    {formatCurrency(lancamento.valor)}
-                  </TableCell>
+          {isLoadingFilters ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#0047FF' }} />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-gray-300">
+                  <TableHead style={{ color: '#1F2937' }}>Data</TableHead>
+                  <TableHead style={{ color: '#1F2937' }}>Empresa</TableHead>
+                  <TableHead style={{ color: '#1F2937' }}>Conta</TableHead>
+                  <TableHead style={{ color: '#1F2937' }}>Descrição</TableHead>
+                  <TableHead className="text-right" style={{ color: '#1F2937' }}>Valor</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody className="bg-white">
+                {lancamentos.map((lancamento) => (
+                  <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
+                    <TableCell className="text-sm">{lancamento.data}</TableCell>
+                    <TableCell className="text-sm">{lancamento.empresa}</TableCell>
+                    <TableCell className="text-sm">{lancamento.conta}</TableCell>
+                    <TableCell className="text-sm">{lancamento.descricao}</TableCell>
+                    <TableCell className={`text-sm text-right font-medium ${
+                      lancamento.valor >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {formatCurrency(lancamento.valor)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -339,7 +439,7 @@ export default function Lancamentos() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-sicofe-navy">Novo Lançamento Orçamentário</DialogTitle>
+            <DialogTitle style={{ color: '#1F2937' }}>Novo Lançamento Orçamentário</DialogTitle>
             <DialogDescription>
               Preencha os dados abaixo para criar um novo lançamento
             </DialogDescription>
@@ -355,7 +455,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{empresa}</SelectItem>
+                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-gray-100">{empresa}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -371,7 +471,7 @@ export default function Lancamentos() {
                           id={mes.key}
                           checked={formData.competencia[mes.key as keyof typeof formData.competencia]}
                           onCheckedChange={(checked) => handleCompetenciaChange(mes.key, checked as boolean)}
-                          className="border-sicofe-blue data-[state=checked]:bg-sicofe-blue data-[state=checked]:border-sicofe-blue"
+                          className="border-gray-400"
                         />
                         <Label htmlFor={mes.key} className="text-sm font-normal cursor-pointer">{mes.label}</Label>
                       </div>
@@ -382,7 +482,7 @@ export default function Lancamentos() {
                       id="selecionar-todos"
                       checked={Object.values(formData.competencia).every(Boolean)}
                       onCheckedChange={(checked) => handleSelectAllCompetencia(checked as boolean)}
-                      className="border-sicofe-blue data-[state=checked]:bg-sicofe-blue data-[state=checked]:border-sicofe-blue"
+                      className="border-gray-400"
                     />
                     <Label htmlFor="selecionar-todos" className="text-sm font-medium cursor-pointer">Selecionar Todos</Label>
                   </div>
@@ -399,7 +499,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-gray-100">{grupo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -413,7 +513,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">{grupo}</SelectItem>
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-gray-100">{grupo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -428,9 +528,9 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">1.1.1 - Vendas Produtos</SelectItem>
-                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">2.1.1 - Salários</SelectItem>
-                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-sicofe-blue hover:text-white focus:bg-sicofe-blue focus:text-white">3.1.1 - Outras Receitas</SelectItem>
+                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-gray-100">1.1.1 - Vendas Produtos</SelectItem>
+                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-gray-100">2.1.1 - Salários</SelectItem>
+                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-gray-100">3.1.1 - Outras Receitas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -472,7 +572,8 @@ export default function Lancamentos() {
               </Button>
               <Button 
                 type="submit"
-                className="bg-sicofe-blue hover:bg-sicofe-blue-dark text-white"
+                className="text-white"
+                style={{ backgroundColor: '#0047FF' }}
               >
                 Salvar Lançamento
               </Button>

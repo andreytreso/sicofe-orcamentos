@@ -46,20 +46,20 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="bg-white">
+    <Sidebar className="bg-white border-r-4" style={{ borderRightColor: '#0047FF' }}>
       <SidebarHeader className="p-6 bg-white">
         <div className="flex items-center justify-center">
           <img 
             src="/lovable-uploads/aeb6e43a-0df5-4317-b487-2cf292d5bf0a.png" 
             alt="SICOFE" 
-            className="h-16 w-auto"
+            className="h-20 w-auto"
           />
         </div>
       </SidebarHeader>
       
       <SidebarContent className="p-4 bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sicofe-gray text-xs uppercase tracking-wider mb-2">
+          <SidebarGroupLabel className="text-gray-500 text-xs uppercase tracking-wider mb-2">
             Menu Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -68,11 +68,25 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    className={`w-full justify-start transition-all duration-200 hover:bg-sicofe-blue hover:text-white group ${
+                    className={`w-full justify-start transition-all duration-200 hover:text-white group ${
                       location.pathname === item.url 
-                        ? 'bg-sicofe-blue text-white shadow-md' 
-                        : 'text-sicofe-gray-dark hover:text-white'
+                        ? 'text-white shadow-md' 
+                        : 'text-gray-700 hover:text-white'
                     }`}
+                    style={{
+                      backgroundColor: location.pathname === item.url ? '#0047FF' : 'transparent',
+                      '--hover-bg': '#0047FF'
+                    } as React.CSSProperties}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== item.url) {
+                        e.currentTarget.style.backgroundColor = '#0047FF';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== item.url) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     <Link to={item.url} className="flex items-center space-x-3 px-3 py-2 rounded-lg">
                       <item.icon className="h-5 w-5" />
@@ -87,9 +101,7 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter className="p-4 bg-white">
-        <div className="flex items-center space-x-3 text-sm text-sicofe-gray">
-          <span>Sistema SICOFE</span>
-        </div>
+        {/* Rodapé removido conforme solicitado */}
       </SidebarFooter>
     </Sidebar>
   );
