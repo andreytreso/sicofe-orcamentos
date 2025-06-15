@@ -486,7 +486,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
+                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
                         {empresa}
                       </SelectItem>
                     ))}
@@ -495,79 +495,7 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Segunda linha - Grupos de Contas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
-                <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione o Grupo S1" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-300 z-50">
-                    {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                        {grupo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
-                <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione o Grupo S2" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-300 z-50">
-                    {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                        {grupo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Terceira linha - Conta Analítica e Valor */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
-                <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione a conta analítica" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-300 z-50">
-                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                      1.1.1 - Vendas Produtos
-                    </SelectItem>
-                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                      2.1.1 - Salários
-                    </SelectItem>
-                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                      3.1.1 - Outras Receitas
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valor" className="text-gray-700 font-medium">Valor *</Label>
-                <Input 
-                  id="valor"
-                  type="text"
-                  placeholder="0,00"
-                  value={formData.valor}
-                  onChange={handleValueChange}
-                  onBlur={handleValueBlur}
-                  required
-                  className="bg-white border-gray-300 focus:ring-blue-300 h-11"
-                />
-              </div>
-            </div>
-
-            {/* Quarta linha - Competência */}
+            {/* Segunda linha - Competência */}
             <div className="space-y-3">
               <Label htmlFor="competencia" className="text-gray-700 font-medium">Competência *</Label>
               <div className="border border-gray-300 rounded-lg p-6 bg-gray-50">
@@ -593,6 +521,78 @@ export default function Lancamentos() {
                   />
                   <Label htmlFor="selecionar-todos" className="text-sm font-medium cursor-pointer text-gray-700">Selecionar Todos</Label>
                 </div>
+              </div>
+            </div>
+
+            {/* Terceira linha - Grupos de Contas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
+                <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                    <SelectValue placeholder="Selecione o Grupo S1" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-300 z-50">
+                    {gruposContas1.map((grupo) => (
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                        {grupo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
+                <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                    <SelectValue placeholder="Selecione o Grupo S2" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-300 z-50">
+                    {gruposContas2.map((grupo) => (
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                        {grupo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Quarta linha - Conta Analítica e Valor */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
+                <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                    <SelectValue placeholder="Selecione a conta analítica" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-300 z-50">
+                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                      1.1.1 - Vendas Produtos
+                    </SelectItem>
+                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                      2.1.1 - Salários
+                    </SelectItem>
+                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                      3.1.1 - Outras Receitas
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="valor" className="text-gray-700 font-medium">Valor *</Label>
+                <Input 
+                  id="valor"
+                  type="text"
+                  placeholder="0,00"
+                  value={formData.valor}
+                  onChange={handleValueChange}
+                  onBlur={handleValueBlur}
+                  required
+                  className="bg-white border-gray-300 focus:ring-blue-300 h-11"
+                />
               </div>
             </div>
 
