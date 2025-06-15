@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -108,7 +107,11 @@ export function ReceitasDespesasChart({ selectedPeriod }: ReceitasDespesasChartP
   };
 
   const renderMonthlyChart = () => (
-    <BarChart data={chartData} onClick={(data) => data && handleBarClick(data.activePayload?.[0]?.payload)}>
+    <BarChart 
+      data={chartData} 
+      onClick={(data) => data && handleBarClick(data.activePayload?.[0]?.payload)}
+      style={{ background: 'transparent' }}
+    >
       <XAxis 
         dataKey="month" 
         tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }}
@@ -161,7 +164,11 @@ export function ReceitasDespesasChart({ selectedPeriod }: ReceitasDespesasChartP
   );
 
   const renderYTDChart = () => (
-    <LineChart data={chartData} onClick={(data) => data && handleBarClick(data.activePayload?.[0]?.payload)}>
+    <LineChart 
+      data={chartData} 
+      onClick={(data) => data && handleBarClick(data.activePayload?.[0]?.payload)}
+      style={{ background: 'transparent' }}
+    >
       <XAxis 
         dataKey="month" 
         tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }}
