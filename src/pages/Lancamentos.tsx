@@ -467,7 +467,7 @@ export default function Lancamentos() {
 
       {/* Modal de Novo Lançamento */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
+        <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-gray-700">Novo Lançamento Orçamentário</DialogTitle>
             <DialogDescription className="text-gray-700">
@@ -475,12 +475,13 @@ export default function Lancamentos() {
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Primeira linha - Empresa */}
+            <div className="grid grid-cols-1">
               <div className="space-y-2">
-                <Label htmlFor="empresa" className="text-gray-700">Empresa *</Label>
+                <Label htmlFor="empresa" className="text-gray-700 font-medium">Empresa *</Label>
                 <Select value={formData.empresa} onValueChange={(value) => setFormData(prev => ({ ...prev, empresa: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
@@ -492,41 +493,14 @@ export default function Lancamentos() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="competencia" className="text-gray-700">Competência *</Label>
-                <div className="border border-gray-300 rounded-md p-4 bg-white">
-                  <div className="grid grid-cols-4 gap-3">
-                    {meses.map((mes) => (
-                      <div key={mes.key} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={mes.key}
-                          checked={formData.competencia[mes.key as keyof typeof formData.competencia]}
-                          onCheckedChange={(checked) => handleCompetenciaChange(mes.key, checked as boolean)}
-                          className="border-gray-400"
-                        />
-                        <Label htmlFor={mes.key} className="text-sm font-normal cursor-pointer text-gray-700">{mes.label}</Label>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-200">
-                    <Checkbox
-                      id="selecionar-todos"
-                      checked={Object.values(formData.competencia).every(Boolean)}
-                      onCheckedChange={(checked) => handleSelectAllCompetencia(checked as boolean)}
-                      className="border-gray-400"
-                    />
-                    <Label htmlFor="selecionar-todos" className="text-sm font-medium cursor-pointer text-gray-700">Selecionar Todos</Label>
-                  </div>
-                </div>
-              </div>
             </div>
 
+            {/* Segunda linha - Grupos de Contas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-1" className="text-gray-700">Grupo de Contas 1º Nível *</Label>
+                <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
                 <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione o Grupo S1" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
@@ -540,9 +514,9 @@ export default function Lancamentos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-2" className="text-gray-700">Grupo de Contas 2º Nível *</Label>
+                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
                 <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione o Grupo S2" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
@@ -556,11 +530,12 @@ export default function Lancamentos() {
               </div>
             </div>
 
+            {/* Terceira linha - Conta Analítica e Valor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="conta-analitica" className="text-gray-700">Conta Analítica *</Label>
+                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
                 <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
@@ -578,7 +553,7 @@ export default function Lancamentos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="valor" className="text-gray-700">Valor *</Label>
+                <Label htmlFor="valor" className="text-gray-700 font-medium">Valor *</Label>
                 <Input 
                   id="valor"
                   type="text"
@@ -587,24 +562,54 @@ export default function Lancamentos() {
                   onChange={handleValueChange}
                   onBlur={handleValueBlur}
                   required
-                  className="bg-white border-gray-300 focus:ring-blue-300"
+                  className="bg-white border-gray-300 focus:ring-blue-300 h-11"
                 />
               </div>
             </div>
 
+            {/* Quarta linha - Competência */}
+            <div className="space-y-3">
+              <Label htmlFor="competencia" className="text-gray-700 font-medium">Competência *</Label>
+              <div className="border border-gray-300 rounded-lg p-6 bg-gray-50">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {meses.map((mes) => (
+                    <div key={mes.key} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={mes.key}
+                        checked={formData.competencia[mes.key as keyof typeof formData.competencia]}
+                        onCheckedChange={(checked) => handleCompetenciaChange(mes.key, checked as boolean)}
+                        className="border-gray-400"
+                      />
+                      <Label htmlFor={mes.key} className="text-sm font-normal cursor-pointer text-gray-700">{mes.label}</Label>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-gray-300">
+                  <Checkbox
+                    id="selecionar-todos"
+                    checked={Object.values(formData.competencia).every(Boolean)}
+                    onCheckedChange={(checked) => handleSelectAllCompetencia(checked as boolean)}
+                    className="border-gray-400"
+                  />
+                  <Label htmlFor="selecionar-todos" className="text-sm font-medium cursor-pointer text-gray-700">Selecionar Todos</Label>
+                </div>
+              </div>
+            </div>
+
+            {/* Quinta linha - Observações */}
             <div className="space-y-2">
-              <Label htmlFor="observacoes" className="text-gray-700">Observações</Label>
+              <Label htmlFor="observacoes" className="text-gray-700 font-medium">Observações</Label>
               <Textarea 
                 id="observacoes"
                 placeholder="Observações adicionais..."
-                rows={3}
+                rows={4}
                 value={formData.observacoes}
                 onChange={(e) => setFormData(prev => ({ ...prev, observacoes: e.target.value }))}
                 className="bg-white border-gray-300 focus:ring-blue-300"
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-6 border-t">
               <Button 
                 type="button"
                 variant="outline" 
