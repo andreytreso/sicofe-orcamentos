@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
 import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
@@ -150,12 +151,12 @@ export default function Dashboard() {
             <BarChart data={chartData}>
               <XAxis 
                 dataKey="month" 
-                tick={{ fill: '#64748b', fontSize: 12 }}
-                axisLine={{ stroke: '#64748b' }}
+                tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#334155' }}
               />
               <YAxis 
-                tick={{ fill: '#64748b', fontSize: 12 }}
-                axisLine={{ stroke: '#64748b' }}
+                tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#334155' }}
                 tickFormatter={(value) => value.toLocaleString('pt-BR')}
               />
               <Bar 
