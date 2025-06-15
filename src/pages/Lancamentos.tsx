@@ -102,6 +102,7 @@ export default function Lancamentos() {
   
   const [formData, setFormData] = useState({
     empresa: "",
+    ano: new Date().getFullYear().toString(),
     grupoContas1: "",
     grupoContas2: "",
     contaAnalitica: "",
@@ -122,6 +123,10 @@ export default function Lancamentos() {
       dez: false,
     }
   });
+
+  // Generate year options: current year + 5 years ahead
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear + i);
 
   const empresas = [
     "Examine Loja 1",
@@ -300,9 +305,21 @@ export default function Lancamentos() {
       .filter(([_, selected]) => selected)
       .map(([mes, _]) => mes);
 
+    // Map month abbreviations to month numbers
+    const monthMap: { [key: string]: string } = {
+      jan: '01', fev: '02', mar: '03', abr: '04',
+      mai: '05', jun: '06', jul: '07', ago: '08',
+      set: '09', out: '10', nov: '11', dez: '12'
+    };
+
+    // Create date with first day of selected months and chosen year
+    const dataFormatada = mesesSelecionados.length > 0 
+      ? `01/${monthMap[mesesSelecionados[0]]}/${formData.ano}`
+      : new Date().toLocaleDateString('pt-BR');
+
     const novoLancamento: Lancamento = {
       id: Date.now().toString(),
-      data: new Date().toLocaleDateString('pt-BR'),
+      data: dataFormatada,
       empresa: formData.empresa,
       conta: formData.contaAnalitica,
       descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
@@ -326,6 +343,7 @@ export default function Lancamentos() {
     // Reset form
     setFormData({
       empresa: "",
+      ano: new Date().getFullYear().toString(),
       grupoContas1: "",
       grupoContas2: "",
       contaAnalitica: "",
@@ -504,7 +522,24 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Segunda linha - Competência */}
+            {/* Segunda linha - Ano */}
+            <div className="space-y-2">
+              <Label htmlFor="ano" className="text-gray-700 font-medium">Ano *</Label>
+              <Select value={formData.ano} onValueChange={(value) => setFormData(prev => ({ ...prev, ano: value }))}>
+                <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                  <SelectValue placeholder="Selecione o ano" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-300 z-50">
+                  {yearOptions.map((year) => (
+                    <SelectItem key={year} value={year.toString()} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Terceira linha - Competência */}
             <div className="space-y-3">
               <Label htmlFor="competencia" className="text-gray-700 font-medium">Competência *</Label>
               <div className="border border-gray-300 rounded-lg p-6 bg-gray-50">
@@ -533,7 +568,7 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Terceira linha - Grupos de Contas */}
+            {/* Quarta linha - Grupos de Contas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
@@ -568,7 +603,7 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Quarta linha - Conta Analítica e Valor */}
+            {/* Quinta linha - Conta Analítica e Valor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
@@ -605,7 +640,7 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Quinta linha - Observações */}
+            {/* Sexta linha - Observações */}
             <div className="space-y-2">
               <Label htmlFor="observacoes" className="text-gray-700 font-medium">Observações</Label>
               <Textarea 
