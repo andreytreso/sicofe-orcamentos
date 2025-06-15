@@ -1,7 +1,7 @@
 
 import { StatsCard } from "@/components/StatsCard";
 import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 const chartData = [
@@ -106,11 +106,26 @@ export default function Dashboard() {
           </h3>
           <ChartContainer config={chartConfig} className="h-64">
             <BarChart data={chartData}>
-              <XAxis dataKey="month" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="receitas" fill="var(--color-receitas)" />
-              <Bar dataKey="despesas" fill="var(--color-despesas)" />
+              <XAxis 
+                dataKey="month" 
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                axisLine={{ stroke: '#64748b' }}
+              />
+              <YAxis 
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                axisLine={{ stroke: '#64748b' }}
+                tickFormatter={(value) => value.toLocaleString('pt-BR')}
+              />
+              <Bar 
+                dataKey="receitas" 
+                fill="var(--color-receitas)" 
+                style={{ cursor: 'default' }}
+              />
+              <Bar 
+                dataKey="despesas" 
+                fill="var(--color-despesas)" 
+                style={{ cursor: 'default' }}
+              />
             </BarChart>
           </ChartContainer>
         </div>
