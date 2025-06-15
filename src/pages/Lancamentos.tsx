@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Filter, Search, Loader2 } from "lucide-react";
+import { Plus, Filter, Search, Loader2, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -39,35 +39,13 @@ interface Lancamento {
 export default function Lancamentos() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [editingLancamento, setEditingLancamento] = useState<Lancamento | null>(null);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
   
-  const [lancamentos, setLancamentos] = useState<Lancamento[]>([
-    {
-      id: "1",
-      data: "15/12/2024",
-      empresa: "SICOFE LTDA",
-      conta: "1.1.1 - Vendas Produtos",
-      descricao: "Vendas dezembro",
-      valor: 25000.00,
-      observacoes: "",
-      competencia: ["dez"]
-    },
-    {
-      id: "2",
-      data: "14/12/2024",
-      empresa: "SICOFE LTDA",
-      conta: "2.1.1 - Salários",
-      descricao: "Folha de pagamento",
-      valor: -15500.00,
-      observacoes: "",
-      competencia: ["dez"]
-    }
-  ]);
-  
-  const [allLancamentos] = useState<Lancamento[]>([
+  const [allLancamentos, setAllLancamentos] = useState<Lancamento[]>([
     {
       id: "1",
       data: "15/12/2024",
@@ -99,6 +77,8 @@ export default function Lancamentos() {
       competencia: ["nov"]
     }
   ]);
+  
+  const [lancamentos, setLancamentos] = useState<Lancamento[]>([...allLancamentos]);
   
   const [formData, setFormData] = useState({
     empresa: "",
@@ -229,6 +209,44 @@ export default function Lancamentos() {
     fetchTransactions(filters);
   };
 
+  const handleEdit = (lancamento: Lancamento) => {
+    setEditingLancamento(lancamento);
+    
+    // Populate form with existing data
+    const competenciaState = Object.keys(formData.competencia).reduce((acc, mes) => {
+      acc[mes] = lancamento.competencia.includes(mes);
+      return acc;
+    }, {} as typeof formData.competencia);
+
+    setFormData({
+      empresa: lancamento.empresa,
+      ano: new Date().getFullYear().toString(), // Default to current year
+      grupoContas1: "",
+      grupoContas2: "",
+      contaAnalitica: lancamento.conta,
+      valor: lancamento.valor.toString().replace('.', ','),
+      observacoes: lancamento.observacoes,
+      competencia: competenciaState
+    });
+    
+    setShowForm(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
+      const updatedLancamentos = allLancamentos.filter(l => l.id !== id);
+      setAllLancamentos(updatedLancamentos);
+      setLancamentos(updatedLancamentos);
+      
+      toast({
+        title: "Sucesso!",
+        description: "Lançamento excluído com sucesso.",
+        variant: "default",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+    }
+  };
+
   const handleCompetenciaChange = (mes: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -317,31 +335,89 @@ export default function Lancamentos() {
       ? `01/${monthMap[mesesSelecionados[0]]}/${formData.ano}`
       : new Date().toLocaleDateString('pt-BR');
 
-    const novoLancamento: Lancamento = {
-      id: Date.now().toString(),
-      data: dataFormatada,
-      empresa: formData.empresa,
-      conta: formData.contaAnalitica,
-      descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
-      valor: parseFloat(valorFormatado.toFixed(2)),
-      observacoes: formData.observacoes,
-      competencia: mesesSelecionados
-    };
+    if (editingLancamento) {
+      // Update existing lancamento
+      const updatedLancamento: Lancamento = {
+        ...editingLancamento,
+        data: dataFormatada,
+        empresa: formData.empresa,
+        conta: formData.contaAnalitica,
+        descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
+        valor: parseFloat(valorFormatado.toFixed(2)),
+        observacoes: formData.observacoes,
+        competencia: mesesSelecionados
+      };
 
-    setLancamentos(prev => [novoLancamento, ...prev]);
-    
-    console.log("Lançamento salvo!", novoLancamento);
-    
-    // Show success toast
-    toast({
-      title: "Sucesso!",
-      description: "Lançamento criado com sucesso.",
-      variant: "default",
-      className: "bg-green-50 border-green-200 text-green-800",
-    });
+      const updatedAllLancamentos = allLancamentos.map(l => 
+        l.id === editingLancamento.id ? updatedLancamento : l
+      );
+      
+      setAllLancamentos(updatedAllLancamentos);
+      setLancamentos(updatedAllLancamentos);
+      
+      toast({
+        title: "Sucesso!",
+        description: "Lançamento atualizado com sucesso.",
+        variant: "default",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+    } else {
+      // Create new lancamento
+      const novoLancamento: Lancamento = {
+        id: Date.now().toString(),
+        data: dataFormatada,
+        empresa: formData.empresa,
+        conta: formData.contaAnalitica,
+        descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
+        valor: parseFloat(valorFormatado.toFixed(2)),
+        observacoes: formData.observacoes,
+        competencia: mesesSelecionados
+      };
+
+      const updatedAllLancamentos = [novoLancamento, ...allLancamentos];
+      setAllLancamentos(updatedAllLancamentos);
+      setLancamentos(updatedAllLancamentos);
+      
+      toast({
+        title: "Sucesso!",
+        description: "Lançamento criado com sucesso.",
+        variant: "default",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+    }
     
     setShowForm(false);
+    setEditingLancamento(null);
     
+    // Reset form
+    setFormData({
+      empresa: "",
+      ano: new Date().getFullYear().toString(),
+      grupoContas1: "",
+      grupoContas2: "",
+      contaAnalitica: "",
+      valor: "",
+      observacoes: "",
+      competencia: {
+        jan: false,
+        fev: false,
+        mar: false,
+        abr: false,
+        mai: false,
+        jun: false,
+        jul: false,
+        ago: false,
+        set: false,
+        out: false,
+        nov: false,
+        dez: false,
+      }
+    });
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingLancamento(null);
     // Reset form
     setFormData({
       empresa: "",
@@ -472,6 +548,7 @@ export default function Lancamentos() {
                   <TableHead className="text-gray-700">Conta</TableHead>
                   <TableHead className="text-gray-700">Descrição</TableHead>
                   <TableHead className="text-right text-gray-700">Valor</TableHead>
+                  <TableHead className="text-center text-gray-700">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
@@ -486,6 +563,26 @@ export default function Lancamentos() {
                     }`}>
                       {formatCurrency(lancamento.valor)}
                     </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(lancamento)}
+                          className="h-8 w-8 p-0 hover:bg-blue-100"
+                        >
+                          <Edit className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(lancamento.id)}
+                          className="h-8 w-8 p-0 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -494,13 +591,15 @@ export default function Lancamentos() {
         </CardContent>
       </Card>
 
-      {/* Modal de Novo Lançamento */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
+      {/* Modal de Novo/Editar Lançamento */}
+      <Dialog open={showForm} onOpenChange={handleCloseForm}>
         <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
           <DialogHeader>
-            <DialogTitle className="text-gray-700">Novo Lançamento Orçamentário</DialogTitle>
+            <DialogTitle className="text-gray-700">
+              {editingLancamento ? 'Editar Lançamento Orçamentário' : 'Novo Lançamento Orçamentário'}
+            </DialogTitle>
             <DialogDescription className="text-gray-700">
-              Preencha os dados abaixo para criar um novo lançamento
+              {editingLancamento ? 'Altere os dados abaixo para atualizar o lançamento' : 'Preencha os dados abaixo para criar um novo lançamento'}
             </DialogDescription>
           </DialogHeader>
           
@@ -659,7 +758,7 @@ export default function Lancamentos() {
               <Button 
                 type="button"
                 variant="outline" 
-                onClick={() => setShowForm(false)}
+                onClick={handleCloseForm}
                 className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
               >
                 Cancelar
@@ -669,7 +768,7 @@ export default function Lancamentos() {
                 className="text-white"
                 style={{ backgroundColor: '#0047FF' }}
               >
-                Salvar Lançamento
+                {editingLancamento ? 'Atualizar Lançamento' : 'Salvar Lançamento'}
               </Button>
             </DialogFooter>
           </form>
