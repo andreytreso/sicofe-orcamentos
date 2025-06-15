@@ -336,6 +336,8 @@ export default function Lancamentos() {
     toast({
       title: "Sucesso!",
       description: "Lançamento criado com sucesso.",
+      variant: "default",
+      className: "bg-green-50 border-green-200 text-green-800",
     });
     
     setShowForm(false);
