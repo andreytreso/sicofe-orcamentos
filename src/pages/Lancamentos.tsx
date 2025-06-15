@@ -34,6 +34,7 @@ interface Lancamento {
   valor: number;
   observacoes: string;
   competencia: string[];
+  grupoContas1?: string; // Add this field to track the grupo de contas
 }
 
 export default function Lancamentos() {
@@ -54,7 +55,8 @@ export default function Lancamentos() {
       descricao: "Vendas dezembro",
       valor: 25000.00,
       observacoes: "",
-      competencia: ["dez"]
+      competencia: ["dez"],
+      grupoContas1: "Receita Bruta"
     },
     {
       id: "2",
@@ -62,9 +64,10 @@ export default function Lancamentos() {
       empresa: "SICOFE LTDA",
       conta: "2.1.1 - Salários",
       descricao: "Folha de pagamento",
-      valor: -15500.00,
+      valor: 15500.00,
       observacoes: "",
-      competencia: ["dez"]
+      competencia: ["dez"],
+      grupoContas1: "SG&A"
     },
     {
       id: "3",
@@ -74,7 +77,8 @@ export default function Lancamentos() {
       descricao: "Vendas novembro",
       valor: 18000.00,
       observacoes: "",
-      competencia: ["nov"]
+      competencia: ["nov"],
+      grupoContas1: "Receita Bruta"
     }
   ]);
   
@@ -273,7 +277,26 @@ export default function Lancamentos() {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value);
+    }).format(Math.abs(value)); // Always show absolute value, sign will be handled by display logic
+  };
+
+  const getDisplayValue = (lancamento: Lancamento) => {
+    const isReceitaBruta = lancamento.grupoContas1 === "Receita Bruta";
+    const absoluteValue = Math.abs(lancamento.valor);
+    
+    if (isReceitaBruta) {
+      return {
+        value: absoluteValue,
+        isPositive: true,
+        colorClass: "text-green-600"
+      };
+    } else {
+      return {
+        value: -absoluteValue,
+        isPositive: false,
+        colorClass: "text-red-600"
+      };
+    }
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,7 +368,8 @@ export default function Lancamentos() {
         descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
         valor: parseFloat(valorFormatado.toFixed(2)),
         observacoes: formData.observacoes,
-        competencia: mesesSelecionados
+        competencia: mesesSelecionados,
+        grupoContas1: formData.grupoContas1 // Save the grupo de contas
       };
 
       const updatedAllLancamentos = allLancamentos.map(l => 
@@ -371,7 +395,8 @@ export default function Lancamentos() {
         descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
         valor: parseFloat(valorFormatado.toFixed(2)),
         observacoes: formData.observacoes,
-        competencia: mesesSelecionados
+        competencia: mesesSelecionados,
+        grupoContas1: formData.grupoContas1 // Save the grupo de contas
       };
 
       const updatedAllLancamentos = [novoLancamento, ...allLancamentos];
@@ -552,39 +577,40 @@ export default function Lancamentos() {
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
-                {lancamentos.map((lancamento) => (
-                  <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
-                    <TableCell className="text-sm">{lancamento.data}</TableCell>
-                    <TableCell className="text-sm">{lancamento.empresa}</TableCell>
-                    <TableCell className="text-sm">{lancamento.conta}</TableCell>
-                    <TableCell className="text-sm">{lancamento.descricao}</TableCell>
-                    <TableCell className={`text-sm text-right font-medium ${
-                      lancamento.valor >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {formatCurrency(lancamento.valor)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex gap-2 justify-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(lancamento)}
-                          className="h-8 w-8 p-0 hover:bg-blue-100"
-                        >
-                          <Edit className="h-4 w-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(lancamento.id)}
-                          className="h-8 w-8 p-0 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {lancamentos.map((lancamento) => {
+                  const displayValue = getDisplayValue(lancamento);
+                  return (
+                    <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
+                      <TableCell className="text-sm">{lancamento.data}</TableCell>
+                      <TableCell className="text-sm">{lancamento.empresa}</TableCell>
+                      <TableCell className="text-sm">{lancamento.conta}</TableCell>
+                      <TableCell className="text-sm">{lancamento.descricao}</TableCell>
+                      <TableCell className={`text-sm text-right font-medium ${displayValue.colorClass}`}>
+                        {displayValue.isPositive ? '' : '-'}{formatCurrency(displayValue.value)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(lancamento)}
+                            className="h-8 w-8 p-0 hover:bg-blue-100"
+                          >
+                            <Edit className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(lancamento.id)}
+                            className="h-8 w-8 p-0 hover:bg-red-100"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
