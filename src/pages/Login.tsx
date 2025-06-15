@@ -72,7 +72,7 @@ export default function Login() {
               <img 
                 src="/lovable-uploads/aeb6e43a-0df5-4317-b487-2cf292d5bf0a.png" 
                 alt="SICOFE" 
-                className="h-14 w-auto"
+                className="h-16 w-auto"
               />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-800">
@@ -150,6 +150,18 @@ export default function Login() {
               >
                 Esqueci minha senha
               </Link>
+
+              <div className="text-center">
+                <p className="text-gray-600 text-sm">
+                  Não possui uma conta?{' '}
+                  <Link
+                    to="/cadastro-usuario"
+                    className="text-[#0047FF] hover:underline font-medium"
+                  >
+                    Criar conta
+                  </Link>
+                </p>
+              </div>
             </CardFooter>
           </form>
         </Card>

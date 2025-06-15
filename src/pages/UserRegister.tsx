@@ -131,8 +131,8 @@ const UserRegister = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg rounded-xl">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg rounded-xl bg-white">
         <CardHeader className="text-center">
           <CardTitle className="text-xl font-semibold text-gray-800">
             Cadastro de Usuário
@@ -155,6 +155,7 @@ const UserRegister = () => {
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.name}
               />
               {errors.name && (
@@ -173,6 +174,7 @@ const UserRegister = () => {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.email}
               />
               {errors.email && (
@@ -191,6 +193,7 @@ const UserRegister = () => {
                 value={formData.company}
                 onChange={(e) => handleInputChange('company', e.target.value)}
                 className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.company}
               />
               {errors.company && (
@@ -203,7 +206,7 @@ const UserRegister = () => {
                 Cargo *
               </Label>
               <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300" aria-invalid={!!errors.role}>
+                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300" style={{ backgroundColor: '#EEF4FF' }} aria-invalid={!!errors.role}>
                   <SelectValue placeholder="Selecione seu cargo" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
@@ -235,6 +238,7 @@ const UserRegister = () => {
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.password}
               />
               {errors.password && (
@@ -254,6 +258,7 @@ const UserRegister = () => {
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.confirmPassword}
               />
               {errors.confirmPassword && (
