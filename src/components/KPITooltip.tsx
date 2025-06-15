@@ -18,7 +18,7 @@ export function KPITooltip({ content }: KPITooltipProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <button 
-            className="ml-1 p-0.5 rounded-full hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-sicofe-blue focus:ring-opacity-50 transition-colors"
+            className="ml-1 p-0.5 rounded-full hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
             aria-label="Informações sobre este indicador"
           >
             <Info className="h-3.5 w-3.5 text-sicofe-gray hover:text-sicofe-blue transition-colors" />
