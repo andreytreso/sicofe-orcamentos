@@ -1,6 +1,52 @@
 
 import { StatsCard } from "@/components/StatsCard";
 import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+
+const chartData = [
+  {
+    month: "Jan",
+    receitas: 45000,
+    despesas: 32000,
+  },
+  {
+    month: "Fev",
+    receitas: 52000,
+    despesas: 38000,
+  },
+  {
+    month: "Mar",
+    receitas: 48000,
+    despesas: 35000,
+  },
+  {
+    month: "Abr",
+    receitas: 61000,
+    despesas: 42000,
+  },
+  {
+    month: "Mai",
+    receitas: 55000,
+    despesas: 40000,
+  },
+  {
+    month: "Jun",
+    receitas: 67000,
+    despesas: 45000,
+  },
+];
+
+const chartConfig = {
+  receitas: {
+    label: "Receitas",
+    color: "#059669",
+  },
+  despesas: {
+    label: "Despesas",
+    color: "#dc2626",
+  },
+};
 
 export default function Dashboard() {
   return (
@@ -58,9 +104,15 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">
             Receitas vs Despesas
           </h3>
-          <div className="h-64 flex items-center justify-center text-sicofe-gray">
-            Gráfico será implementado aqui
-          </div>
+          <ChartContainer config={chartConfig} className="h-64">
+            <BarChart data={chartData}>
+              <XAxis dataKey="month" />
+              <YAxis />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="receitas" fill="var(--color-receitas)" />
+              <Bar dataKey="despesas" fill="var(--color-despesas)" />
+            </BarChart>
+          </ChartContainer>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -68,11 +120,11 @@ export default function Dashboard() {
             Últimos Lançamentos
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b">
+            <div className="flex justify-between items-center py-2 border-b border-gray-200">
               <span className="text-sm text-sicofe-gray-dark">Receita de Vendas</span>
               <span className="text-sm font-medium text-sicofe-green">+R$ 25.000,00</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b">
+            <div className="flex justify-between items-center py-2 border-b border-gray-200">
               <span className="text-sm text-sicofe-gray-dark">Despesas Operacionais</span>
               <span className="text-sm font-medium text-sicofe-red">-R$ 15.500,00</span>
             </div>
