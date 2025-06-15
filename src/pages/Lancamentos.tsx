@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -763,9 +762,7 @@ export default function Lancamentos() {
                           {grupo}
                         </SelectItem>
                       ))
-                    ) : (
-                      <SelectItem value="" disabled className="text-gray-400">-- Nenhum registro --</SelectItem>
-                    )}
+                    ) : null}
                   </SelectContent>
                 </Select>
               </div>
@@ -786,9 +783,7 @@ export default function Lancamentos() {
                           {conta}
                         </SelectItem>
                       ))
-                    ) : (
-                      <SelectItem value="" disabled className="text-gray-400">-- Nenhum registro --</SelectItem>
-                    )}
+                    ) : null}
                   </SelectContent>
                 </Select>
               </div>
@@ -844,7 +839,7 @@ export default function Lancamentos() {
 
       {/* Alert Dialog para Confirmação de Exclusão */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-white border-gray-200">
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-gray-700">Excluir Lançamento</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-600">
