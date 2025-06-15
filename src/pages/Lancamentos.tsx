@@ -253,9 +253,40 @@ export default function Lancamentos() {
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const numericValue = value.replace(/[^\d.,-]/g, '');
+    
+    // Remove todos os caracteres não numéricos, exceto vírgula e ponto
+    let numericValue = value.replace(/[^\d.,-]/g, '');
+    
+    // Substitui vírgula por ponto para padronização
+    numericValue = numericValue.replace(',', '.');
+    
+    // Remove pontos extras, mantendo apenas o primeiro
+    const parts = numericValue.split('.');
+    if (parts.length > 2) {
+      numericValue = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Se há um ponto, limita a 2 casas decimais
+    if (numericValue.includes('.')) {
+      const [integerPart, decimalPart] = numericValue.split('.');
+      numericValue = integerPart + '.' + decimalPart.slice(0, 2);
+    }
     
     setFormData(prev => ({ ...prev, valor: numericValue }));
+  };
+
+  const handleValueBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    if (value && value !== '') {
+      const numericValue = parseFloat(value.replace(',', '.'));
+      
+      if (!isNaN(numericValue)) {
+        // Formata o valor com duas casas decimais usando vírgula
+        const formattedValue = numericValue.toFixed(2).replace('.', ',');
+        setFormData(prev => ({ ...prev, valor: formattedValue }));
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -554,6 +585,7 @@ export default function Lancamentos() {
                   placeholder="0,00"
                   value={formData.valor}
                   onChange={handleValueChange}
+                  onBlur={handleValueBlur}
                   required
                   className="bg-white border-gray-300 focus:ring-blue-300"
                 />
