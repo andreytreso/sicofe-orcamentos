@@ -206,7 +206,7 @@ const UserRegister = () => {
                 Cargo *
               </Label>
               <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 focus-visible:ring-blue-300 focus-visible:ring-offset-0" style={{ backgroundColor: '#EEF4FF' }} aria-invalid={!!errors.role}>
+                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 focus-visible:ring-blue-300 focus-visible:ring-offset-0 focus-visible:ring-0" style={{ backgroundColor: '#EEF4FF' }} aria-invalid={!!errors.role}>
                   <SelectValue placeholder="Selecione seu cargo" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-0">
