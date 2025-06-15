@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
 import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
@@ -137,7 +136,6 @@ export default function Dashboard() {
           value={kpiData.variation.value}
           icon={TrendingDown}
           tooltip={tooltips.variation}
-          trend={{ ...kpiData.variation.trend, isPositive: false }}
         />
       </div>
 
