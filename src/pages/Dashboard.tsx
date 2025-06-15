@@ -1,5 +1,6 @@
-
+import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
+import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
 import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
@@ -48,53 +49,94 @@ const chartConfig = {
   },
 };
 
+// Mock data based on period - in real app this would come from API
+const getKPIData = (period: PeriodType) => {
+  const data = {
+    month: {
+      budget: { value: "R$ 150.000,00", trend: { value: "12%", absoluteValue: "R$ 18.000", isPositive: true } },
+      realized: { value: "R$ 87.500,00", trend: { value: "8%", absoluteValue: "R$ 6.500", isPositive: true } },
+      available: { value: "R$ 62.500,00", trend: { value: "5%", absoluteValue: "R$ 2.800", isPositive: false } },
+      variation: { value: "58,3%", trend: { value: "3%", absoluteValue: "0", isPositive: true } }
+    },
+    quarter: {
+      budget: { value: "R$ 450.000,00", trend: { value: "15%", absoluteValue: "R$ 58.500", isPositive: true } },
+      realized: { value: "R$ 287.500,00", trend: { value: "12%", absoluteValue: "R$ 30.800", isPositive: true } },
+      available: { value: "R$ 162.500,00", trend: { value: "8%", absoluteValue: "R$ 12.000", isPositive: false } },
+      variation: { value: "63,9%", trend: { value: "6%", absoluteValue: "0", isPositive: true } }
+    },
+    year: {
+      budget: { value: "R$ 1.800.000,00", trend: { value: "18%", absoluteValue: "R$ 274.500", isPositive: true } },
+      realized: { value: "R$ 1.125.000,00", trend: { value: "14%", absoluteValue: "R$ 138.200", isPositive: true } },
+      available: { value: "R$ 675.000,00", trend: { value: "10%", absoluteValue: "R$ 61.400", isPositive: false } },
+      variation: { value: "62,5%", trend: { value: "4%", absoluteValue: "0", isPositive: true } }
+    },
+    ytd: {
+      budget: { value: "R$ 900.000,00", trend: { value: "16%", absoluteValue: "R$ 124.100", isPositive: true } },
+      realized: { value: "R$ 562.500,00", trend: { value: "11%", absoluteValue: "R$ 55.700", isPositive: true } },
+      available: { value: "R$ 337.500,00", trend: { value: "7%", absoluteValue: "R$ 22.000", isPositive: false } },
+      variation: { value: "62,5%", trend: { value: "2%", absoluteValue: "0", isPositive: true } }
+    }
+  };
+  return data[period];
+};
+
+const tooltips = {
+  budget: "Valor planejado para o período selecionado.",
+  realized: "Despesas liquidadas até hoje.",
+  available: "Orçamento Total – Realizado.",
+  variation: "Realizado ÷ Orçamento Total."
+};
+
 export default function Dashboard() {
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month');
+  const kpiData = getKPIData(selectedPeriod);
+
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold text-sicofe-navy">Dashboard</h1>
-        <p className="text-sicofe-gray mt-2">
-          Visão geral do controle orçamentário
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-sicofe-navy">Dashboard</h1>
+          <p className="text-sicofe-gray mt-2">
+            Visão geral do controle orçamentário
+          </p>
+        </div>
+        
+        <PeriodSelector 
+          value={selectedPeriod} 
+          onChange={setSelectedPeriod}
+          className="mt-1"
+        />
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <StatsCard
           title="Orçamento Total"
-          value="R$ 150.000,00"
+          value={kpiData.budget.value}
           icon={DollarSign}
-          trend={{
-            value: "12%",
-            isPositive: true,
-          }}
+          tooltip={tooltips.budget}
+          trend={kpiData.budget.trend}
         />
         <StatsCard
           title="Realizado"
-          value="R$ 87.500,00"
+          value={kpiData.realized.value}
           icon={TrendingUp}
-          trend={{
-            value: "8%",
-            isPositive: true,
-          }}
+          tooltip={tooltips.realized}
+          trend={kpiData.realized.trend}
         />
         <StatsCard
           title="Disponível"
-          value="R$ 62.500,00"
+          value={kpiData.available.value}
           icon={PieChart}
-          trend={{
-            value: "5%",
-            isPositive: false,
-          }}
+          tooltip={tooltips.available}
+          trend={kpiData.available.trend}
         />
         <StatsCard
           title="Variação"
-          value="58,3%"
+          value={kpiData.variation.value}
           icon={TrendingDown}
-          trend={{
-            value: "3%",
-            isPositive: true,
-          }}
+          tooltip={tooltips.variation}
+          trend={kpiData.variation.trend}
         />
       </div>
 
