@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -352,9 +351,9 @@ export default function Lancamentos() {
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-[#EEF4FF] text-black">Todas as empresas</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">Todas as empresas</SelectItem>
                   {empresas.map((empresa) => (
-                    <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-[#EEF4FF] text-black">
+                    <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       {empresa}
                     </SelectItem>
                   ))}
@@ -368,9 +367,9 @@ export default function Lancamentos() {
                   <SelectValue placeholder="Buscar por mês" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-[#EEF4FF] text-black">Buscar por mês</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">Buscar por mês</SelectItem>
                   {meses.map((mes) => (
-                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-[#EEF4FF] text-black">
+                    <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       {mes.label}
                     </SelectItem>
                   ))}
@@ -455,7 +454,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
-                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-[#EEF4FF] text-black">
+                      <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                         {empresa}
                       </SelectItem>
                     ))}
@@ -501,7 +500,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-[#EEF4FF] text-black">
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                         {grupo}
                       </SelectItem>
                     ))}
@@ -517,7 +516,7 @@ export default function Lancamentos() {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-[#EEF4FF] text-black">
+                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                         {grupo}
                       </SelectItem>
                     ))}
@@ -534,13 +533,13 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione a conta analítica" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-[#EEF4FF] text-black">
+                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       1.1.1 - Vendas Produtos
                     </SelectItem>
-                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-[#EEF4FF] text-black">
+                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       2.1.1 - Salários
                     </SelectItem>
-                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-[#EEF4FF] text-black">
+                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       3.1.1 - Outras Receitas
                     </SelectItem>
                   </SelectContent>
