@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -346,6 +347,15 @@ export default function Lancamentos() {
       .filter(([_, selected]) => selected)
       .map(([mes, _]) => mes);
 
+    if (mesesSelecionados.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Selecione pelo menos um mês de competência.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Map month abbreviations to month numbers
     const monthMap: { [key: string]: string } = {
       jan: '01', fev: '02', mar: '03', abr: '04',
@@ -353,13 +363,12 @@ export default function Lancamentos() {
       set: '09', out: '10', nov: '11', dez: '12'
     };
 
-    // Create date with first day of selected months and chosen year
-    const dataFormatada = mesesSelecionados.length > 0 
-      ? `01/${monthMap[mesesSelecionados[0]]}/${formData.ano}`
-      : new Date().toLocaleDateString('pt-BR');
-
     if (editingLancamento) {
-      // Update existing lancamento
+      // Update existing lancamento (single transaction)
+      const dataFormatada = mesesSelecionados.length > 0 
+        ? `01/${monthMap[mesesSelecionados[0]]}/${formData.ano}`
+        : new Date().toLocaleDateString('pt-BR');
+
       const updatedLancamento: Lancamento = {
         ...editingLancamento,
         data: dataFormatada,
@@ -369,7 +378,7 @@ export default function Lancamentos() {
         valor: parseFloat(valorFormatado.toFixed(2)),
         observacoes: formData.observacoes,
         competencia: mesesSelecionados,
-        grupoContas1: formData.grupoContas1 // Save the grupo de contas
+        grupoContas1: formData.grupoContas1
       };
 
       const updatedAllLancamentos = allLancamentos.map(l => 
@@ -386,26 +395,30 @@ export default function Lancamentos() {
         className: "bg-green-50 border-green-200 text-green-800",
       });
     } else {
-      // Create new lancamento
-      const novoLancamento: Lancamento = {
-        id: Date.now().toString(),
-        data: dataFormatada,
-        empresa: formData.empresa,
-        conta: formData.contaAnalitica,
-        descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
-        valor: parseFloat(valorFormatado.toFixed(2)),
-        observacoes: formData.observacoes,
-        competencia: mesesSelecionados,
-        grupoContas1: formData.grupoContas1 // Save the grupo de contas
-      };
+      // Create new lancamentos - one for each selected month
+      const novosLancamentos: Lancamento[] = mesesSelecionados.map((mes, index) => {
+        const dataFormatada = `01/${monthMap[mes]}/${formData.ano}`;
+        
+        return {
+          id: (Date.now() + index).toString(), // Ensure unique IDs
+          data: dataFormatada,
+          empresa: formData.empresa,
+          conta: formData.contaAnalitica,
+          descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
+          valor: parseFloat(valorFormatado.toFixed(2)),
+          observacoes: formData.observacoes,
+          competencia: [mes], // Single month per transaction
+          grupoContas1: formData.grupoContas1
+        };
+      });
 
-      const updatedAllLancamentos = [novoLancamento, ...allLancamentos];
+      const updatedAllLancamentos = [...novosLancamentos, ...allLancamentos];
       setAllLancamentos(updatedAllLancamentos);
       setLancamentos(updatedAllLancamentos);
       
       toast({
         title: "Sucesso!",
-        description: "Lançamento criado com sucesso.",
+        description: `${novosLancamentos.length} lançamento(s) criado(s) com sucesso.`,
         variant: "default",
         className: "bg-green-50 border-green-200 text-green-800",
       });
