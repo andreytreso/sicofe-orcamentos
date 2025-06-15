@@ -12,6 +12,7 @@ import Orcamentos from "./pages/Orcamentos";
 import PlanoContas from "./pages/PlanoContas";
 import Lancamentos from "./pages/Lancamentos";
 import Login from "./pages/Login";
+import UserRegister from "./pages/UserRegister";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/cadastro-usuario" element={<UserRegister />} />
           <Route path="*" element={
             <ProtectedRoute>
               <Layout>
