@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -450,7 +451,7 @@ export default function Lancamentos() {
                 <Label htmlFor="empresa" className="text-gray-700">Empresa *</Label>
                 <Select value={formData.empresa} onValueChange={(value) => setFormData(prev => ({ ...prev, empresa: value }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
-                    <SelectValue placeholder="Selecione a empresa" />
+                    <SelectValue placeholder="Selecione a empresa" className="text-gray-500" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {empresas.map((empresa) => (
@@ -496,7 +497,7 @@ export default function Lancamentos() {
                 <Label htmlFor="grupo-contas-1" className="text-gray-700">Grupo de Contas 1º Nível *</Label>
                 <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
-                    <SelectValue placeholder="Selecione o Grupo S1" />
+                    <SelectValue placeholder="Selecione o Grupo S1" className="text-gray-500" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
@@ -512,7 +513,7 @@ export default function Lancamentos() {
                 <Label htmlFor="grupo-contas-2" className="text-gray-700">Grupo de Contas 2º Nível *</Label>
                 <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
-                    <SelectValue placeholder="Selecione o Grupo S2" />
+                    <SelectValue placeholder="Selecione o Grupo S2" className="text-gray-500" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
@@ -530,7 +531,7 @@ export default function Lancamentos() {
                 <Label htmlFor="conta-analitica" className="text-gray-700">Conta Analítica *</Label>
                 <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300">
-                    <SelectValue placeholder="Selecione a conta analítica" />
+                    <SelectValue placeholder="Selecione a conta analítica" className="text-gray-500" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
