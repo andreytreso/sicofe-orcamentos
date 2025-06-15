@@ -609,7 +609,7 @@ export default function Lancamentos() {
               />
             </div>
 
-            <DialogFooter className="pt-6 border-t">
+            <DialogFooter className="pt-6">
               <Button 
                 type="button"
                 variant="outline" 
