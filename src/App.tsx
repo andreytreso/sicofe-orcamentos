@@ -9,7 +9,6 @@ import { AuthProvider } from "./hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
 import Empresas from "./pages/Empresas";
 import Orcamentos from "./pages/Orcamentos";
-import PlanoContas from "./pages/PlanoContas";
 import Lancamentos from "./pages/Lancamentos";
 import Login from "./pages/Login";
 import UserRegister from "./pages/UserRegister";
@@ -33,7 +32,6 @@ const App = () => (
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/empresas" element={<Empresas />} />
                   <Route path="/orcamentos" element={<Orcamentos />} />
-                  <Route path="/plano-contas" element={<PlanoContas />} />
                   <Route path="/lancamentos" element={<Lancamentos />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

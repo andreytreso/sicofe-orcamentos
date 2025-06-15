@@ -1,4 +1,3 @@
-
 import { Building2, LayoutDashboard, Calculator, FileText, Plus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -29,11 +28,6 @@ const menuItems = [
     title: "Orçamentos",
     url: "/orcamentos",
     icon: Calculator,
-  },
-  {
-    title: "Plano de Contas",
-    url: "/plano-contas",
-    icon: FileText,
   },
   {
     title: "Lançamentos",
