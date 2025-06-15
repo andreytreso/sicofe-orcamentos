@@ -151,7 +151,7 @@ const UserRegister = () => {
               <Input
                 id="name"
                 type="text"
-                placeholder="Digite seu nome completo"
+                placeholder="Digite seu nome e sobrenome"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500 focus-visible:ring-blue-300 focus-visible:ring-offset-0"
