@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
 import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
-import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
+import { LancamentoDetalhe } from "@/components/LancamentoDetalhe";
+import { TrendingUp, TrendingDown, DollarSign, PieChart, ArrowUp, ArrowDown, Megaphone } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 const chartData = [
   {
@@ -87,9 +89,140 @@ const tooltips = {
   variation: "Realizado ÷ Orçamento Total."
 };
 
+// Mock data for recent transactions
+const recentTransactions = [
+  {
+    id: '1',
+    data: '15/06/2025',
+    tipo: 'receita' as const,
+    descricao: 'Receita de Vendas',
+    valor: 25000,
+    empresa: 'Empresa A',
+    centroCusto: 'Vendas',
+    observacoes: 'Venda de produtos para cliente premium'
+  },
+  {
+    id: '2',
+    data: '14/06/2025',
+    tipo: 'despesa' as const,
+    descricao: 'Despesas Operacionais',
+    valor: -15500,
+    empresa: 'Empresa A',
+    centroCusto: 'Operações',
+    observacoes: 'Custos mensais de operação'
+  },
+  {
+    id: '3',
+    data: '13/06/2025',
+    tipo: 'marketing' as const,
+    descricao: 'Marketing',
+    valor: -8200,
+    empresa: 'Empresa B',
+    centroCusto: 'Marketing',
+    observacoes: 'Campanha publicitária digital'
+  },
+  {
+    id: '4',
+    data: '12/06/2025',
+    tipo: 'receita' as const,
+    descricao: 'Receita de Serviços',
+    valor: 18000,
+    empresa: 'Empresa A',
+    centroCusto: 'Serviços',
+  },
+  {
+    id: '5',
+    data: '11/06/2025',
+    tipo: 'despesa' as const,
+    descricao: 'Aluguel',
+    valor: -12000,
+    empresa: 'Empresa A',
+    centroCusto: 'Administração',
+  },
+  {
+    id: '6',
+    data: '10/06/2025',
+    tipo: 'marketing' as const,
+    descricao: 'Google Ads',
+    valor: -5500,
+    empresa: 'Empresa B',
+    centroCusto: 'Marketing',
+    observacoes: 'Campanha de aquisição de clientes'
+  },
+  {
+    id: '7',
+    data: '09/06/2025',
+    tipo: 'receita' as const,
+    descricao: 'Receita de Consultoria',
+    valor: 32000,
+    empresa: 'Empresa A',
+    centroCusto: 'Consultoria',
+  },
+  {
+    id: '8',
+    data: '08/06/2025',
+    tipo: 'despesa' as const,
+    descricao: 'Fornecedores',
+    valor: -22000,
+    empresa: 'Empresa B',
+    centroCusto: 'Compras',
+  },
+  {
+    id: '9',
+    data: '07/06/2025',
+    tipo: 'receita' as const,
+    descricao: 'Receita de Licenças',
+    valor: 15000,
+    empresa: 'Empresa A',
+    centroCusto: 'Licenças',
+  },
+  {
+    id: '10',
+    data: '06/06/2025',
+    tipo: 'despesa' as const,
+    descricao: 'Salários',
+    valor: -45000,
+    empresa: 'Empresa A',
+    centroCusto: 'RH',
+    observacoes: 'Folha de pagamento mensal'
+  }
+];
+
+const getIconForType = (tipo: string) => {
+  switch (tipo) {
+    case 'receita':
+      return <ArrowUp className="h-4 w-4 text-green-600" />;
+    case 'despesa':
+      return <ArrowDown className="h-4 w-4 text-red-600" />;
+    case 'marketing':
+      return <Megaphone className="h-4 w-4 text-gray-500" />;
+    default:
+      return <ArrowDown className="h-4 w-4 text-red-600" />;
+  }
+};
+
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(Math.abs(value));
+};
+
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month');
+  const [selectedLancamento, setSelectedLancamento] = useState<typeof recentTransactions[0] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const kpiData = getKPIData(selectedPeriod);
+
+  const handleLancamentoClick = (lancamento: typeof recentTransactions[0]) => {
+    setSelectedLancamento(lancamento);
+    setIsModalOpen(true);
+  };
+
+  const handleVerTodos = () => {
+    navigate('/lancamentos?sort=data_desc');
+  };
 
   return (
     <div className="space-y-4">
@@ -175,22 +308,47 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">
             Últimos Lançamentos
           </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-gray-200">
-              <span className="text-sm text-sicofe-gray-dark">Receita de Vendas</span>
-              <span className="text-sm font-medium text-sicofe-green">+R$ 25.000,00</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-200">
-              <span className="text-sm text-sicofe-gray-dark">Despesas Operacionais</span>
-              <span className="text-sm font-medium text-sicofe-red">-R$ 15.500,00</span>
-            </div>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-sm text-sicofe-gray-dark">Marketing</span>
-              <span className="text-sm font-medium text-sicofe-red">-R$ 8.200,00</span>
-            </div>
+          <div className="space-y-2">
+            {recentTransactions.slice(0, 10).map((transaction) => (
+              <div 
+                key={transaction.id}
+                className="flex justify-between items-center py-3 px-2 border-b border-gray-100 last:border-b-0 hover:bg-blue-50 rounded-sm cursor-pointer transition-colors"
+                onClick={() => handleLancamentoClick(transaction)}
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  {getIconForType(transaction.tipo)}
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 font-medium">{transaction.data}</span>
+                    <span className="text-sm text-sicofe-gray-dark">{transaction.descricao}</span>
+                  </div>
+                </div>
+                <span className={`text-sm font-medium ${
+                  transaction.tipo === 'receita' 
+                    ? 'text-sicofe-green' 
+                    : 'text-sicofe-red'
+                }`}>
+                  {transaction.tipo === 'receita' ? '+' : '-'}{formatCurrency(transaction.valor)}
+                </span>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <button
+              onClick={handleVerTodos}
+              className="text-sm text-sicofe-blue hover:text-sicofe-blue-dark font-medium transition-colors"
+            >
+              Ver todos →
+            </button>
           </div>
         </div>
       </div>
+
+      <LancamentoDetalhe
+        lancamento={selectedLancamento}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
