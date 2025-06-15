@@ -304,6 +304,39 @@ export default function Lancamentos() {
     }).format(Math.abs(value));
   };
 
+  const formatValueWithThousandSeparator = (value: string) => {
+    // Remove tudo exceto números, vírgula e ponto
+    let numericValue = value.replace(/[^\d.,-]/g, '');
+    
+    // Substitui vírgula por ponto para processamento
+    numericValue = numericValue.replace(',', '.');
+    
+    // Remove pontos extras (manter apenas o último como decimal)
+    const parts = numericValue.split('.');
+    if (parts.length > 2) {
+      numericValue = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+    }
+    
+    // Se tem parte decimal, limita a 2 casas
+    if (numericValue.includes('.')) {
+      const [integerPart, decimalPart] = numericValue.split('.');
+      numericValue = integerPart + '.' + decimalPart.slice(0, 2);
+    }
+    
+    // Converte para número para formatação
+    const numberValue = parseFloat(numericValue);
+    
+    if (isNaN(numberValue)) {
+      return '';
+    }
+    
+    // Formata com separador de milhares
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numberValue);
+  };
+
   const getDisplayValue = (lancamento: Lancamento) => {
     const isReceitaBruta = lancamento.grupoContas1 === "Receita Bruta";
     const absoluteValue = Math.abs(lancamento.valor);
@@ -326,14 +359,19 @@ export default function Lancamentos() {
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
+    // Remove tudo exceto números, vírgula e ponto
     let numericValue = value.replace(/[^\d.,-]/g, '');
+    
+    // Substitui vírgula por ponto para processamento interno
     numericValue = numericValue.replace(',', '.');
     
+    // Remove pontos extras (manter apenas o último como decimal)
     const parts = numericValue.split('.');
     if (parts.length > 2) {
-      numericValue = parts[0] + '.' + parts.slice(1).join('');
+      numericValue = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
     }
     
+    // Se tem parte decimal, limita a 2 casas
     if (numericValue.includes('.')) {
       const [integerPart, decimalPart] = numericValue.split('.');
       numericValue = integerPart + '.' + decimalPart.slice(0, 2);
@@ -349,8 +387,23 @@ export default function Lancamentos() {
       const numericValue = parseFloat(value.replace(',', '.'));
       
       if (!isNaN(numericValue)) {
-        const formattedValue = numericValue.toFixed(2).replace('.', ',');
+        const formattedValue = formatValueWithThousandSeparator(numericValue.toString());
         setFormData(prev => ({ ...prev, valor: formattedValue }));
+      }
+    }
+  };
+
+  const handleValueFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    if (value) {
+      // Remove formatação para edição (manter apenas números, vírgula e ponto)
+      const unformattedValue = value.replace(/\./g, '').replace(',', '.');
+      const numberValue = parseFloat(unformattedValue);
+      
+      if (!isNaN(numberValue)) {
+        const editableValue = numberValue.toFixed(2).replace('.', ',');
+        setFormData(prev => ({ ...prev, valor: editableValue }));
       }
     }
   };
@@ -368,7 +421,9 @@ export default function Lancamentos() {
       return;
     }
     
-    const valorFormatado = parseFloat(formData.valor.replace(',', '.')) || 0;
+    // Remove formatação do valor para conversão
+    const valorLimpo = formData.valor.replace(/\./g, '').replace(',', '.');
+    const valorFormatado = parseFloat(valorLimpo) || 0;
     
     const mesesSelecionados = Object.entries(formData.competencia)
       .filter(([_, selected]) => selected)
@@ -797,6 +852,7 @@ export default function Lancamentos() {
                   value={formData.valor}
                   onChange={handleValueChange}
                   onBlur={handleValueBlur}
+                  onFocus={handleValueFocus}
                   required
                   className="bg-white border-gray-300 focus:ring-blue-300 h-11"
                 />
