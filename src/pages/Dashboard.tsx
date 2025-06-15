@@ -54,7 +54,7 @@ export default function Dashboard() {
 
       {/* Charts and Additional Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">
             Receitas vs Despesas
           </h3>
@@ -63,7 +63,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">
             Últimos Lançamentos
           </h3>
