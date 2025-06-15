@@ -364,10 +364,10 @@ export default function Lancamentos() {
               <Label htmlFor="filter-periodo">Período</Label>
               <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
                 <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
-                  <SelectValue placeholder="Buscar por mês" />
+                  <SelectValue placeholder="Todos os Meses" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">Buscar por mês</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">Todos os Meses</SelectItem>
                   {meses.map((mes) => (
                     <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       {mes.label}
