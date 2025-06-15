@@ -1,55 +1,11 @@
+
 import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
 import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
 import { LancamentoDetalhe } from "@/components/LancamentoDetalhe";
+import { ReceitasDespesasChart } from "@/components/ReceitasDespesasChart";
 import { TrendingUp, TrendingDown, DollarSign, PieChart, ArrowUp, ArrowDown, Megaphone } from "lucide-react";
-import { ChartContainer } from "@/components/ui/chart";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { useNavigate } from "react-router-dom";
-
-const chartData = [
-  {
-    month: "Jan",
-    receitas: 45000,
-    despesas: 32000,
-  },
-  {
-    month: "Fev",
-    receitas: 52000,
-    despesas: 38000,
-  },
-  {
-    month: "Mar",
-    receitas: 48000,
-    despesas: 35000,
-  },
-  {
-    month: "Abr",
-    receitas: 61000,
-    despesas: 42000,
-  },
-  {
-    month: "Mai",
-    receitas: 55000,
-    despesas: 40000,
-  },
-  {
-    month: "Jun",
-    receitas: 67000,
-    despesas: 45000,
-  },
-];
-
-const chartConfig = {
-  receitas: {
-    label: "Receitas",
-    color: "#059669",
-  },
-  despesas: {
-    label: "Despesas",
-    color: "#dc2626",
-  },
-};
 
 // Mock data based on period - in real app this would come from API
 const getKPIData = (period: PeriodType) => {
@@ -89,6 +45,18 @@ const tooltips = {
   variation: "Realizado ÷ Orçamento Total."
 };
 
+// Interface for LancamentoDetalhe component
+interface LancamentoDetalheType {
+  id: string;
+  data: string;
+  tipo: 'receita' | 'marketing' | 'despesa';
+  descricao: string;
+  valor: number;
+  empresa: string;
+  centroCusto: string;
+  observacoes: string;
+}
+
 // Interface matching the Lancamentos page
 interface Lancamento {
   id: string;
@@ -100,18 +68,6 @@ interface Lancamento {
   observacoes: string;
   competencia: string[];
   grupoContas1?: string;
-}
-
-// Interface for LancamentoDetalhe component
-interface LancamentoDetalheType {
-  id: string;
-  data: string;
-  tipo: 'receita' | 'marketing' | 'despesa';
-  descricao: string;
-  valor: number;
-  empresa: string;
-  centroCusto: string;
-  observacoes: string;
 }
 
 // Same mock data as in Lancamentos page
@@ -271,35 +227,7 @@ export default function Dashboard() {
 
       {/* Charts and Additional Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-sicofe-navy mb-4">
-            Receitas vs Despesas
-          </h3>
-          <ChartContainer config={chartConfig} className="h-64">
-            <BarChart data={chartData}>
-              <XAxis 
-                dataKey="month" 
-                tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#334155' }}
-              />
-              <YAxis 
-                tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#334155' }}
-                tickFormatter={(value) => value.toLocaleString('pt-BR')}
-              />
-              <Bar 
-                dataKey="receitas" 
-                fill="var(--color-receitas)" 
-                style={{ cursor: 'default' }}
-              />
-              <Bar 
-                dataKey="despesas" 
-                fill="var(--color-despesas)" 
-                style={{ cursor: 'default' }}
-              />
-            </BarChart>
-          </ChartContainer>
-        </div>
+        <ReceitasDespesasChart selectedPeriod={selectedPeriod} />
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">
