@@ -32,7 +32,6 @@ export function PeriodSelector({ value, onChange, className = "" }: PeriodSelect
         <Select value={value} onValueChange={onChange}>
           <SelectTrigger className="w-36 h-9 text-sm border-gray-300 bg-white">
             <SelectValue />
-            <ChevronDown className="h-4 w-4 opacity-50" />
           </SelectTrigger>
           <SelectContent className="bg-white border border-gray-200 shadow-lg">
             {periodOptions.map((option) => (

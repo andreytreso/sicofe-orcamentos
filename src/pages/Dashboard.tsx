@@ -137,7 +137,7 @@ export default function Dashboard() {
           value={kpiData.variation.value}
           icon={TrendingDown}
           tooltip={tooltips.variation}
-          trend={kpiData.variation.trend}
+          trend={{ ...kpiData.variation.trend, isPositive: false }}
         />
       </div>
 
