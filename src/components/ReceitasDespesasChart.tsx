@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -215,35 +214,37 @@ export function ReceitasDespesasChart({ selectedPeriod }: ReceitasDespesasChartP
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       {/* Estilos CSS customizados para remover fundo amarelo */}
-      <style jsx>{`
-        .recharts-active-bar,
-        .recharts-bar:hover,
-        .recharts-active-dot,
-        .recharts-dot:hover,
-        .recharts-tooltip-cursor {
-          fill: transparent !important;
-          background: transparent !important;
-          background-color: transparent !important;
-        }
-        
-        .recharts-cartesian-grid-horizontal line,
-        .recharts-cartesian-grid-vertical line {
-          stroke: #e5e7eb !important;
-        }
-        
-        .recharts-surface {
-          background: transparent !important;
-        }
-        
-        .recharts-wrapper {
-          background: transparent !important;
-        }
-        
-        .recharts-rectangle.recharts-tooltip-cursor {
-          fill: rgba(59, 130, 246, 0.1) !important;
-          stroke: transparent !important;
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .recharts-active-bar,
+          .recharts-bar:hover,
+          .recharts-active-dot,
+          .recharts-dot:hover,
+          .recharts-tooltip-cursor {
+            fill: transparent !important;
+            background: transparent !important;
+            background-color: transparent !important;
+          }
+          
+          .recharts-cartesian-grid-horizontal line,
+          .recharts-cartesian-grid-vertical line {
+            stroke: #e5e7eb !important;
+          }
+          
+          .recharts-surface {
+            background: transparent !important;
+          }
+          
+          .recharts-wrapper {
+            background: transparent !important;
+          }
+          
+          .recharts-rectangle.recharts-tooltip-cursor {
+            fill: rgba(59, 130, 246, 0.1) !important;
+            stroke: transparent !important;
+          }
+        `
+      }} />
       
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-sicofe-navy">
