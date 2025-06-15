@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -340,7 +341,7 @@ export default function Lancamentos() {
                   placeholder="Buscar por descrição, conta..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white border-gray-300 placeholder:text-gray-500"
+                  className="pl-10 bg-white border-gray-300 placeholder:text-gray-500 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>
             </div>
