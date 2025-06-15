@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Filter, Search, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ interface Lancamento {
 }
 
 export default function Lancamentos() {
+  const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -312,6 +314,13 @@ export default function Lancamentos() {
     setLancamentos(prev => [novoLancamento, ...prev]);
     
     console.log("Lançamento salvo!", novoLancamento);
+    
+    // Show success toast
+    toast({
+      title: "Sucesso!",
+      description: "Lançamento criado com sucesso.",
+    });
+    
     setShowForm(false);
     
     // Reset form
@@ -530,7 +539,7 @@ export default function Lancamentos() {
                 <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
                 <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione o Grupo S1" />
+                    <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas1.map((grupo) => (
@@ -546,7 +555,7 @@ export default function Lancamentos() {
                 <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
                 <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione o Grupo S2" />
+                    <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                     {gruposContas2.map((grupo) => (
