@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -34,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { contasHierarquia, ContaHierarquia } from "@/data/contasHierarquia";
 
 interface Lancamento {
   id: string;
@@ -44,7 +46,7 @@ interface Lancamento {
   valor: number;
   observacoes: string;
   competencia: string[];
-  grupoContas1?: string; // Add this field to track the grupo de contas
+  grupoContas1?: string;
 }
 
 export default function Lancamentos() {
@@ -63,7 +65,7 @@ export default function Lancamentos() {
       id: "1",
       data: "15/12/2024",
       empresa: "SICOFE LTDA",
-      conta: "1.1.1 - Vendas Produtos",
+      conta: "Receitas com Visa Crédito",
       descricao: "Vendas dezembro",
       valor: 25000.00,
       observacoes: "",
@@ -74,7 +76,7 @@ export default function Lancamentos() {
       id: "2",
       data: "14/12/2024",
       empresa: "SICOFE LTDA",
-      conta: "2.1.1 - Salários",
+      conta: "Salários e Ordenados",
       descricao: "Folha de pagamento",
       valor: 15500.00,
       observacoes: "",
@@ -85,7 +87,7 @@ export default function Lancamentos() {
       id: "3",
       data: "13/11/2024",
       empresa: "Examine Loja 1",
-      conta: "1.1.1 - Vendas Produtos",
+      conta: "Receitas com Visa Crédito",
       descricao: "Vendas novembro",
       valor: 18000.00,
       observacoes: "",
@@ -134,34 +136,17 @@ export default function Lancamentos() {
     "SICOFE LTDA"
   ];
 
-  const gruposContas1 = [
-    "Receita Bruta",
-    "Deduções Sobre as Vendas",
-    "Resultado Não Operacional",
-    "Custo das Mercadorias para Revenda",
-    "SG&A"
-  ];
+  // Lógica dos dropdowns em cascata
+  const opcoesNivel1 = [...new Set(contasHierarquia.map(c => c.nivel1))];
 
-  const gruposContas2 = [
-    "Impostos Indiretos",
-    "Cancelamentos e Devoluções",
-    "Outras Receitas",
-    "Outras Receitas/ (Despesas) Não Operacionais",
-    "Custo das Mercadorias para Revenda",
-    "Utilidades",
-    "Folha de Pagamentos",
-    "Outras Despesas",
-    "Ocupação",
-    "Aluguel de Equipamentos",
-    "Marketing",
-    "Contratação de Terceiros",
-    "TI/Software",
-    "Despesas de Veículos",
-    "Manutenção",
-    "Material de Uso e Consumo",
-    "Deságio de Cartões",
-    "Impostos e Taxas"
-  ];
+  const opcoesNivel2 = contasHierarquia
+    .filter(c => c.nivel1 === formData.grupoContas1)
+    .map(c => c.nivel2)
+    .filter((v, i, a) => a.indexOf(v) === i); // distinct
+
+  const opcoesAnaliticas = contasHierarquia
+    .filter(c => c.nivel1 === formData.grupoContas1 && c.nivel2 === formData.grupoContas2)
+    .map(c => c.analitica);
 
   const meses = [
     { key: "jan", label: "Janeiro" },
@@ -177,6 +162,24 @@ export default function Lancamentos() {
     { key: "nov", label: "Novembro" },
     { key: "dez", label: "Dezembro" }
   ];
+
+  // Função para limpar campos dependentes quando muda o nível superior
+  const handleNivel1Change = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      grupoContas1: value,
+      grupoContas2: "", // limpa nível 2
+      contaAnalitica: "" // limpa conta analítica
+    }));
+  };
+
+  const handleNivel2Change = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      grupoContas2: value,
+      contaAnalitica: "" // limpa conta analítica
+    }));
+  };
 
   const fetchTransactions = async (filters: { companyId?: string; period?: string; search?: string }) => {
     setIsLoadingFilters(true);
@@ -228,6 +231,9 @@ export default function Lancamentos() {
   const handleEdit = (lancamento: Lancamento) => {
     setEditingLancamento(lancamento);
     
+    // Find the conta in hierarchy to populate all levels
+    const contaEncontrada = contasHierarquia.find(c => c.analitica === lancamento.conta);
+    
     // Populate form with existing data
     const competenciaState = Object.keys(formData.competencia).reduce((acc, mes) => {
       acc[mes] = lancamento.competencia.includes(mes);
@@ -236,9 +242,9 @@ export default function Lancamentos() {
 
     setFormData({
       empresa: lancamento.empresa,
-      ano: new Date().getFullYear().toString(), // Default to current year
-      grupoContas1: lancamento.grupoContas1 || "",
-      grupoContas2: "",
+      ano: new Date().getFullYear().toString(),
+      grupoContas1: contaEncontrada?.nivel1 || "",
+      grupoContas2: contaEncontrada?.nivel2 || "",
       contaAnalitica: lancamento.conta,
       valor: lancamento.valor.toString().replace('.', ','),
       observacoes: lancamento.observacoes,
@@ -296,7 +302,7 @@ export default function Lancamentos() {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(Math.abs(value)); // Always show absolute value, sign will be handled by display logic
+    }).format(Math.abs(value));
   };
 
   const getDisplayValue = (lancamento: Lancamento) => {
@@ -321,19 +327,14 @@ export default function Lancamentos() {
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
-    // Remove todos os caracteres não numéricos, exceto vírgula e ponto
     let numericValue = value.replace(/[^\d.,-]/g, '');
-    
-    // Substitui vírgula por ponto para padronização
     numericValue = numericValue.replace(',', '.');
     
-    // Remove pontos extras, mantendo apenas o primeiro
     const parts = numericValue.split('.');
     if (parts.length > 2) {
       numericValue = parts[0] + '.' + parts.slice(1).join('');
     }
     
-    // Se há um ponto, limita a 2 casas decimais
     if (numericValue.includes('.')) {
       const [integerPart, decimalPart] = numericValue.split('.');
       numericValue = integerPart + '.' + decimalPart.slice(0, 2);
@@ -349,7 +350,6 @@ export default function Lancamentos() {
       const numericValue = parseFloat(value.replace(',', '.'));
       
       if (!isNaN(numericValue)) {
-        // Formata o valor com duas casas decimais usando vírgula
         const formattedValue = numericValue.toFixed(2).replace('.', ',');
         setFormData(prev => ({ ...prev, valor: formattedValue }));
       }
@@ -358,6 +358,16 @@ export default function Lancamentos() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validação dos campos obrigatórios
+    if (!formData.empresa || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
+      toast({
+        title: "Erro",
+        description: "Todos os campos são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     const valorFormatado = parseFloat(formData.valor.replace(',', '.')) || 0;
     
@@ -374,7 +384,6 @@ export default function Lancamentos() {
       return;
     }
 
-    // Map month abbreviations to month numbers
     const monthMap: { [key: string]: string } = {
       jan: '01', fev: '02', mar: '03', abr: '04',
       mai: '05', jun: '06', jul: '07', ago: '08',
@@ -382,22 +391,20 @@ export default function Lancamentos() {
     };
 
     if (editingLancamento) {
-      // For editing, first remove the old lancamento
       const updatedAllLancamentosWithoutOld = allLancamentos.filter(l => l.id !== editingLancamento.id);
       
-      // Then create new lancamentos - one for each selected month
       const novosLancamentos: Lancamento[] = mesesSelecionados.map((mes, index) => {
         const dataFormatada = `01/${monthMap[mes]}/${formData.ano}`;
         
         return {
-          id: (Date.now() + index).toString(), // Ensure unique IDs
+          id: (Date.now() + index).toString(),
           data: dataFormatada,
           empresa: formData.empresa,
           conta: formData.contaAnalitica,
           descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
           valor: parseFloat(valorFormatado.toFixed(2)),
           observacoes: formData.observacoes,
-          competencia: [mes], // Single month per transaction
+          competencia: [mes],
           grupoContas1: formData.grupoContas1
         };
       });
@@ -413,19 +420,18 @@ export default function Lancamentos() {
         className: "bg-green-50 border-green-200 text-green-800",
       });
     } else {
-      // Create new lancamentos - one for each selected month
       const novosLancamentos: Lancamento[] = mesesSelecionados.map((mes, index) => {
         const dataFormatada = `01/${monthMap[mes]}/${formData.ano}`;
         
         return {
-          id: (Date.now() + index).toString(), // Ensure unique IDs
+          id: (Date.now() + index).toString(),
           data: dataFormatada,
           empresa: formData.empresa,
           conta: formData.contaAnalitica,
           descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
           valor: parseFloat(valorFormatado.toFixed(2)),
           observacoes: formData.observacoes,
-          competencia: [mes], // Single month per transaction
+          competencia: [mes],
           grupoContas1: formData.grupoContas1
         };
       });
@@ -726,16 +732,16 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Quarta linha - Grupos de Contas */}
+            {/* Quarta linha - Grupos de Contas em Cascata */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
-                <Select value={formData.grupoContas1} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas1: value }))}>
+                <Select value={formData.grupoContas1} onValueChange={handleNivel1Change}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {gruposContas1.map((grupo) => (
+                    {opcoesNivel1.map((grupo) => (
                       <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
                         {grupo}
                       </SelectItem>
@@ -746,16 +752,20 @@ export default function Lancamentos() {
 
               <div className="space-y-2">
                 <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
-                <Select value={formData.grupoContas2} onValueChange={(value) => setFormData(prev => ({ ...prev, grupoContas2: value }))}>
+                <Select value={formData.grupoContas2} onValueChange={handleNivel2Change} disabled={!formData.grupoContas1}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione o grupo" />
+                    <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {gruposContas2.map((grupo) => (
-                      <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                        {grupo}
-                      </SelectItem>
-                    ))}
+                    {opcoesNivel2.length > 0 ? (
+                      opcoesNivel2.map((grupo) => (
+                        <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {grupo}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled className="text-gray-400">-- Nenhum registro --</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -765,20 +775,20 @@ export default function Lancamentos() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
-                <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))}>
+                <Select value={formData.contaAnalitica} onValueChange={(value) => setFormData(prev => ({ ...prev, contaAnalitica: value }))} disabled={!formData.grupoContas2}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione a conta analítica" />
+                    <SelectValue placeholder={formData.grupoContas2 ? "Selecione a conta analítica" : "Primeiro selecione o 2º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    <SelectItem value="1.1.1 - Vendas Produtos" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                      1.1.1 - Vendas Produtos
-                    </SelectItem>
-                    <SelectItem value="2.1.1 - Salários" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                      2.1.1 - Salários
-                    </SelectItem>
-                    <SelectItem value="3.1.1 - Outras Receitas" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                      3.1.1 - Outras Receitas
-                    </SelectItem>
+                    {opcoesAnaliticas.length > 0 ? (
+                      opcoesAnaliticas.map((conta) => (
+                        <SelectItem key={conta} value={conta} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {conta}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled className="text-gray-400">-- Nenhum registro --</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
