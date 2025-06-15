@@ -96,7 +96,7 @@ export default function Login() {
                     setUsername(e.target.value);
                     if (errors.username) setErrors(prev => ({ ...prev, username: '' }));
                   }}
-                  className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-300`}
+                  className={`${errors.username ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0`}
                   style={{ backgroundColor: '#EEF4FF' }}
                   placeholder="Digite seu usuário"
                 />
@@ -116,7 +116,7 @@ export default function Login() {
                     setPassword(e.target.value);
                     if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                   }}
-                  className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-blue-300`}
+                  className={`${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'} focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0`}
                   style={{ backgroundColor: '#EEF4FF' }}
                   placeholder="Digite sua senha"
                 />
