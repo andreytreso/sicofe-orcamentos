@@ -834,7 +834,7 @@ export default function Lancamentos() {
 
       {/* Alert Dialog para Confirmação de Exclusão */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-white">
+        <AlertDialogContent className="bg-white border-gray-200">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-gray-700">Excluir Lançamento</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-600">
