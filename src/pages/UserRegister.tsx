@@ -214,7 +214,7 @@ const UserRegister = () => {
                     <SelectItem 
                       key={option.value} 
                       value={option.value}
-                      className="hover:bg-[#EEF4FF] text-black focus:bg-[#EEF4FF]"
+                      className="hover:bg-[#EEF4FF] text-black focus:bg-[#EEF4FF] focus:text-black data-[state=checked]:text-black"
                     >
                       {option.label}
                     </SelectItem>
