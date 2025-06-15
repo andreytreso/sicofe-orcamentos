@@ -132,7 +132,7 @@ const UserRegister = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg rounded-xl bg-white">
+      <Card className="w-full max-w-md shadow-lg rounded-xl bg-white border-0">
         <CardHeader className="text-center">
           <CardTitle className="text-xl font-semibold text-gray-800">
             Cadastro de Usuário
@@ -154,7 +154,7 @@ const UserRegister = () => {
                 placeholder="Digite seu nome completo"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500 focus-visible:ring-blue-300 focus-visible:ring-offset-0"
                 style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.name}
               />
@@ -173,7 +173,7 @@ const UserRegister = () => {
                 placeholder="Digite seu e-mail"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500 focus-visible:ring-blue-300 focus-visible:ring-offset-0"
                 style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.email}
               />
@@ -192,7 +192,7 @@ const UserRegister = () => {
                 placeholder="Digite o nome da empresa"
                 value={formData.company}
                 onChange={(e) => handleInputChange('company', e.target.value)}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500 focus-visible:ring-blue-300 focus-visible:ring-offset-0"
                 style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.company}
               />
@@ -206,7 +206,7 @@ const UserRegister = () => {
                 Cargo *
               </Label>
               <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300" style={{ backgroundColor: '#EEF4FF' }} aria-invalid={!!errors.role}>
+                <SelectTrigger className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 focus-visible:ring-blue-300 focus-visible:ring-offset-0" style={{ backgroundColor: '#EEF4FF' }} aria-invalid={!!errors.role}>
                   <SelectValue placeholder="Selecione seu cargo" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
@@ -237,7 +237,7 @@ const UserRegister = () => {
                 autoComplete="new-password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500 focus-visible:ring-blue-300 focus-visible:ring-offset-0"
                 style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.password}
               />
@@ -257,7 +257,7 @@ const UserRegister = () => {
                 autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500"
+                className="border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 placeholder:text-gray-500 focus-visible:ring-blue-300 focus-visible:ring-offset-0"
                 style={{ backgroundColor: '#EEF4FF' }}
                 aria-invalid={!!errors.confirmPassword}
               />
