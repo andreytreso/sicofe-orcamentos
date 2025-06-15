@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -17,6 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -46,6 +55,8 @@ export default function Lancamentos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [lancamentoToDelete, setLancamentoToDelete] = useState<string | null>(null);
   
   const [allLancamentos, setAllLancamentos] = useState<Lancamento[]>([
     {
@@ -238,8 +249,13 @@ export default function Lancamentos() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
-      const updatedLancamentos = allLancamentos.filter(l => l.id !== id);
+    setLancamentoToDelete(id);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    if (lancamentoToDelete) {
+      const updatedLancamentos = allLancamentos.filter(l => l.id !== lancamentoToDelete);
       setAllLancamentos(updatedLancamentos);
       setLancamentos(updatedLancamentos);
       
@@ -250,6 +266,8 @@ export default function Lancamentos() {
         className: "bg-green-50 border-green-200 text-green-800",
       });
     }
+    setShowDeleteDialog(false);
+    setLancamentoToDelete(null);
   };
 
   const handleCompetenciaChange = (mes: string, checked: boolean) => {
@@ -813,6 +831,32 @@ export default function Lancamentos() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Alert Dialog para Confirmação de Exclusão */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-gray-700">Excluir Lançamento</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600">
+              Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setShowDeleteDialog(false)}
+              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
