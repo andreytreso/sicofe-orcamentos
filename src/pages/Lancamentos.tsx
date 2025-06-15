@@ -226,7 +226,7 @@ export default function Lancamentos() {
     setFormData({
       empresa: lancamento.empresa,
       ano: new Date().getFullYear().toString(), // Default to current year
-      grupoContas1: "",
+      grupoContas1: lancamento.grupoContas1 || "",
       grupoContas2: "",
       contaAnalitica: lancamento.conta,
       valor: lancamento.valor.toString().replace('.', ','),
@@ -364,33 +364,33 @@ export default function Lancamentos() {
     };
 
     if (editingLancamento) {
-      // Update existing lancamento (single transaction)
-      const dataFormatada = mesesSelecionados.length > 0 
-        ? `01/${monthMap[mesesSelecionados[0]]}/${formData.ano}`
-        : new Date().toLocaleDateString('pt-BR');
-
-      const updatedLancamento: Lancamento = {
-        ...editingLancamento,
-        data: dataFormatada,
-        empresa: formData.empresa,
-        conta: formData.contaAnalitica,
-        descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
-        valor: parseFloat(valorFormatado.toFixed(2)),
-        observacoes: formData.observacoes,
-        competencia: mesesSelecionados,
-        grupoContas1: formData.grupoContas1
-      };
-
-      const updatedAllLancamentos = allLancamentos.map(l => 
-        l.id === editingLancamento.id ? updatedLancamento : l
-      );
+      // For editing, first remove the old lancamento
+      const updatedAllLancamentosWithoutOld = allLancamentos.filter(l => l.id !== editingLancamento.id);
       
+      // Then create new lancamentos - one for each selected month
+      const novosLancamentos: Lancamento[] = mesesSelecionados.map((mes, index) => {
+        const dataFormatada = `01/${monthMap[mes]}/${formData.ano}`;
+        
+        return {
+          id: (Date.now() + index).toString(), // Ensure unique IDs
+          data: dataFormatada,
+          empresa: formData.empresa,
+          conta: formData.contaAnalitica,
+          descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
+          valor: parseFloat(valorFormatado.toFixed(2)),
+          observacoes: formData.observacoes,
+          competencia: [mes], // Single month per transaction
+          grupoContas1: formData.grupoContas1
+        };
+      });
+
+      const updatedAllLancamentos = [...novosLancamentos, ...updatedAllLancamentosWithoutOld];
       setAllLancamentos(updatedAllLancamentos);
       setLancamentos(updatedAllLancamentos);
       
       toast({
         title: "Sucesso!",
-        description: "Lançamento atualizado com sucesso.",
+        description: `Lançamento atualizado com sucesso. ${novosLancamentos.length} lançamento(s) criado(s).`,
         variant: "default",
         className: "bg-green-50 border-green-200 text-green-800",
       });
