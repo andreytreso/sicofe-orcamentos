@@ -348,10 +348,10 @@ export default function Lancamentos() {
               <Label htmlFor="filter-empresa">Empresa</Label>
               <Select value={selectedEmpresa} onValueChange={setSelectedEmpresa}>
                 <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
-                  <SelectValue placeholder="Todas as empresas" />
+                  <SelectValue placeholder="Todas as empresas" className="text-gray-500" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">Todas as empresas</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-gray-500">Todas as empresas</SelectItem>
                   {empresas.map((empresa) => (
                     <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       {empresa}
@@ -364,10 +364,10 @@ export default function Lancamentos() {
               <Label htmlFor="filter-periodo">Período</Label>
               <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
                 <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
-                  <SelectValue placeholder="Todos os Meses" />
+                  <SelectValue placeholder="Todos os Meses" className="text-gray-500" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
-                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">Todos os Meses</SelectItem>
+                  <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-gray-500">Todos os Meses</SelectItem>
                   {meses.map((mes) => (
                     <SelectItem key={mes.key} value={mes.key} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       {mes.label}
