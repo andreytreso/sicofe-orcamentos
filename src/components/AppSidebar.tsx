@@ -46,7 +46,7 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="bg-white border-r-4" style={{ borderRightColor: '#0047FF' }}>
+    <Sidebar className="bg-white border-r border-gray-200">
       <SidebarHeader className="p-6 bg-white">
         <div className="flex items-center justify-center">
           <img 
