@@ -21,14 +21,28 @@ export function StatsCard({ title, value, icon: Icon, tooltip, trend, className 
     if (!trend) return null;
     
     if (trend.absoluteValue === "0" || trend.value === "0%") {
-      return "0%";
+      return (
+        <span className="text-sicofe-gray">
+          0% em relação ao período anterior
+        </span>
+      );
     }
     
-    const sign = trend.isPositive ? "+" : "";
-    const absolutePart = trend.absoluteValue ? `${sign}${trend.absoluteValue}  ` : "";
-    const percentagePart = `(${sign}${trend.value})`;
+    const sign = trend.isPositive ? "+" : "-";
+    const colorClass = trend.isPositive ? 'text-sicofe-green' : 'text-sicofe-red';
     
-    return `${absolutePart}${percentagePart} em relação ao período anterior`;
+    return (
+      <>
+        {trend.absoluteValue && (
+          <>
+            <span className={colorClass}>{sign}{trend.absoluteValue}</span>
+            <span className="text-sicofe-gray">  </span>
+          </>
+        )}
+        <span className={colorClass}>({sign}{trend.value})</span>
+        <span className="text-sicofe-gray"> em relação ao período anterior</span>
+      </>
+    );
   };
 
   return (
@@ -43,7 +57,7 @@ export function StatsCard({ title, value, icon: Icon, tooltip, trend, className 
       <CardContent>
         <div className="text-2xl font-bold text-sicofe-navy">{value}</div>
         {trend && (
-          <p className={`text-xs mt-1 ${trend.isPositive ? 'text-sicofe-green' : 'text-sicofe-red'}`}>
+          <p className="text-xs mt-1">
             {formatTrendText()}
           </p>
         )}

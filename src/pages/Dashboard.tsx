@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
 import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
@@ -103,6 +102,18 @@ interface Lancamento {
   grupoContas1?: string;
 }
 
+// Interface for LancamentoDetalhe component
+interface LancamentoDetalheType {
+  id: string;
+  data: string;
+  tipo: 'receita' | 'marketing' | 'despesa';
+  descricao: string;
+  valor: number;
+  empresa: string;
+  centroCusto: string;
+  observacoes: string;
+}
+
 // Same mock data as in Lancamentos page
 const allLancamentos: Lancamento[] = [
   {
@@ -178,7 +189,7 @@ const getDisplayValue = (lancamento: Lancamento) => {
 
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month');
-  const [selectedLancamento, setSelectedLancamento] = useState<Lancamento | null>(null);
+  const [selectedLancamento, setSelectedLancamento] = useState<LancamentoDetalheType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const kpiData = getKPIData(selectedPeriod);
@@ -190,7 +201,7 @@ export default function Dashboard() {
 
   const handleLancamentoClick = (lancamento: Lancamento) => {
     // Convert to the format expected by LancamentoDetalhe
-    const lancamentoForModal = {
+    const lancamentoForModal: LancamentoDetalheType = {
       id: lancamento.id,
       data: lancamento.data,
       tipo: lancamento.grupoContas1 === "Receita Bruta" ? 'receita' as const : 
