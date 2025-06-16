@@ -1,4 +1,5 @@
-import { Building2, LayoutDashboard, Calculator, FileText, Plus } from "lucide-react";
+
+import { Building2, LayoutDashboard, Calculator, FileText, Plus, CheckSquare } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -34,10 +35,22 @@ const menuItems = [
     url: "/lancamentos",
     icon: Plus,
   },
+  {
+    title: "Aprovações",
+    url: "/aprovacoes",
+    icon: CheckSquare,
+    role: "APPROVER", // Apenas para usuários com role APPROVER
+  },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
+
+  // TODO: Implementar verificação de role do usuário
+  // Por enquanto, vamos mostrar todas as opções
+  const userRole = "APPROVER"; // Mock - deve vir do contexto de autenticação
+  
+  const visibleMenuItems = menuItems.filter(item => !item.role || item.role === userRole);
 
   return (
     <Sidebar className="bg-white border-r border-gray-200">
@@ -58,7 +71,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
+              {visibleMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 

@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Empresas from "./pages/Empresas";
 import Orcamentos from "./pages/Orcamentos";
 import Lancamentos from "./pages/Lancamentos";
+import Aprovacoes from "./pages/Aprovacoes";
 import Login from "./pages/Login";
 import UserRegister from "./pages/UserRegister";
 import NotFound from "./pages/NotFound";
@@ -33,6 +34,7 @@ const App = () => (
                   <Route path="/empresas" element={<Empresas />} />
                   <Route path="/orcamentos" element={<Orcamentos />} />
                   <Route path="/lancamentos" element={<Lancamentos />} />
+                  <Route path="/aprovacoes" element={<Aprovacoes />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Layout>
