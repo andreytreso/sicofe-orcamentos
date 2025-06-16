@@ -68,10 +68,8 @@ export function ApprovalTable({
             <TableHead className="w-12">
               <Checkbox
                 checked={isAllSelected}
-                ref={(ref) => {
-                  if (ref) ref.indeterminate = isPartiallySelected;
-                }}
                 onCheckedChange={handleSelectAll}
+                className={isPartiallySelected ? "data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-blue-100" : ""}
               />
             </TableHead>
             <TableHead className="w-8"></TableHead>
