@@ -3,14 +3,34 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { ApprovalFilter } from "@/types/approval";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 interface ApprovalFiltersProps {
   filters: ApprovalFilter;
   onFiltersChange: (filters: ApprovalFilter) => void;
   onSearch: () => void;
+  isSearching?: boolean;
 }
 
-export function ApprovalFilters({ filters, onFiltersChange, onSearch }: ApprovalFiltersProps) {
+// Mock de empresas - seria substituído por chamada real da API
+const fetchEmpresas = async () => {
+  // Simular delay da API
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return [
+    { id: '1', nome: 'Empresa Alpha Ltda' },
+    { id: '2', nome: 'Beta Corporação S/A' },
+    { id: '3', nome: 'Gamma Negócios ME' },
+    { id: '4', nome: 'Delta Holdings S/A' }
+  ];
+};
+
+export function ApprovalFilters({ filters, onFiltersChange, onSearch, isSearching = false }: ApprovalFiltersProps) {
+  const { data: empresas = [], isLoading: isLoadingEmpresas } = useQuery({
+    queryKey: ['empresas'],
+    queryFn: fetchEmpresas
+  });
+
   const handleFilterChange = (key: keyof ApprovalFilter, value: string) => {
     onFiltersChange({
       ...filters,
@@ -18,23 +38,28 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch }: Approval
     });
   };
 
+  const isSearchDisabled = !filters.empresaId || isSearching || isLoadingEmpresas;
+
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 bg-white border border-gray-200">
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Empresa</label>
+            <label className="text-sm font-medium text-gray-700">Empresa *</label>
             <Select
               value={filters.empresaId}
               onValueChange={(value) => handleFilterChange('empresaId', value)}
+              disabled={isLoadingEmpresas}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a empresa" />
+              <SelectTrigger className="bg-white border-gray-200">
+                <SelectValue placeholder={isLoadingEmpresas ? "Carregando..." : "Selecione a empresa"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">Empresa A</SelectItem>
-                <SelectItem value="2">Empresa B</SelectItem>
-                <SelectItem value="3">Empresa C</SelectItem>
+                {empresas.map((empresa) => (
+                  <SelectItem key={empresa.id} value={empresa.id}>
+                    {empresa.nome}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -45,13 +70,17 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch }: Approval
               value={filters.periodo}
               onValueChange={(value) => handleFilterChange('periodo', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-white border-gray-200">
                 <SelectValue placeholder="Selecione o período" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2024-06">Junho 2024</SelectItem>
-                <SelectItem value="2024-05">Maio 2024</SelectItem>
-                <SelectItem value="2024-04">Abril 2024</SelectItem>
+                <SelectItem value="2024-12">Dezembro 2024</SelectItem>
+                <SelectItem value="2024-11">Novembro 2024</SelectItem>
+                <SelectItem value="2024-10">Outubro 2024</SelectItem>
+                <SelectItem value="2024-09">Setembro 2024</SelectItem>
+                <SelectItem value="2024-Q4">4º Trimestre 2024</SelectItem>
+                <SelectItem value="2024-Q3">3º Trimestre 2024</SelectItem>
+                <SelectItem value="2024">Ano 2024</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -62,7 +91,7 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch }: Approval
               value={filters.status}
               onValueChange={(value) => handleFilterChange('status', value as ApprovalFilter['status'])}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-white border-gray-200">
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
               <SelectContent>
@@ -75,11 +104,25 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch }: Approval
           </div>
 
           <div className="flex items-end">
-            <Button onClick={onSearch} className="w-full bg-sicofe-blue hover:bg-sicofe-blue-dark">
-              Buscar
+            <Button 
+              onClick={onSearch} 
+              className="w-full bg-sicofe-blue hover:bg-sicofe-blue-dark"
+              disabled={isSearchDisabled}
+            >
+              {isSearching ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Buscando...
+                </>
+              ) : (
+                'Buscar'
+              )}
             </Button>
           </div>
         </div>
+        {!filters.empresaId && (
+          <p className="text-sm text-red-600 mt-2">* Selecione uma empresa para habilitar a busca</p>
+        )}
       </CardContent>
     </Card>
   );

@@ -49,11 +49,11 @@ export function ApprovalTable({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'APROVADO':
-        return <Badge className="bg-green-100 text-green-800"><Check className="w-3 h-3 mr-1" />Aprovado</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200"><Check className="w-3 h-3 mr-1" />Aprovado</Badge>;
       case 'REPROVADO':
-        return <Badge className="bg-red-100 text-red-800"><X className="w-3 h-3 mr-1" />Reprovado</Badge>;
+        return <Badge className="bg-red-100 text-red-800 border-red-200"><X className="w-3 h-3 mr-1" />Reprovado</Badge>;
       default:
-        return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
     }
   };
 
@@ -61,10 +61,10 @@ export function ApprovalTable({
   const isPartiallySelected = selectedIds.length > 0 && selectedIds.length < approvals.length;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50">
+          <TableRow className="bg-gray-50 border-b border-gray-200">
             <TableHead className="w-12">
               <Checkbox
                 checked={isAllSelected}
@@ -73,27 +73,27 @@ export function ApprovalTable({
               />
             </TableHead>
             <TableHead className="w-8"></TableHead>
-            <TableHead>Data</TableHead>
-            <TableHead>Grupo 1º Nível</TableHead>
-            <TableHead>Grupo 2º Nível</TableHead>
-            <TableHead>Conta Analítica</TableHead>
-            <TableHead className="text-right">Valor</TableHead>
-            <TableHead>Solicitante</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead className="text-gray-700 font-medium">Data</TableHead>
+            <TableHead className="text-gray-700 font-medium">Grupo 1º Nível</TableHead>
+            <TableHead className="text-gray-700 font-medium">Grupo 2º Nível</TableHead>
+            <TableHead className="text-gray-700 font-medium">Conta Analítica</TableHead>
+            <TableHead className="text-right text-gray-700 font-medium">Valor</TableHead>
+            <TableHead className="text-gray-700 font-medium">Solicitante</TableHead>
+            <TableHead className="text-gray-700 font-medium">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {approvals.length === 0 ? (
             <TableRow>
               <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                Nenhuma aprovação encontrada
+                Nenhum item encontrado
               </TableCell>
             </TableRow>
           ) : (
             approvals.map((approval) => (
               <TableRow 
                 key={approval.id}
-                className="hover:bg-gray-50 cursor-pointer"
+                className="hover:bg-gray-50 cursor-pointer border-b border-gray-100"
                 onClick={() => onRowClick(approval)}
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
@@ -108,7 +108,7 @@ export function ApprovalTable({
                       variant="ghost"
                       size="sm"
                       onClick={() => toggleExpand(approval.id)}
-                      className="p-0 h-6 w-6"
+                      className="p-0 h-6 w-6 hover:bg-gray-100"
                     >
                       {expandedRows.includes(approval.id) ? (
                         <ChevronDown className="w-4 h-4" />
@@ -118,14 +118,14 @@ export function ApprovalTable({
                     </Button>
                   )}
                 </TableCell>
-                <TableCell className="font-medium">{approval.data}</TableCell>
-                <TableCell>{approval.grupo1Nivel}</TableCell>
-                <TableCell>{approval.grupo2Nivel}</TableCell>
-                <TableCell>{approval.contaAnalitica}</TableCell>
-                <TableCell className="text-right font-medium">
+                <TableCell className="font-medium text-gray-900">{approval.data}</TableCell>
+                <TableCell className="text-gray-700">{approval.grupo1Nivel}</TableCell>
+                <TableCell className="text-gray-700">{approval.grupo2Nivel}</TableCell>
+                <TableCell className="text-gray-700">{approval.contaAnalitica}</TableCell>
+                <TableCell className="text-right font-medium text-gray-900">
                   {approval.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </TableCell>
-                <TableCell>{approval.solicitante}</TableCell>
+                <TableCell className="text-gray-700">{approval.solicitante}</TableCell>
                 <TableCell>{getStatusBadge(approval.status)}</TableCell>
               </TableRow>
             ))

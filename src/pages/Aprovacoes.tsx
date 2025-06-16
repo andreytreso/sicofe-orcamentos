@@ -32,10 +32,12 @@ export default function Aprovacoes() {
     total: 0
   });
 
-  const { approvals, isLoading, executeAction, isExecuting } = useApprovals(filters);
+  const { approvals, isLoading, executeAction, isExecuting, search, hasSearched } = useApprovals(filters);
 
   const handleSearch = () => {
     console.log('Searching with filters:', filters);
+    setSelectedIds([]); // Limpar seleções ao buscar
+    search();
   };
 
   const handleSelectChange = (ids: string[]) => {
@@ -85,7 +87,7 @@ export default function Aprovacoes() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white min-h-screen">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
@@ -99,41 +101,44 @@ export default function Aprovacoes() {
         filters={filters}
         onFiltersChange={setFilters}
         onSearch={handleSearch}
+        isSearching={isLoading}
       />
 
       {/* Ações em lote */}
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="bg-white border border-gray-200">
+        <CardHeader className="pb-3 border-b border-gray-100">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">
+            <CardTitle className="text-lg text-gray-900">
               Itens para Aprovação
-              {approvals.length > 0 && (
+              {hasSearched && approvals.length > 0 && (
                 <span className="ml-2 text-sm font-normal text-gray-500">
                   ({approvals.length} {approvals.length === 1 ? 'item' : 'itens'})
                 </span>
               )}
             </CardTitle>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={selectedIds.length === 0 || isExecuting}
-                onClick={() => handleBulkAction('REPROVAR')}
-                className="text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Reprovar Selecionados ({selectedIds.length})
-              </Button>
-              <Button
-                size="sm"
-                disabled={selectedIds.length === 0 || isExecuting}
-                onClick={() => handleBulkAction('APROVAR')}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Aprovar Selecionados ({selectedIds.length})
-              </Button>
-            </div>
+            {hasSearched && (
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={selectedIds.length === 0 || isExecuting}
+                  onClick={() => handleBulkAction('REPROVAR')}
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Reprovar Selecionados ({selectedIds.length})
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={selectedIds.length === 0 || isExecuting}
+                  onClick={() => handleBulkAction('APROVAR')}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Check className="w-4 h-4 mr-2" />
+                  Aprovar Selecionados ({selectedIds.length})
+                </Button>
+              </div>
+            )}
           </div>
           {selectedIds.length > 0 && (
             <p className="text-sm text-gray-600">
@@ -142,7 +147,11 @@ export default function Aprovacoes() {
           )}
         </CardHeader>
         <CardContent className="pt-0">
-          {isLoading ? (
+          {!hasSearched ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>Selecione uma empresa e clique em "Buscar" para ver os itens de aprovação</p>
+            </div>
+          ) : isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sicofe-blue"></div>
             </div>
@@ -168,7 +177,7 @@ export default function Aprovacoes() {
 
       {/* Dialog de confirmação */}
       <AlertDialog open={confirmDialog.isOpen} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, isOpen: open }))}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>
               Confirmar {confirmDialog.action === 'APROVAR' ? 'Aprovação' : 'Reprovação'}
