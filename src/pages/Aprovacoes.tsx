@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ApprovalFilters } from "@/components/ApprovalFilters";
@@ -7,7 +7,7 @@ import { ApprovalTable } from "@/components/ApprovalTable";
 import { ApprovalDetailModal } from "@/components/ApprovalDetailModal";
 import { useApprovals } from "@/hooks/useApprovals";
 import { ApprovalFilter, ApprovalItem } from "@/types/approval";
-import { Check, X, Users } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function Aprovacoes() {
@@ -33,29 +33,6 @@ export default function Aprovacoes() {
   });
 
   const { approvals, isLoading, executeAction, isExecuting } = useApprovals(filters);
-
-  // Atalhos de teclado
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      if (event.key === 'a' || event.key === 'A') {
-        event.preventDefault();
-        handleBulkAction('APROVAR');
-      } else if (event.key === 'r' || event.key === 'R') {
-        event.preventDefault();
-        handleBulkAction('REPROVAR');
-      } else if (event.key === 'Escape') {
-        setIsModalOpen(false);
-        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIds]);
 
   const handleSearch = () => {
     console.log('Searching with filters:', filters);
@@ -114,10 +91,6 @@ export default function Aprovacoes() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Aprovações</h1>
           <p className="text-gray-600">Gerencie aprovações de orçamentos pendentes</p>
-        </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-500">
-          <Users className="w-4 h-4" />
-          <span>Atalhos: A (Aprovar) | R (Reprovar) | Esc (Fechar)</span>
         </div>
       </div>
 
