@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function Aprovacoes() {
   const [filters, setFilters] = useState<ApprovalFilter>({
-    empresaId: '',
+    empresaId: 'all',
     periodo: '',
     status: 'TODOS'
   });
@@ -92,7 +91,7 @@ export default function Aprovacoes() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Aprovações</h1>
-          <p className="text-gray-600">Gerencie aprovações de orçamentos pendentes</p>
+          <p className="text-gray-600">Gerencie aprovações de lançamentos pendentes</p>
         </div>
       </div>
 

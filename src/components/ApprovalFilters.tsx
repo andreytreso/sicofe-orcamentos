@@ -18,6 +18,7 @@ const fetchEmpresas = async () => {
   // Simular delay da API
   await new Promise(resolve => setTimeout(resolve, 500));
   return [
+    { id: 'all', nome: 'Todas as empresas' },
     { id: '1', nome: 'Empresa Alpha Ltda' },
     { id: '2', nome: 'Beta Corporação S/A' },
     { id: '3', nome: 'Gamma Negócios ME' },
@@ -51,12 +52,16 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch, isSearchin
               onValueChange={(value) => handleFilterChange('empresaId', value)}
               disabled={isLoadingEmpresas}
             >
-              <SelectTrigger className="bg-white border-gray-200">
+              <SelectTrigger className="h-10 bg-white border border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 rounded-md shadow-sm">
                 <SelectValue placeholder={isLoadingEmpresas ? "Carregando..." : "Selecione a empresa"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 rounded-md shadow-lg z-50">
                 {empresas.map((empresa) => (
-                  <SelectItem key={empresa.id} value={empresa.id}>
+                  <SelectItem 
+                    key={empresa.id} 
+                    value={empresa.id}
+                    className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900"
+                  >
                     {empresa.nome}
                   </SelectItem>
                 ))}
@@ -70,17 +75,17 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch, isSearchin
               value={filters.periodo}
               onValueChange={(value) => handleFilterChange('periodo', value)}
             >
-              <SelectTrigger className="bg-white border-gray-200">
+              <SelectTrigger className="h-10 bg-white border border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 rounded-md shadow-sm">
                 <SelectValue placeholder="Selecione o período" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2024-12">Dezembro 2024</SelectItem>
-                <SelectItem value="2024-11">Novembro 2024</SelectItem>
-                <SelectItem value="2024-10">Outubro 2024</SelectItem>
-                <SelectItem value="2024-09">Setembro 2024</SelectItem>
-                <SelectItem value="2024-Q4">4º Trimestre 2024</SelectItem>
-                <SelectItem value="2024-Q3">3º Trimestre 2024</SelectItem>
-                <SelectItem value="2024">Ano 2024</SelectItem>
+              <SelectContent className="bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                <SelectItem value="2024-12" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Dezembro 2024</SelectItem>
+                <SelectItem value="2024-11" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Novembro 2024</SelectItem>
+                <SelectItem value="2024-10" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Outubro 2024</SelectItem>
+                <SelectItem value="2024-09" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Setembro 2024</SelectItem>
+                <SelectItem value="2024-Q4" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">4º Trimestre 2024</SelectItem>
+                <SelectItem value="2024-Q3" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">3º Trimestre 2024</SelectItem>
+                <SelectItem value="2024" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Ano 2024</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -91,14 +96,14 @@ export function ApprovalFilters({ filters, onFiltersChange, onSearch, isSearchin
               value={filters.status}
               onValueChange={(value) => handleFilterChange('status', value as ApprovalFilter['status'])}
             >
-              <SelectTrigger className="bg-white border-gray-200">
+              <SelectTrigger className="h-10 bg-white border border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 rounded-md shadow-sm">
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TODOS">Todos</SelectItem>
-                <SelectItem value="PENDENTE">Pendente</SelectItem>
-                <SelectItem value="APROVADO">Aprovado</SelectItem>
-                <SelectItem value="REPROVADO">Reprovado</SelectItem>
+              <SelectContent className="bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                <SelectItem value="TODOS" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Todos</SelectItem>
+                <SelectItem value="PENDENTE" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Pendente</SelectItem>
+                <SelectItem value="APROVADO" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Aprovado</SelectItem>
+                <SelectItem value="REPROVADO" className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer px-3 py-2 text-gray-900">Reprovado</SelectItem>
               </SelectContent>
             </Select>
           </div>
