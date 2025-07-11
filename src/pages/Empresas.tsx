@@ -2,50 +2,32 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Building2, Users, Calendar, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Plus, Building2, Users, Calendar, MoreVertical, Edit, Trash2, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const empresasData = [
-  {
-    id: 1,
-    nome: "Tech Solutions LTDA",
-    orcamentos: 3,
-    usuarios: 5,
-    ultimaAtualizacao: "2024-06-01",
-    status: "ativa"
-  },
-  {
-    id: 2,
-    nome: "Marketing Digital S/A",
-    orcamentos: 2,
-    usuarios: 3,
-    ultimaAtualizacao: "2024-05-28",
-    status: "ativa"
-  },
-  {
-    id: 3,
-    nome: "Consultoria Financeira",
-    orcamentos: 1,
-    usuarios: 2,
-    ultimaAtualizacao: "2024-05-15",
-    status: "inativa"
-  },
-  {
-    id: 4,
-    nome: "E-commerce Brasil",
-    orcamentos: 4,
-    usuarios: 8,
-    ultimaAtualizacao: "2024-06-02",
-    status: "ativa"
-  }
-];
+import { useCompanies } from '@/hooks/useCompanies';
 
 export default function Empresas() {
+  const { data: companies = [], isLoading } = useCompanies();
+  
+  const activeCompanies = companies.filter(company => company.status === 'active');
+  const totalUsers = 0; // TODO: Implement user count
+  const totalBudgets = 0; // TODO: Implement budget count
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-sicofe-blue" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -70,7 +52,7 @@ export default function Empresas() {
               </div>
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Total de Empresas</p>
-                <p className="text-2xl font-bold text-sicofe-navy">4</p>
+                <p className="text-2xl font-bold text-sicofe-navy">{companies.length}</p>
               </div>
             </div>
           </CardContent>
@@ -83,8 +65,8 @@ export default function Empresas() {
                 <Users className="h-6 w-6 text-sicofe-green" />
               </div>
               <div>
-                <p className="text-sm font-medium text-sicofe-gray">Usuários Ativos</p>
-                <p className="text-2xl font-bold text-sicofe-navy">18</p>
+                <p className="text-sm font-medium text-sicofe-gray">Empresas Ativas</p>
+                <p className="text-2xl font-bold text-sicofe-navy">{activeCompanies.length}</p>
               </div>
             </div>
           </CardContent>
@@ -98,7 +80,7 @@ export default function Empresas() {
               </div>
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Orçamentos Ativos</p>
-                <p className="text-2xl font-bold text-sicofe-navy">10</p>
+                <p className="text-2xl font-bold text-sicofe-navy">{totalBudgets}</p>
               </div>
             </div>
           </CardContent>
@@ -112,7 +94,7 @@ export default function Empresas() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {empresasData.map((empresa) => (
+            {companies.map((empresa) => (
               <div
                 key={empresa.id}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -122,12 +104,12 @@ export default function Empresas() {
                     <Building2 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sicofe-navy">{empresa.nome}</h3>
+                    <h3 className="font-semibold text-sicofe-navy">{empresa.name}</h3>
                     <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-sm text-sicofe-gray">{empresa.orcamentos} orçamentos</span>
-                      <span className="text-sm text-sicofe-gray">{empresa.usuarios} usuários</span>
+                      <span className="text-sm text-sicofe-gray">0 orçamentos</span>
+                      <span className="text-sm text-sicofe-gray">0 usuários</span>
                       <span className="text-sm text-sicofe-gray">
-                        Atualizado em {new Date(empresa.ultimaAtualizacao).toLocaleDateString('pt-BR')}
+                        Criado em {new Date(empresa.created_at).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                   </div>
@@ -135,10 +117,10 @@ export default function Empresas() {
                 
                 <div className="flex items-center space-x-3">
                   <Badge 
-                    variant={empresa.status === 'ativa' ? 'default' : 'secondary'}
-                    className={empresa.status === 'ativa' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}
+                    variant={empresa.status === 'active' ? 'default' : 'secondary'}
+                    className={empresa.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}
                   >
-                    {empresa.status === 'ativa' ? 'Ativa' : 'Inativa'}
+                    {empresa.status === 'active' ? 'Ativa' : 'Inativa'}
                   </Badge>
                   
                   <DropdownMenu>

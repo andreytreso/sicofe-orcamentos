@@ -3,75 +3,7 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApprovalItem, ApprovalFilter, ApprovalAction, ApprovalHistoryItem } from '@/types/approval';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock data expandido para demonstrar diferentes cenários
-const mockApprovals: ApprovalItem[] = [
-  {
-    id: '1',
-    data: '2024-12-15',
-    grupo1Nivel: 'Receitas',
-    grupo2Nivel: 'Receitas Operacionais',
-    contaAnalitica: 'Vendas de Produtos',
-    valor: 150000,
-    solicitante: 'João Silva',
-    status: 'PENDENTE',
-    empresaId: '1',
-    periodo: '2024-12',
-    level: 3
-  },
-  {
-    id: '2',
-    data: '2024-12-14',
-    grupo1Nivel: 'Despesas',
-    grupo2Nivel: 'Despesas Administrativas',
-    contaAnalitica: 'Material de Escritório',
-    valor: 5000,
-    solicitante: 'Maria Santos',
-    status: 'PENDENTE',
-    empresaId: '1',
-    periodo: '2024-12',
-    level: 3
-  },
-  {
-    id: '3',
-    data: '2024-12-13',
-    grupo1Nivel: 'Despesas',
-    grupo2Nivel: 'Despesas Operacionais',
-    contaAnalitica: 'Salários',
-    valor: 80000,
-    solicitante: 'Carlos Lima',
-    status: 'APROVADO',
-    empresaId: '1',
-    periodo: '2024-12',
-    level: 3
-  },
-  {
-    id: '4',
-    data: '2024-11-30',
-    grupo1Nivel: 'Receitas',
-    grupo2Nivel: 'Receitas Extraordinárias',
-    contaAnalitica: 'Venda de Ativos',
-    valor: 25000,
-    solicitante: 'Ana Costa',
-    status: 'REPROVADO',
-    empresaId: '2',
-    periodo: '2024-11',
-    level: 3
-  },
-  {
-    id: '5',
-    data: '2024-10-25',
-    grupo1Nivel: 'Despesas',
-    grupo2Nivel: 'Despesas Comerciais',
-    contaAnalitica: 'Marketing Digital',
-    valor: 12000,
-    solicitante: 'Pedro Oliveira',
-    status: 'PENDENTE',
-    empresaId: '3',
-    periodo: '2024-Q4',
-    level: 3
-  }
-];
+import { supabase } from '@/integrations/supabase/client';
 
 export function useApprovals(filters: ApprovalFilter) {
   const { toast } = useToast();
@@ -80,21 +12,57 @@ export function useApprovals(filters: ApprovalFilter) {
 
   const { data: approvals = [], isLoading } = useQuery({
     queryKey: ['approvals', filters, hasSearched],
-    queryFn: async () => {
+    queryFn: async (): Promise<ApprovalItem[]> => {
       if (!hasSearched) {
         return []; // Não retorna dados até que a busca seja executada
       }
 
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Fetching approvals with filters:', filters);
-      return mockApprovals.filter(item => {
-        if (filters.empresaId && item.empresaId !== filters.empresaId) return false;
-        if (filters.periodo && item.periodo !== filters.periodo) return false;
-        if (filters.status !== 'TODOS' && item.status !== filters.status) return false;
-        return true;
-      });
+      let query = supabase
+        .from('approval_items')
+        .select(`
+          *,
+          companies(name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filters.empresaId && filters.empresaId !== 'all') {
+        query = query.eq('company_id', filters.empresaId);
+      }
+
+      if (filters.periodo) {
+        query = query.eq('period', filters.periodo);
+      }
+
+      if (filters.status !== 'TODOS') {
+        const statusMap = {
+          'PENDENTE': 'PENDING',
+          'APROVADO': 'APPROVED', 
+          'REPROVADO': 'REJECTED'
+        };
+        query = query.eq('status', statusMap[filters.status as keyof typeof statusMap]);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Failed to fetch approvals: ${error.message}`);
+      }
+
+      // Transform data to match ApprovalItem interface
+      return (data || []).map(item => ({
+        id: item.id,
+        data: item.transaction_date,
+        grupo1Nivel: item.level_1_group,
+        grupo2Nivel: item.level_2_group,
+        contaAnalitica: item.analytical_account,
+        valor: Number(item.amount),
+        solicitante: item.requester,
+        status: item.status === 'PENDING' ? 'PENDENTE' : 
+               item.status === 'APPROVED' ? 'APROVADO' : 'REPROVADO',
+        empresaId: item.company_id,
+        periodo: item.period,
+        level: item.approval_level as 1 | 2 | 3
+      }));
     },
     enabled: hasSearched // Só executa a query após busca manual
   });
@@ -106,9 +74,36 @@ export function useApprovals(filters: ApprovalFilter) {
 
   const approvalMutation = useMutation({
     mutationFn: async (action: ApprovalAction) => {
-      console.log('Executing approval action:', action);
-      // Simular API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const newStatus = action.acao === 'APROVAR' ? 'APPROVED' : 'REJECTED';
+      
+      const { error } = await supabase
+        .from('approval_items')
+        .update({ status: newStatus })
+        .in('id', action.ids);
+
+      if (error) {
+        throw new Error(`Failed to update approval status: ${error.message}`);
+      }
+
+      // Insert history records
+      for (const id of action.ids) {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+          const { error: historyError } = await supabase
+            .from('approval_history')
+            .insert({
+              approval_item_id: id,
+              user_id: user.user.id,
+              action: action.acao,
+              comment: action.comentario
+            });
+
+           if (historyError) {
+            console.error('Failed to insert history:', historyError);
+          }
+        }
+      }
+
       return { success: true };
     },
     onSuccess: (_, variables) => {
@@ -147,24 +142,23 @@ export function useApprovalHistory(approvalId: string) {
   return useQuery({
     queryKey: ['approval-history', approvalId],
     queryFn: async (): Promise<ApprovalHistoryItem[]> => {
-      console.log('Fetching history for approval:', approvalId);
-      // Mock data
-      return [
-        {
-          id: '1',
-          data: '2024-12-15 10:30',
-          usuario: 'João Silva',
-          acao: 'Criado',
-          comentario: 'Orçamento inicial criado'
-        },
-        {
-          id: '2',
-          data: '2024-12-15 14:20',
-          usuario: 'Maria Santos',
-          acao: 'Modificado',
-          comentario: 'Valor ajustado conforme reunião'
-        }
-      ];
+      const { data, error } = await supabase
+        .from('approval_history')
+        .select('*')
+        .eq('approval_item_id', approvalId)
+        .order('created_at');
+
+      if (error) {
+        throw new Error(`Failed to fetch approval history: ${error.message}`);
+      }
+
+      return (data || []).map(item => ({
+        id: item.id,
+        data: new Date(item.created_at).toLocaleString('pt-BR'),
+        usuario: 'Usuário do Sistema',
+        acao: item.action,
+        comentario: item.comment || ''
+      }));
     },
     enabled: !!approvalId
   });

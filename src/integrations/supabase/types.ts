@@ -14,7 +14,266 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      account_hierarchy: {
+        Row: {
+          analytical_account: string
+          created_at: string
+          id: string
+          level_1: string
+          level_2: string
+        }
+        Insert: {
+          analytical_account: string
+          created_at?: string
+          id?: string
+          level_1: string
+          level_2: string
+        }
+        Update: {
+          analytical_account?: string
+          created_at?: string
+          id?: string
+          level_1?: string
+          level_2?: string
+        }
+        Relationships: []
+      }
+      approval_history: {
+        Row: {
+          action: string
+          approval_item_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          approval_item_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          approval_item_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_history_approval_item_id_fkey"
+            columns: ["approval_item_id"]
+            isOneToOne: false
+            referencedRelation: "approval_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approval_items: {
+        Row: {
+          amount: number
+          analytical_account: string
+          approval_level: number
+          company_id: string
+          created_at: string
+          id: string
+          level_1_group: string
+          level_2_group: string
+          period: string
+          requester: string
+          status: string
+          transaction_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          analytical_account: string
+          approval_level?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          level_1_group: string
+          level_2_group: string
+          period: string
+          requester: string
+          status?: string
+          transaction_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          analytical_account?: string
+          approval_level?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          level_1_group?: string
+          level_2_group?: string
+          period?: string
+          requester?: string
+          status?: string
+          transaction_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          analytical_account: string
+          company_id: string
+          competency_months: string[]
+          created_at: string
+          description: string | null
+          id: string
+          level_1_group: string
+          level_2_group: string
+          observations: string | null
+          transaction_date: string
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          amount: number
+          analytical_account: string
+          company_id: string
+          competency_months?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          level_1_group: string
+          level_2_group: string
+          observations?: string | null
+          transaction_date: string
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          analytical_account?: string
+          company_id?: string
+          competency_months?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          level_1_group?: string
+          level_2_group?: string
+          observations?: string | null
+          transaction_date?: string
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_company_access: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -13,24 +13,15 @@ interface ApprovalFiltersProps {
   isSearching?: boolean;
 }
 
-// Mock de empresas - seria substituído por chamada real da API
-const fetchEmpresas = async () => {
-  // Simular delay da API
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return [
-    { id: 'all', nome: 'Todas as empresas' },
-    { id: '1', nome: 'Empresa Alpha Ltda' },
-    { id: '2', nome: 'Beta Corporação S/A' },
-    { id: '3', nome: 'Gamma Negócios ME' },
-    { id: '4', nome: 'Delta Holdings S/A' }
-  ];
-};
+import { useUserCompanies } from '@/hooks/useCompanies';
 
 export function ApprovalFilters({ filters, onFiltersChange, onSearch, isSearching = false }: ApprovalFiltersProps) {
-  const { data: empresas = [], isLoading: isLoadingEmpresas } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: fetchEmpresas
-  });
+  const { data: companies = [], isLoading: isLoadingEmpresas } = useUserCompanies();
+  
+  const empresas = [
+    { id: 'all', nome: 'Todas as empresas' },
+    ...companies.map(company => ({ id: company.id, nome: company.name }))
+  ];
 
   const handleFilterChange = (key: keyof ApprovalFilter, value: string) => {
     onFiltersChange({

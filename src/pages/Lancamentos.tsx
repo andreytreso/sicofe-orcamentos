@@ -34,7 +34,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { contasHierarquia, ContaHierarquia } from "@/data/contasHierarquia";
+import { useUserCompanies } from '@/hooks/useCompanies';
+import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from '@/hooks/useAccountHierarchy';
+import { useTransactions, TransactionFilters } from '@/hooks/useTransactions';
 
 interface Lancamento {
   id: string;
@@ -51,51 +53,12 @@ interface Lancamento {
 export default function Lancamentos() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
-  const [editingLancamento, setEditingLancamento] = useState<Lancamento | null>(null);
-  const [isLoadingFilters, setIsLoadingFilters] = useState(false);
+  const [editingLancamento, setEditingLancamento] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lancamentoToDelete, setLancamentoToDelete] = useState<string | null>(null);
-  
-  const [allLancamentos, setAllLancamentos] = useState<Lancamento[]>([
-    {
-      id: "1",
-      data: "15/12/2024",
-      empresa: "SICOFE LTDA",
-      conta: "Receitas com Visa Crédito",
-      descricao: "Vendas dezembro",
-      valor: 25000.00,
-      observacoes: "",
-      competencia: ["dez"],
-      grupoContas1: "Receita Bruta"
-    },
-    {
-      id: "2",
-      data: "14/12/2024",
-      empresa: "SICOFE LTDA",
-      conta: "Salários e Ordenados",
-      descricao: "Folha de pagamento",
-      valor: 15500.00,
-      observacoes: "",
-      competencia: ["dez"],
-      grupoContas1: "SG&A"
-    },
-    {
-      id: "3",
-      data: "13/11/2024",
-      empresa: "Examine Loja 1",
-      conta: "Receitas com Visa Crédito",
-      descricao: "Vendas novembro",
-      valor: 18000.00,
-      observacoes: "",
-      competencia: ["nov"],
-      grupoContas1: "Receita Bruta"
-    }
-  ]);
-  
-  const [lancamentos, setLancamentos] = useState<Lancamento[]>([...allLancamentos]);
   
   const [formData, setFormData] = useState({
     empresa: "",
@@ -120,32 +83,36 @@ export default function Lancamentos() {
       dez: false,
     }
   });
+  
+  // Hooks for data
+  const { data: companies = [] } = useUserCompanies();
+  const level1Options = useLevel1Options();
+  const level2Options = useLevel2Options(formData.grupoContas1);
+  const analyticalOptions = useAnalyticalAccountOptions(formData.grupoContas1, formData.grupoContas2);
+  
+  const filters: TransactionFilters = {
+    companyId: selectedEmpresa || undefined,
+    period: selectedPeriodo || undefined,
+    search: searchTerm || undefined
+  };
+  
+  const { 
+    transactions,
+    isLoading: isLoadingTransactions,
+    createTransaction,
+    updateTransaction,
+    deleteTransaction,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useTransactions(filters);
 
   // Generate year options: current year + 5 years ahead
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear + i);
 
-  const empresas = [
-    "Examine Loja 1",
-    "Examine Loja 2", 
-    "Examine Loja 3",
-    "Examine Loja 4",
-    "Examine Loja 6",
-    "Examine Loja 7",
-    "SICOFE LTDA"
-  ];
-
-  // Lógica dos dropdowns em cascata
-  const opcoesNivel1 = [...new Set(contasHierarquia.map(c => c.nivel1))];
-
-  const opcoesNivel2 = contasHierarquia
-    .filter(c => c.nivel1 === formData.grupoContas1)
-    .map(c => c.nivel2)
-    .filter((v, i, a) => a.indexOf(v) === i); // distinct
-
-  const opcoesAnaliticas = contasHierarquia
-    .filter(c => c.nivel1 === formData.grupoContas1 && c.nivel2 === formData.grupoContas2)
-    .map(c => c.analitica);
+  // Transform companies for compatibility
+  const empresas = companies.map(company => company.name);
 
   const meses = [
     { key: "jan", label: "Janeiro" },
@@ -180,75 +147,15 @@ export default function Lancamentos() {
     }));
   };
 
-  const fetchTransactions = async (filters: { companyId?: string; period?: string; search?: string }) => {
-    setIsLoadingFilters(true);
-    
-    // Simula delay de API
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    let filtered = [...allLancamentos];
-    
-    if (filters.companyId && filters.companyId !== "all") {
-      filtered = filtered.filter(lancamento => lancamento.empresa === filters.companyId);
-    }
-    
-    if (filters.period && filters.period !== "all") {
-      filtered = filtered.filter(lancamento => lancamento.competencia.includes(filters.period));
-    }
-    
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(lancamento => 
-        lancamento.descricao.toLowerCase().includes(searchLower) ||
-        lancamento.conta.toLowerCase().includes(searchLower) ||
-        lancamento.empresa.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    setLancamentos(filtered);
-    setIsLoadingFilters(false);
-  };
-
+  // Remove unused functions since we're using the hook
   const handleFilter = () => {
-    const filters: { companyId?: string; period?: string; search?: string } = {};
-    
-    if (selectedEmpresa && selectedEmpresa !== "all") {
-      filters.companyId = selectedEmpresa;
-    }
-    
-    if (selectedPeriodo && selectedPeriodo !== "all") {
-      filters.period = selectedPeriodo;
-    }
-    
-    if (searchTerm.trim()) {
-      filters.search = searchTerm.trim();
-    }
-    
-    fetchTransactions(filters);
+    // Data is already filtered by the useTransactions hook
+    // This function is kept for button compatibility but doesn't do anything
   };
 
-  const handleEdit = (lancamento: Lancamento) => {
-    setEditingLancamento(lancamento);
-    
-    // Find the conta in hierarchy to populate all levels
-    const contaEncontrada = contasHierarquia.find(c => c.analitica === lancamento.conta);
-    
-    // Populate form with existing data
-    const competenciaState = Object.keys(formData.competencia).reduce((acc, mes) => {
-      acc[mes] = lancamento.competencia.includes(mes);
-      return acc;
-    }, {} as typeof formData.competencia);
 
-    setFormData({
-      empresa: lancamento.empresa,
-      ano: new Date().getFullYear().toString(),
-      grupoContas1: contaEncontrada?.nivel1 || "",
-      grupoContas2: contaEncontrada?.nivel2 || "",
-      contaAnalitica: lancamento.conta,
-      valor: lancamento.valor.toString().replace('.', ','),
-      observacoes: lancamento.observacoes,
-      competencia: competenciaState
-    });
+  const handleEdit = (transaction: any) => {
+    setEditingLancamento(transaction);
     
     setShowForm(true);
   };
@@ -260,16 +167,7 @@ export default function Lancamentos() {
 
   const confirmDelete = () => {
     if (lancamentoToDelete) {
-      const updatedLancamentos = allLancamentos.filter(l => l.id !== lancamentoToDelete);
-      setAllLancamentos(updatedLancamentos);
-      setLancamentos(updatedLancamentos);
-      
-      toast({
-        title: "Sucesso!",
-        description: "Lançamento excluído com sucesso.",
-        variant: "default",
-        className: "bg-green-50 border-green-200 text-green-800",
-      });
+      deleteTransaction(lancamentoToDelete);
     }
     setShowDeleteDialog(false);
     setLancamentoToDelete(null);
@@ -444,63 +342,36 @@ export default function Lancamentos() {
       set: '09', out: '10', nov: '11', dez: '12'
     };
 
-    if (editingLancamento) {
-      const updatedAllLancamentosWithoutOld = allLancamentos.filter(l => l.id !== editingLancamento.id);
-      
-      const novosLancamentos: Lancamento[] = mesesSelecionados.map((mes, index) => {
-        const dataFormatada = `01/${monthMap[mes]}/${formData.ano}`;
-        
-        return {
-          id: (Date.now() + index).toString(),
-          data: dataFormatada,
-          empresa: formData.empresa,
-          conta: formData.contaAnalitica,
-          descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
-          valor: parseFloat(valorFormatado.toFixed(2)),
-          observacoes: formData.observacoes,
-          competencia: [mes],
-          grupoContas1: formData.grupoContas1
-        };
-      });
-
-      const updatedAllLancamentos = [...novosLancamentos, ...updatedAllLancamentosWithoutOld];
-      setAllLancamentos(updatedAllLancamentos);
-      setLancamentos(updatedAllLancamentos);
-      
+    // Find the selected company ID
+    const selectedCompany = companies.find(c => c.name === formData.empresa);
+    if (!selectedCompany) {
       toast({
-        title: "Sucesso!",
-        description: `Lançamento atualizado com sucesso. ${novosLancamentos.length} lançamento(s) criado(s).`,
-        variant: "default",
-        className: "bg-green-50 border-green-200 text-green-800",
+        title: "Erro",
+        description: "Empresa não encontrada.",
+        variant: "destructive",
       });
-    } else {
-      const novosLancamentos: Lancamento[] = mesesSelecionados.map((mes, index) => {
-        const dataFormatada = `01/${monthMap[mes]}/${formData.ano}`;
-        
-        return {
-          id: (Date.now() + index).toString(),
-          data: dataFormatada,
-          empresa: formData.empresa,
-          conta: formData.contaAnalitica,
-          descricao: formData.observacoes || `Lançamento ${formData.grupoContas1}`,
-          valor: parseFloat(valorFormatado.toFixed(2)),
-          observacoes: formData.observacoes,
-          competencia: [mes],
-          grupoContas1: formData.grupoContas1
-        };
-      });
-
-      const updatedAllLancamentos = [...novosLancamentos, ...allLancamentos];
-      setAllLancamentos(updatedAllLancamentos);
-      setLancamentos(updatedAllLancamentos);
-      
-      toast({
-        title: "Sucesso!",
-        description: `${novosLancamentos.length} lançamento(s) criado(s) com sucesso.`,
-        variant: "default",
-        className: "bg-green-50 border-green-200 text-green-800",
-      });
+      return;
     }
+
+    // Create transaction data for each selected month
+    mesesSelecionados.forEach(mes => {
+      const transactionData = {
+        company_id: selectedCompany.id,
+        year: parseInt(formData.ano),
+        level_1_group: formData.grupoContas1,
+        level_2_group: formData.grupoContas2,
+        analytical_account: formData.contaAnalitica,
+        amount: valorFormatado,
+        observations: formData.observacoes,
+        competency_months: [mes]
+      };
+
+      if (editingLancamento) {
+        updateTransaction(editingLancamento.id, transactionData);
+      } else {
+        createTransaction(transactionData);
+      }
+    });
     
     setShowForm(false);
     setEditingLancamento(null);
@@ -632,9 +503,9 @@ export default function Lancamentos() {
               variant="outline" 
               className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
               onClick={handleFilter}
-              disabled={isLoadingFilters}
+              disabled={isLoadingTransactions}
             >
-              {isLoadingFilters ? (
+              {isLoadingTransactions ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Filter className="h-4 w-4 mr-2" />
@@ -651,7 +522,7 @@ export default function Lancamentos() {
           <CardTitle className="text-lg font-semibold" style={{ color: '#1F2937' }}>Histórico de Lançamentos</CardTitle>
         </CardHeader>
         <CardContent className="bg-white">
-          {isLoadingFilters ? (
+          {isLoadingTransactions ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#0047FF' }} />
             </div>
@@ -668,23 +539,27 @@ export default function Lancamentos() {
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
-                {lancamentos.map((lancamento) => {
-                  const displayValue = getDisplayValue(lancamento);
+                {transactions.map((transaction) => {
+                  const companyName = transaction.companies?.name || 'N/A';
+                  const isPositive = transaction.level_1_group === "Receita Bruta";
+                  const colorClass = isPositive ? "text-green-600" : "text-red-600";
+                  const value = Math.abs(transaction.amount);
+                  
                   return (
-                    <TableRow key={lancamento.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
-                      <TableCell className="text-sm">{lancamento.data}</TableCell>
-                      <TableCell className="text-sm">{lancamento.empresa}</TableCell>
-                      <TableCell className="text-sm">{lancamento.conta}</TableCell>
-                      <TableCell className="text-sm">{lancamento.descricao}</TableCell>
-                      <TableCell className={`text-sm text-right font-medium ${displayValue.colorClass}`}>
-                        {displayValue.isPositive ? '' : '-'}{formatCurrency(displayValue.value)}
+                    <TableRow key={transaction.id} className="border-b border-gray-300 hover:bg-gray-50 bg-white">
+                      <TableCell className="text-sm">{new Date(transaction.transaction_date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="text-sm">{companyName}</TableCell>
+                      <TableCell className="text-sm">{transaction.analytical_account}</TableCell>
+                      <TableCell className="text-sm">{transaction.description}</TableCell>
+                      <TableCell className={`text-sm text-right font-medium ${colorClass}`}>
+                        {isPositive ? '' : '-'}{formatCurrency(value)}
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex gap-2 justify-center">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEdit(lancamento)}
+                            onClick={() => handleEdit(transaction)}
                             className="h-8 w-8 p-0 hover:bg-blue-100"
                           >
                             <Edit className="h-4 w-4 text-blue-600" />
@@ -692,7 +567,7 @@ export default function Lancamentos() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(lancamento.id)}
+                            onClick={() => handleDelete(transaction.id)}
                             className="h-8 w-8 p-0 hover:bg-red-100"
                           >
                             <Trash2 className="h-4 w-4 text-red-600" />
@@ -795,7 +670,7 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {opcoesNivel1.map((grupo) => (
+                    {level1Options.map((grupo) => (
                       <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
                         {grupo}
                       </SelectItem>
@@ -811,8 +686,8 @@ export default function Lancamentos() {
                     <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {opcoesNivel2.length > 0 ? (
-                      opcoesNivel2.map((grupo) => (
+                    {level2Options.length > 0 ? (
+                      level2Options.map((grupo) => (
                         <SelectItem key={grupo} value={grupo} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
                           {grupo}
                         </SelectItem>
@@ -832,8 +707,8 @@ export default function Lancamentos() {
                     <SelectValue placeholder={formData.grupoContas2 ? "Selecione a conta analítica" : "Primeiro selecione o 2º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {opcoesAnaliticas.length > 0 ? (
-                      opcoesAnaliticas.map((conta) => (
+                    {analyticalOptions.length > 0 ? (
+                      analyticalOptions.map((conta) => (
                         <SelectItem key={conta} value={conta} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
                           {conta}
                         </SelectItem>
