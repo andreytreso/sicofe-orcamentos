@@ -1,15 +1,14 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
-
-interface User {
-  id: string;
-  username: string;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -17,51 +16,60 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar se há token salvo
-    const token = localStorage.getItem('auth-token');
-    const userData = localStorage.getItem('user-data');
-    
-    if (token && userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        localStorage.removeItem('auth-token');
-        localStorage.removeItem('user-data');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    try {
-      // Simulação de API - remover quando tiver backend real
-      if (username === 'admin' && password === 'admin123') {
-        const userData = { id: '1', username };
-        const token = 'mock-token-' + Date.now();
-        
-        localStorage.setItem('auth-token', token);
-        localStorage.setItem('user-data', JSON.stringify(userData));
-        setUser(userData);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Erro no login:', error);
-      return false;
-    }
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
   };
 
-  const logout = () => {
-    localStorage.removeItem('auth-token');
-    localStorage.removeItem('user-data');
-    setUser(null);
+  const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+        }
+      }
+    });
+    return { error };
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, session, login, signUp, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
