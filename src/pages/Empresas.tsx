@@ -27,7 +27,7 @@ export default function Empresas() {
           <h1 className="text-3xl font-bold text-sicofe-navy">Empresas</h1>
           <p className="text-sicofe-gray mt-1">Gerencie todas as empresas do seu sistema</p>
         </div>
-        <Button className="sicofe-gradient hover:opacity-90 transition-opacity text-slate-50">
+        <Button className="sicofe-gradient hover:opacity-90 transition-opacity text-white">
           <Plus className="h-4 w-4 mr-2" />
           Nova Empresa
         </Button>
