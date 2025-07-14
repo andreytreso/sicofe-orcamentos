@@ -1,42 +1,33 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Building2, Users, Calendar, MoreVertical, Edit, Trash2, Loader2 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCompanies } from '@/hooks/useCompanies';
-
 export default function Empresas() {
-  const { data: companies = [], isLoading } = useCompanies();
-  
+  const {
+    data: companies = [],
+    isLoading
+  } = useCompanies();
   const activeCompanies = companies.filter(company => company.status === 'active');
   const totalUsers = 0; // TODO: Implement user count
   const totalBudgets = 0; // TODO: Implement budget count
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="flex justify-center items-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-sicofe-blue" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-sicofe-navy">Empresas</h1>
           <p className="text-sicofe-gray mt-1">Gerencie todas as empresas do seu sistema</p>
         </div>
-        <Button className="sicofe-gradient hover:opacity-90 transition-opacity">
+        <Button className="sicofe-gradient hover:opacity-90 transition-opacity text-slate-50">
           <Plus className="h-4 w-4 mr-2" />
           Nova Empresa
         </Button>
@@ -94,11 +85,7 @@ export default function Empresas() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {companies.map((empresa) => (
-              <div
-                key={empresa.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
+            {companies.map(empresa => <div key={empresa.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 sicofe-gradient rounded-lg flex items-center justify-center">
                     <Building2 className="h-5 w-5 text-white" />
@@ -116,10 +103,7 @@ export default function Empresas() {
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Badge 
-                    variant={empresa.status === 'active' ? 'default' : 'secondary'}
-                    className={empresa.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}
-                  >
+                  <Badge variant={empresa.status === 'active' ? 'default' : 'secondary'} className={empresa.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}>
                     {empresa.status === 'active' ? 'Ativa' : 'Inativa'}
                   </Badge>
                   
@@ -141,11 +125,9 @@ export default function Empresas() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
