@@ -6,36 +6,48 @@ import { LancamentoDetalhe } from "@/components/LancamentoDetalhe";
 import { ReceitasDespesasChart } from "@/components/ReceitasDespesasChart";
 import { TrendingUp, TrendingDown, DollarSign, PieChart, ArrowUp, ArrowDown, Megaphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDashboardKPIs } from "@/hooks/useDashboardKPIs";
+import { useDashboardTransactions, DashboardTransaction } from "@/hooks/useDashboardTransactions";
 
-// Mock data based on period - in real app this would come from API
-const getKPIData = (period: PeriodType) => {
-  const data = {
-    month: {
-      budget: { value: "R$ 150.000,00", trend: { value: "12%", absoluteValue: "R$ 18.000", isPositive: true } },
-      realized: { value: "R$ 87.500,00", trend: { value: "8%", absoluteValue: "R$ 6.500", isPositive: true } },
-      available: { value: "R$ 62.500,00", trend: { value: "5%", absoluteValue: "R$ 2.800", isPositive: false } },
-      variation: { value: "58,3%", trend: { value: "3%", absoluteValue: "0", isPositive: true } }
-    },
-    quarter: {
-      budget: { value: "R$ 450.000,00", trend: { value: "15%", absoluteValue: "R$ 58.500", isPositive: true } },
-      realized: { value: "R$ 287.500,00", trend: { value: "12%", absoluteValue: "R$ 30.800", isPositive: true } },
-      available: { value: "R$ 162.500,00", trend: { value: "8%", absoluteValue: "R$ 12.000", isPositive: false } },
-      variation: { value: "63,9%", trend: { value: "6%", absoluteValue: "0", isPositive: true } }
-    },
-    year: {
-      budget: { value: "R$ 1.800.000,00", trend: { value: "18%", absoluteValue: "R$ 274.500", isPositive: true } },
-      realized: { value: "R$ 1.125.000,00", trend: { value: "14%", absoluteValue: "R$ 138.200", isPositive: true } },
-      available: { value: "R$ 675.000,00", trend: { value: "10%", absoluteValue: "R$ 61.400", isPositive: false } },
-      variation: { value: "62,5%", trend: { value: "4%", absoluteValue: "0", isPositive: true } }
-    },
-    ytd: {
-      budget: { value: "R$ 900.000,00", trend: { value: "16%", absoluteValue: "R$ 124.100", isPositive: true } },
-      realized: { value: "R$ 562.500,00", trend: { value: "11%", absoluteValue: "R$ 55.700", isPositive: true } },
-      available: { value: "R$ 337.500,00", trend: { value: "7%", absoluteValue: "R$ 22.000", isPositive: false } },
-      variation: { value: "62,5%", trend: { value: "2%", absoluteValue: "0", isPositive: true } }
-    }
-  };
-  return data[period];
+// Helper functions for real transactions
+const getIconForType = (level1Group?: string) => {
+  if (level1Group === "Receita Bruta") {
+    return <ArrowUp className="h-4 w-4 text-green-600" />;
+  } else if (level1Group === "Marketing") {
+    return <Megaphone className="h-4 w-4 text-gray-500" />;
+  } else {
+    return <ArrowDown className="h-4 w-4 text-red-600" />;
+  }
+};
+
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(Math.abs(value));
+};
+
+const formatTransactionDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('pt-BR');
+};
+
+const getDisplayValue = (transaction: DashboardTransaction) => {
+  const isReceitaBruta = transaction.level_1_group === "Receita Bruta";
+  const absoluteValue = Math.abs(Number(transaction.amount));
+  
+  if (isReceitaBruta) {
+    return {
+      value: absoluteValue,
+      isPositive: true,
+      colorClass: "text-sicofe-green"
+    };
+  } else {
+    return {
+      value: -absoluteValue,
+      isPositive: false,
+      colorClass: "text-sicofe-red"
+    };
+  }
 };
 
 const tooltips = {
@@ -57,116 +69,28 @@ interface LancamentoDetalheType {
   observacoes: string;
 }
 
-// Interface matching the Lancamentos page
-interface Lancamento {
-  id: string;
-  data: string;
-  empresa: string;
-  conta: string;
-  descricao: string;
-  valor: number;
-  observacoes: string;
-  competencia: string[];
-  grupoContas1?: string;
-}
-
-// Same mock data as in Lancamentos page
-const allLancamentos: Lancamento[] = [
-  {
-    id: "1",
-    data: "15/12/2024",
-    empresa: "SICOFE LTDA",
-    conta: "Receitas com Visa Crédito",
-    descricao: "Vendas dezembro",
-    valor: 25000.00,
-    observacoes: "",
-    competencia: ["dez"],
-    grupoContas1: "Receita Bruta"
-  },
-  {
-    id: "2",
-    data: "14/12/2024",
-    empresa: "SICOFE LTDA",
-    conta: "Salários e Ordenados",
-    descricao: "Folha de pagamento",
-    valor: 15500.00,
-    observacoes: "",
-    competencia: ["dez"],
-    grupoContas1: "SG&A"
-  },
-  {
-    id: "3",
-    data: "13/11/2024",
-    empresa: "Examine Loja 1",
-    conta: "Receitas com Visa Crédito",
-    descricao: "Vendas novembro",
-    valor: 18000.00,
-    observacoes: "",
-    competencia: ["nov"],
-    grupoContas1: "Receita Bruta"
-  }
-];
-
-const getIconForType = (grupoContas1?: string) => {
-  if (grupoContas1 === "Receita Bruta") {
-    return <ArrowUp className="h-4 w-4 text-green-600" />;
-  } else if (grupoContas1 === "Marketing") {
-    return <Megaphone className="h-4 w-4 text-gray-500" />;
-  } else {
-    return <ArrowDown className="h-4 w-4 text-red-600" />;
-  }
-};
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(Math.abs(value));
-};
-
-const getDisplayValue = (lancamento: Lancamento) => {
-  const isReceitaBruta = lancamento.grupoContas1 === "Receita Bruta";
-  const absoluteValue = Math.abs(lancamento.valor);
-  
-  if (isReceitaBruta) {
-    return {
-      value: absoluteValue,
-      isPositive: true,
-      colorClass: "text-sicofe-green"
-    };
-  } else {
-    return {
-      value: -absoluteValue,
-      isPositive: false,
-      colorClass: "text-sicofe-red"
-    };
-  }
-};
-
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month');
   const [selectedLancamento, setSelectedLancamento] = useState<LancamentoDetalheType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  const kpiData = getKPIData(selectedPeriod);
+  
+  // Usar hooks para dados do Supabase
+  const { data: kpiData, isLoading: kpiLoading } = useDashboardKPIs(selectedPeriod);
+  const { data: transactions = [], isLoading: transactionsLoading } = useDashboardTransactions(10);
 
-  // Sort by date descending and get the 10 most recent
-  const recentTransactions = [...allLancamentos]
-    .sort((a, b) => new Date(b.data.split('/').reverse().join('-')).getTime() - new Date(a.data.split('/').reverse().join('-')).getTime())
-    .slice(0, 10);
-
-  const handleLancamentoClick = (lancamento: Lancamento) => {
+  const handleLancamentoClick = (transaction: DashboardTransaction) => {
     // Convert to the format expected by LancamentoDetalhe
     const lancamentoForModal: LancamentoDetalheType = {
-      id: lancamento.id,
-      data: lancamento.data,
-      tipo: lancamento.grupoContas1 === "Receita Bruta" ? 'receita' as const : 
-            lancamento.grupoContas1 === "Marketing" ? 'marketing' as const : 'despesa' as const,
-      descricao: lancamento.descricao,
-      valor: lancamento.valor,
-      empresa: lancamento.empresa,
-      centroCusto: lancamento.conta,
-      observacoes: lancamento.observacoes
+      id: transaction.id,
+      data: formatTransactionDate(transaction.transaction_date),
+      tipo: transaction.level_1_group === "Receita Bruta" ? 'receita' as const : 
+            transaction.level_1_group === "Marketing" ? 'marketing' as const : 'despesa' as const,
+      descricao: transaction.description || 'Sem descrição',
+      valor: Number(transaction.amount),
+      empresa: transaction.companies?.name || 'Empresa não encontrada',
+      centroCusto: transaction.analytical_account,
+      observacoes: transaction.observations || ''
     };
     
     setSelectedLancamento(lancamentoForModal);
@@ -196,33 +120,54 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatsCard
-          title="Orçamento Total"
-          value={kpiData.budget.value}
-          icon={DollarSign}
-          tooltip={tooltips.budget}
-          trend={kpiData.budget.trend}
-        />
-        <StatsCard
-          title="Realizado"
-          value={kpiData.realized.value}
-          icon={TrendingUp}
-          tooltip={tooltips.realized}
-          trend={kpiData.realized.trend}
-        />
-        <StatsCard
-          title="Disponível"
-          value={kpiData.available.value}
-          icon={PieChart}
-          tooltip={tooltips.available}
-          trend={kpiData.available.trend}
-        />
-        <StatsCard
-          title="Variação"
-          value={kpiData.variation.value}
-          icon={TrendingDown}
-          tooltip={tooltips.variation}
-        />
+        {kpiLoading ? (
+          // Loading skeleton for KPIs
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-pulse">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-4 bg-gray-300 rounded w-20"></div>
+                <div className="h-5 w-5 bg-gray-300 rounded"></div>
+              </div>
+              <div className="h-8 bg-gray-300 rounded w-24 mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded w-32"></div>
+            </div>
+          ))
+        ) : kpiData ? (
+          <>
+            <StatsCard
+              title="Orçamento Total"
+              value={kpiData.budget.value}
+              icon={DollarSign}
+              tooltip={tooltips.budget}
+              trend={kpiData.budget.trend}
+            />
+            <StatsCard
+              title="Realizado"
+              value={kpiData.realized.value}
+              icon={TrendingUp}
+              tooltip={tooltips.realized}
+              trend={kpiData.realized.trend}
+            />
+            <StatsCard
+              title="Disponível"
+              value={kpiData.available.value}
+              icon={PieChart}
+              tooltip={tooltips.available}
+              trend={kpiData.available.trend}
+            />
+            <StatsCard
+              title="Variação"
+              value={kpiData.variation.value}
+              icon={TrendingDown}
+              tooltip={tooltips.variation}
+            />
+          </>
+        ) : (
+          // Error state
+          <div className="col-span-4 text-center py-8">
+            <span className="text-sicofe-gray">Erro ao carregar indicadores</span>
+          </div>
+        )}
       </div>
 
       {/* Charts and Additional Content */}
@@ -234,27 +179,41 @@ export default function Dashboard() {
             Últimos Lançamentos
           </h3>
           <div className="space-y-2">
-            {recentTransactions.map((transaction) => {
-              const displayValue = getDisplayValue(transaction);
-              return (
-                <div 
-                  key={transaction.id}
-                  className="flex justify-between items-center py-3 px-2 border-b border-gray-100 last:border-b-0 hover:bg-blue-50 rounded-sm cursor-pointer transition-colors"
-                  onClick={() => handleLancamentoClick(transaction)}
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    {getIconForType(transaction.grupoContas1)}
-                    <div className="flex flex-col">
-                      <span className="text-xs text-gray-500 font-medium">{transaction.data}</span>
-                      <span className="text-sm text-sicofe-gray-dark">{transaction.descricao}</span>
+            {transactionsLoading ? (
+              <div className="text-center py-4">
+                <span className="text-sicofe-gray">Carregando...</span>
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-4">
+                <span className="text-sicofe-gray">Nenhum lançamento encontrado</span>
+              </div>
+            ) : (
+              transactions.map((transaction) => {
+                const displayValue = getDisplayValue(transaction);
+                return (
+                  <div 
+                    key={transaction.id}
+                    className="flex justify-between items-center py-3 px-2 border-b border-gray-100 last:border-b-0 hover:bg-blue-50 rounded-sm cursor-pointer transition-colors"
+                    onClick={() => handleLancamentoClick(transaction)}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      {getIconForType(transaction.level_1_group)}
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-500 font-medium">
+                          {formatTransactionDate(transaction.transaction_date)}
+                        </span>
+                        <span className="text-sm text-sicofe-gray-dark">
+                          {transaction.description || 'Sem descrição'}
+                        </span>
+                      </div>
                     </div>
+                    <span className={`text-sm font-medium ${displayValue.colorClass}`}>
+                      {displayValue.isPositive ? '+' : '-'}{formatCurrency(displayValue.value)}
+                    </span>
                   </div>
-                  <span className={`text-sm font-medium ${displayValue.colorClass}`}>
-                    {displayValue.isPositive ? '+' : '-'}{formatCurrency(displayValue.value)}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
           
           <div className="mt-4 pt-3 border-t border-gray-200">
