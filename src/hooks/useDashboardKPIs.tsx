@@ -13,8 +13,9 @@ export function useDashboardKPIs(period: PeriodType) {
   return useQuery({
     queryKey: ['dashboard-kpis', period],
     queryFn: async (): Promise<KPIData> => {
-      // Obter dados das transações
-      const { data: transactions, error } = await supabase
+      try {
+        // Obter dados das transações
+        const { data: transactions, error } = await supabase
         .from('transactions')
         .select('*')
         .order('transaction_date', { ascending: false });
@@ -147,6 +148,28 @@ export function useDashboardKPIs(period: PeriodType) {
           trend: variationTrend
         }
       };
+      } catch (error) {
+        console.error('Error calculating KPIs:', error);
+        // Retornar valores padrão em caso de erro
+        return {
+          budget: {
+            value: 'R$ 0,00',
+            trend: { value: '0%', absoluteValue: '0', isPositive: false }
+          },
+          realized: {
+            value: 'R$ 0,00',
+            trend: { value: '0%', absoluteValue: '0', isPositive: false }
+          },
+          available: {
+            value: 'R$ 0,00',
+            trend: { value: '0%', absoluteValue: '0', isPositive: false }
+          },
+          variation: {
+            value: '0%',
+            trend: { value: '0%', absoluteValue: '0', isPositive: false }
+          }
+        };
+      }
     }
   });
 }

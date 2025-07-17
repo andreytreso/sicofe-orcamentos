@@ -132,7 +132,7 @@ export default function Dashboard() {
               <div className="h-3 bg-gray-300 rounded w-32"></div>
             </div>
           ))
-        ) : kpiData ? (
+        ) : kpiData && kpiData.budget && kpiData.realized && kpiData.available && kpiData.variation ? (
           <>
             <StatsCard
               title="Orçamento Total"
@@ -163,9 +163,9 @@ export default function Dashboard() {
             />
           </>
         ) : (
-          // Error state
+          // Error state or no data
           <div className="col-span-4 text-center py-8">
-            <span className="text-sicofe-gray">Erro ao carregar indicadores</span>
+            <span className="text-sicofe-gray">Nenhum dado disponível para o período selecionado</span>
           </div>
         )}
       </div>
