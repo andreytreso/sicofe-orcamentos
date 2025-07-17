@@ -132,6 +132,59 @@ export type Database = {
           },
         ]
       }
+      budgets: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          period_end: string
+          period_start: string
+          planned_amount: number
+          progress: number
+          realized_amount: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          period_end: string
+          period_start: string
+          planned_amount?: number
+          progress?: number
+          realized_amount?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          period_end?: string
+          period_start?: string
+          planned_amount?: number
+          progress?: number
+          realized_amount?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string

@@ -3,58 +3,53 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Calculator, Calendar, TrendingUp, TrendingDown, Eye, MoreVertical } from "lucide-react";
+import { Plus, Calculator, Calendar, TrendingUp, TrendingDown, Eye, MoreVertical, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useBudgets } from "@/hooks/useBudgets";
 
-const orcamentosData = [
-  {
-    id: 1,
-    nome: "Orçamento Q2 2024",
-    empresa: "Tech Solutions LTDA",
-    periodo: "Abr - Jun 2024",
-    planejado: 180000,
-    realizado: 165000,
-    status: "ativo",
-    progresso: 91.7
-  },
-  {
-    id: 2,
-    nome: "Plano Anual 2024",
-    empresa: "Marketing Digital S/A",
-    periodo: "Jan - Dez 2024",
-    planejado: 720000,
-    realizado: 320000,
-    status: "ativo",
-    progresso: 44.4
-  },
-  {
-    id: 3,
-    nome: "Expansão Filial",
-    empresa: "E-commerce Brasil",
-    periodo: "Mar - Ago 2024",
-    planejado: 450000,
-    realizado: 380000,
-    status: "ativo",
-    progresso: 84.4
-  },
-  {
-    id: 4,
-    nome: "Orçamento Q1 2024",
-    empresa: "Consultoria Financeira",
-    periodo: "Jan - Mar 2024",
-    planejado: 120000,
-    realizado: 118000,
-    status: "concluido",
-    progresso: 98.3
-  }
-];
+// Removed mock data - now using real data from Supabase
 
 export default function Orcamentos() {
+  const { data: budgets = [], isLoading } = useBudgets();
+  
+  const activeBudgets = budgets.filter(budget => budget.status === 'active');
+  const totalPlanned = budgets.reduce((sum, budget) => sum + budget.planned_amount, 0);
+  const totalRealized = budgets.reduce((sum, budget) => sum + budget.realized_amount, 0);
+  const variation = totalPlanned > 0 ? ((totalRealized - totalPlanned) / totalPlanned) * 100 : 0;
+
+  const formatCurrency = (value: number): string => {
+    if (value >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `R$ ${(value / 1000).toFixed(0)}K`;
+    }
+    return `R$ ${value.toLocaleString('pt-BR')}`;
+  };
+
+  const formatPeriod = (start: string, end: string): string => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const startMonth = startDate.toLocaleDateString('pt-BR', { month: 'short' });
+    const endMonth = endDate.toLocaleDateString('pt-BR', { month: 'short' });
+    const year = startDate.getFullYear();
+    return `${startMonth} - ${endMonth} ${year}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-sicofe-blue" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -76,7 +71,7 @@ export default function Orcamentos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Total Planejado</p>
-                <p className="text-2xl font-bold text-sicofe-navy">R$ 1.47M</p>
+                <p className="text-2xl font-bold text-sicofe-navy">{formatCurrency(totalPlanned)}</p>
               </div>
               <Calculator className="h-8 w-8 text-sicofe-blue" />
             </div>
@@ -88,7 +83,7 @@ export default function Orcamentos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Total Realizado</p>
-                <p className="text-2xl font-bold text-sicofe-navy">R$ 983K</p>
+                <p className="text-2xl font-bold text-sicofe-navy">{formatCurrency(totalRealized)}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-sicofe-green" />
             </div>
@@ -100,7 +95,9 @@ export default function Orcamentos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Variação</p>
-                <p className="text-2xl font-bold text-sicofe-red">-33.1%</p>
+                <p className={`text-2xl font-bold ${variation >= 0 ? 'text-sicofe-green' : 'text-sicofe-red'}`}>
+                  {variation >= 0 ? '+' : ''}{variation.toFixed(1)}%
+                </p>
               </div>
               <TrendingDown className="h-8 w-8 text-sicofe-red" />
             </div>
@@ -112,7 +109,7 @@ export default function Orcamentos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Orçamentos Ativos</p>
-                <p className="text-2xl font-bold text-sicofe-navy">3</p>
+                <p className="text-2xl font-bold text-sicofe-navy">{activeBudgets.length}</p>
               </div>
               <Calendar className="h-8 w-8 text-sicofe-blue" />
             </div>
@@ -126,72 +123,79 @@ export default function Orcamentos() {
           <CardTitle className="text-sicofe-navy">Lista de Orçamentos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            {orcamentosData.map((orcamento) => (
-              <div
-                key={orcamento.id}
-                className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-sicofe-navy">{orcamento.nome}</h3>
-                    <p className="text-sm text-sicofe-gray">{orcamento.empresa}</p>
-                    <p className="text-sm text-sicofe-gray">{orcamento.periodo}</p>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Badge 
-                      variant={orcamento.status === 'ativo' ? 'default' : 'secondary'}
-                      className={orcamento.status === 'ativo' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}
-                    >
-                      {orcamento.status === 'ativo' ? 'Ativo' : 'Concluído'}
-                    </Badge>
+          {budgets.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sicofe-gray">Nenhum orçamento encontrado</p>
+              <p className="text-sm text-sicofe-gray mt-1">Crie seu primeiro orçamento para começar</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {budgets.map((budget) => (
+                <div
+                  key={budget.id}
+                  className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-sicofe-navy">{budget.name}</h3>
+                      <p className="text-sm text-sicofe-gray">{budget.companies?.name || 'Empresa não informada'}</p>
+                      <p className="text-sm text-sicofe-gray">{formatPeriod(budget.period_start, budget.period_end)}</p>
+                    </div>
                     
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-white">
-                        <DropdownMenuItem className="cursor-pointer">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver Detalhes
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center space-x-3">
+                      <Badge 
+                        variant={budget.status === 'active' ? 'default' : 'secondary'}
+                        className={budget.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}
+                      >
+                        {budget.status === 'active' ? 'Ativo' : budget.status === 'completed' ? 'Concluído' : 'Cancelado'}
+                      </Badge>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white">
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalhes
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm font-medium text-sicofe-gray">Planejado</p>
-                    <p className="text-xl font-bold text-sicofe-navy">
-                      R$ {orcamento.planejado.toLocaleString()}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <p className="text-sm font-medium text-sicofe-gray">Planejado</p>
+                      <p className="text-xl font-bold text-sicofe-navy">
+                        {formatCurrency(budget.planned_amount)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-sicofe-gray">Realizado</p>
+                      <p className="text-xl font-bold text-sicofe-green">
+                        {formatCurrency(budget.realized_amount)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-sicofe-gray">Progresso</p>
+                      <p className="text-xl font-bold text-sicofe-blue">{budget.progress.toFixed(1)}%</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-sicofe-gray">Realizado</p>
-                    <p className="text-xl font-bold text-sicofe-green">
-                      R$ {orcamento.realizado.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-sicofe-gray">Progresso</p>
-                    <p className="text-xl font-bold text-sicofe-blue">{orcamento.progresso}%</p>
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-sicofe-gray">Execução do orçamento</span>
-                    <span className="text-sicofe-navy font-medium">{orcamento.progresso}%</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-sicofe-gray">Execução do orçamento</span>
+                      <span className="text-sicofe-navy font-medium">{budget.progress.toFixed(1)}%</span>
+                    </div>
+                    <Progress value={budget.progress} className="h-2" />
                   </div>
-                  <Progress value={orcamento.progresso} className="h-2" />
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -4,6 +4,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, ReferenceLine, Cell } from "recharts";
 import { PeriodType } from "./PeriodSelector";
 import { useNavigate } from "react-router-dom";
+import { useChartData } from "@/hooks/useChartData";
+import { Loader2 } from "lucide-react";
 interface ChartDataPoint {
   month: string;
   receitas: number;
@@ -32,62 +34,7 @@ const chartConfig = {
   }
 };
 
-// Mock data expandido com metas
-const getChartData = (period: PeriodType): ChartDataPoint[] => {
-  const baseData = [{
-    month: "Jan",
-    receitas: 45000,
-    despesas: 32000,
-    meta: 35000,
-    monthKey: "01-2024"
-  }, {
-    month: "Fev",
-    receitas: 52000,
-    despesas: 38000,
-    meta: 40000,
-    monthKey: "02-2024"
-  }, {
-    month: "Mar",
-    receitas: 48000,
-    despesas: 35000,
-    meta: 38000,
-    monthKey: "03-2024"
-  }, {
-    month: "Abr",
-    receitas: 61000,
-    despesas: 42000,
-    meta: 45000,
-    monthKey: "04-2024"
-  }, {
-    month: "Mai",
-    receitas: 55000,
-    despesas: 40000,
-    meta: 42000,
-    monthKey: "05-2024"
-  }, {
-    month: "Jun",
-    receitas: 67000,
-    despesas: 45000,
-    meta: 48000,
-    monthKey: "06-2024"
-  }];
-
-  // Calcular dados acumulados
-  let receitasAcum = 0;
-  let despesasAcum = 0;
-  let metaAcum = 0;
-  return baseData.map(item => {
-    receitasAcum += item.receitas;
-    despesasAcum += item.despesas;
-    metaAcum += item.meta;
-    return {
-      ...item,
-      receitasAcum,
-      despesasAcum,
-      metaAcum
-    };
-  });
-};
+// Removed mock data - now using real data from Supabase
 const formatCurrency = (value: number): string => {
   if (value >= 1000000) {
     return `R$ ${(value / 1000000).toFixed(1)}M`;
@@ -125,7 +72,7 @@ export function ReceitasDespesasChart({
 }: ReceitasDespesasChartProps) {
   const [viewMode, setViewMode] = useState<'monthly' | 'ytd'>('monthly');
   const navigate = useNavigate();
-  const chartData = getChartData(selectedPeriod);
+  const { data: chartData = [], isLoading } = useChartData(selectedPeriod);
   const handleBarClick = (data: ChartDataPoint) => {
     navigate(`/analise-detalhada?mes=${data.monthKey}`);
   };
@@ -220,6 +167,14 @@ export function ReceitasDespesasChart({
       cursor: 'pointer'
     }} />
     </LineChart>;
+  if (isLoading) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center h-80">
+        <Loader2 className="h-6 w-6 animate-spin text-sicofe-blue" />
+      </div>
+    );
+  }
+
   return <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       {/* Estilos CSS customizados para remover fundo amarelo */}
       <style dangerouslySetInnerHTML={{
