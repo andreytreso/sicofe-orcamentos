@@ -1,27 +1,22 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Calculator, Calendar, TrendingUp, TrendingDown, Eye, MoreVertical, Loader2 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useBudgets } from "@/hooks/useBudgets";
 
 // Removed mock data - now using real data from Supabase
 
 export default function Orcamentos() {
-  const { data: budgets = [], isLoading } = useBudgets();
-  
+  const {
+    data: budgets = [],
+    isLoading
+  } = useBudgets();
   const activeBudgets = budgets.filter(budget => budget.status === 'active');
   const totalPlanned = budgets.reduce((sum, budget) => sum + budget.planned_amount, 0);
   const totalRealized = budgets.reduce((sum, budget) => sum + budget.realized_amount, 0);
-  const variation = totalPlanned > 0 ? ((totalRealized - totalPlanned) / totalPlanned) * 100 : 0;
-
+  const variation = totalPlanned > 0 ? (totalRealized - totalPlanned) / totalPlanned * 100 : 0;
   const formatCurrency = (value: number): string => {
     if (value >= 1000000) {
       return `R$ ${(value / 1000000).toFixed(1)}M`;
@@ -30,35 +25,33 @@ export default function Orcamentos() {
     }
     return `R$ ${value.toLocaleString('pt-BR')}`;
   };
-
   const formatPeriod = (start: string, end: string): string => {
     const startDate = new Date(start);
     const endDate = new Date(end);
-    const startMonth = startDate.toLocaleDateString('pt-BR', { month: 'short' });
-    const endMonth = endDate.toLocaleDateString('pt-BR', { month: 'short' });
+    const startMonth = startDate.toLocaleDateString('pt-BR', {
+      month: 'short'
+    });
+    const endMonth = endDate.toLocaleDateString('pt-BR', {
+      month: 'short'
+    });
     const year = startDate.getFullYear();
     return `${startMonth} - ${endMonth} ${year}`;
   };
-
   if (isLoading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="flex justify-center items-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-sicofe-blue" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-sicofe-navy">Orçamentos</h1>
           <p className="text-sicofe-gray mt-1">Gerencie todos os orçamentos das suas empresas</p>
         </div>
-        <Button className="sicofe-gradient hover:opacity-90 transition-opacity">
+        <Button className="sicofe-gradient hover:opacity-90 transition-opacity text-white">
           <Plus className="h-4 w-4 mr-2" />
           Novo Orçamento
         </Button>
@@ -123,18 +116,11 @@ export default function Orcamentos() {
           <CardTitle className="text-sicofe-navy">Lista de Orçamentos</CardTitle>
         </CardHeader>
         <CardContent>
-          {budgets.length === 0 ? (
-            <div className="text-center py-8">
+          {budgets.length === 0 ? <div className="text-center py-8">
               <p className="text-sicofe-gray">Nenhum orçamento encontrado</p>
               <p className="text-sm text-sicofe-gray mt-1">Crie seu primeiro orçamento para começar</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {budgets.map((budget) => (
-                <div
-                  key={budget.id}
-                  className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
+            </div> : <div className="space-y-6">
+              {budgets.map(budget => <div key={budget.id} className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-sicofe-navy">{budget.name}</h3>
@@ -143,10 +129,7 @@ export default function Orcamentos() {
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      <Badge 
-                        variant={budget.status === 'active' ? 'default' : 'secondary'}
-                        className={budget.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}
-                      >
+                      <Badge variant={budget.status === 'active' ? 'default' : 'secondary'} className={budget.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}>
                         {budget.status === 'active' ? 'Ativo' : budget.status === 'completed' ? 'Concluído' : 'Cancelado'}
                       </Badge>
                       
@@ -192,12 +175,9 @@ export default function Orcamentos() {
                     </div>
                     <Progress value={budget.progress} className="h-2" />
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
