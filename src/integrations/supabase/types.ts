@@ -134,8 +134,11 @@ export type Database = {
       }
       budgets: {
         Row: {
+          actual_amount: number | null
           company_id: string
           created_at: string
+          description: string | null
+          end_date: string | null
           id: string
           name: string
           period_end: string
@@ -143,13 +146,17 @@ export type Database = {
           planned_amount: number
           progress: number
           realized_amount: number
+          start_date: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          actual_amount?: number | null
           company_id: string
           created_at?: string
+          description?: string | null
+          end_date?: string | null
           id?: string
           name: string
           period_end: string
@@ -157,13 +164,17 @@ export type Database = {
           planned_amount?: number
           progress?: number
           realized_amount?: number
+          start_date?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          actual_amount?: number | null
           company_id?: string
           created_at?: string
+          description?: string | null
+          end_date?: string | null
           id?: string
           name?: string
           period_end?: string
@@ -171,6 +182,7 @@ export type Database = {
           planned_amount?: number
           progress?: number
           realized_amount?: number
+          start_date?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -185,32 +197,128 @@ export type Database = {
           },
         ]
       }
-      companies: {
+      categories: {
         Row: {
           created_at: string
-          grupo: string | null
           id: string
           name: string
-          status: string
+          type: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          grupo?: string | null
           id?: string
           name: string
-          status?: string
+          type: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      companies: {
+        Row: {
+          cnpj: string | null
+          created_at: string
+          email: string | null
+          endereco_cep: string | null
+          endereco_cidade: string | null
+          endereco_estado: string | null
+          endereco_numero: string | null
+          endereco_rua: string | null
+          grupo: string | null
+          id: string
+          name: string
+          status: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco_cep?: string | null
+          endereco_cidade?: string | null
+          endereco_estado?: string | null
+          endereco_numero?: string | null
+          endereco_rua?: string | null
+          grupo?: string | null
+          id?: string
+          name: string
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco_cep?: string | null
+          endereco_cidade?: string | null
+          endereco_estado?: string | null
+          endereco_numero?: string | null
+          endereco_rua?: string | null
           grupo?: string | null
           id?: string
           name?: string
           status?: string
+          telefone?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      entries: {
+        Row: {
+          amount: number
+          budget_id: string
+          category_id: string
+          created_at: string
+          description: string | null
+          entry_date: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          budget_id: string
+          category_id: string
+          created_at?: string
+          description?: string | null
+          entry_date: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          budget_id?: string
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          entry_date?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entries_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

@@ -1,17 +1,28 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Building2, Users, Calendar, MoreVertical, Edit, Trash2, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useCompanies } from '@/hooks/useCompanies';
+import { useCompaniesTable, useBudgetsTable } from '@/hooks/useSupabaseTable';
+import { NovaEmpresaModal } from '@/components/NovaEmpresaModal';
+import { format } from 'date-fns';
+interface Company {
+  id: string;
+  name: string;
+  status: string;
+  grupo?: string;
+  created_at: string;
+}
+
 export default function Empresas() {
-  const {
-    data: companies = [],
-    isLoading
-  } = useCompanies();
-  const activeCompanies = companies.filter(company => company.status === 'active');
-  const totalUsers = 0; // TODO: Implement user count
-  const totalBudgets = 0; // TODO: Implement budget count
+  const [modalOpen, setModalOpen] = useState(false);
+  const { data: companies = [], isLoading } = useCompaniesTable();
+  const { data: budgets = [] } = useBudgetsTable();
+  
+  const companiesData = companies as Company[];
+  const activeCompanies = companiesData.filter(company => company.status === 'active');
+  const activeBudgets = budgets.filter((budget: any) => budget.status === 'ativo');
 
   if (isLoading) {
     return <div className="space-y-6 animate-fade-in">
@@ -27,7 +38,10 @@ export default function Empresas() {
           <h1 className="text-3xl font-bold text-sicofe-navy">Empresas</h1>
           <p className="text-sicofe-gray mt-1">Gerencie todas as empresas do seu sistema</p>
         </div>
-        <Button className="sicofe-gradient hover:opacity-90 transition-opacity text-white">
+        <Button 
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          onClick={() => setModalOpen(true)}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Nova Empresa
         </Button>
@@ -43,7 +57,7 @@ export default function Empresas() {
               </div>
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Total de Empresas</p>
-                <p className="text-2xl font-bold text-sicofe-navy">{companies.length}</p>
+                <p className="text-2xl font-bold text-primary">{companiesData.length}</p>
               </div>
             </div>
           </CardContent>
@@ -57,7 +71,7 @@ export default function Empresas() {
               </div>
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Empresas Ativas</p>
-                <p className="text-2xl font-bold text-sicofe-navy">{activeCompanies.length}</p>
+                <p className="text-2xl font-bold text-accent">{activeCompanies.length}</p>
               </div>
             </div>
           </CardContent>
@@ -71,7 +85,7 @@ export default function Empresas() {
               </div>
               <div>
                 <p className="text-sm font-medium text-sicofe-gray">Orçamentos Ativos</p>
-                <p className="text-2xl font-bold text-sicofe-navy">{totalBudgets}</p>
+                <p className="text-2xl font-bold text-primary">{activeBudgets.length}</p>
               </div>
             </div>
           </CardContent>
@@ -85,49 +99,65 @@ export default function Empresas() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {companies.map(empresa => <div key={empresa.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 sicofe-gradient rounded-lg flex items-center justify-center">
-                    <Building2 className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sicofe-navy">{empresa.name}</h3>
-                    <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-sm text-sicofe-gray">0 orçamentos</span>
-                      <span className="text-sm text-sicofe-gray">0 usuários</span>
-                      <span className="text-sm text-sicofe-gray">
-                        Criado em {new Date(empresa.created_at).toLocaleDateString('pt-BR')}
-                      </span>
+            {companiesData.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Nenhuma empresa encontrada – Cadastre sua primeira empresa</p>
+              </div>
+            ) : (
+              companiesData.map(empresa => (
+                <div key={empresa.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary">{empresa.name}</h3>
+                      <div className="flex items-center space-x-4 mt-1">
+                        <span className="text-sm text-muted-foreground">
+                          {empresa.grupo || 'Sem grupo'}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          Criado em {format(new Date(empresa.created_at), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <Badge variant={empresa.status === 'active' ? 'default' : 'secondary'} className={empresa.status === 'active' ? 'bg-sicofe-green hover:bg-sicofe-green' : ''}>
-                    {empresa.status === 'active' ? 'Ativa' : 'Inativa'}
-                  </Badge>
                   
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white">
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer text-red-600">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center space-x-3">
+                    <Badge 
+                      className={empresa.status === 'active' 
+                        ? 'bg-accent text-accent-foreground' 
+                        : 'bg-secondary text-secondary-foreground'
+                      }
+                    >
+                      {empresa.status === 'active' ? 'Ativa' : 'Inativa'}
+                    </Badge>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-white">
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-              </div>)}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
+
+      <NovaEmpresaModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>;
 }
