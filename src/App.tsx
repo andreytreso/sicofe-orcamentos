@@ -11,6 +11,10 @@ import Empresas from "./pages/Empresas";
 import Orcamentos from "./pages/Orcamentos";
 import Lancamentos from "./pages/Lancamentos";
 import Aprovacoes from "./pages/Aprovacoes";
+import PlanoContas from "./pages/PlanoContas";
+import Fornecedores from "./pages/Fornecedores";
+import CentrosCusto from "./pages/CentrosCusto";
+import Usuarios from "./pages/Usuarios";
 import Login from "./pages/Login";
 import UserRegister from "./pages/UserRegister";
 import NotFound from "./pages/NotFound";
@@ -34,6 +38,10 @@ const App = () => (
                 <Route path="/orcamentos" element={<Orcamentos />} />
                 <Route path="/lancamentos" element={<Lancamentos />} />
                 <Route path="/aprovacoes" element={<Aprovacoes />} />
+                <Route path="/cadastros/plano-contas" element={<PlanoContas />} />
+                <Route path="/cadastros/fornecedores" element={<Fornecedores />} />
+                <Route path="/cadastros/centros-custo" element={<CentrosCusto />} />
+                <Route path="/cadastros/usuarios" element={<Usuarios />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
