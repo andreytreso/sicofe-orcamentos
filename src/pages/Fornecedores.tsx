@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { useSupabaseTable } from "@/hooks/useSupabaseTable";
-
 interface Supplier {
   id: string;
   name: string;
@@ -15,39 +14,38 @@ interface Supplier {
   company_id: string;
   created_at: string;
 }
-
 export default function Fornecedores() {
   const [showModal, setShowModal] = useState(false);
-  const { data: suppliers, isLoading } = useSupabaseTable<Supplier>('suppliers', {
-    orderBy: { column: 'name', ascending: true }
+  const {
+    data: suppliers,
+    isLoading
+  } = useSupabaseTable<Supplier>('suppliers', {
+    orderBy: {
+      column: 'name',
+      ascending: true
+    }
   });
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
+    return <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Fornecedores</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-sicofe-navy">Fornecedores</h1>
+          <p className="text-sicofe-gray">
             Gerencie os fornecedores das empresas
           </p>
         </div>
-        <Button onClick={() => setShowModal(true)}>
+        <Button onClick={() => setShowModal(true)} className="text-white bg-sicofe-blue">
           <Plus className="mr-2 h-4 w-4" />
           Novo Fornecedor
         </Button>
       </div>
 
       <div className="grid gap-4">
-        {suppliers?.map((supplier) => (
-          <Card key={supplier.id} className="hover:shadow-md transition-shadow">
+        {suppliers?.map(supplier => <Card key={supplier.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
@@ -60,17 +58,13 @@ export default function Fornecedores() {
                 </div>
               </div>
             </CardHeader>
-          </Card>
-        ))}
+          </Card>)}
       </div>
 
-      {suppliers?.length === 0 && (
-        <Card>
+      {suppliers?.length === 0 && <Card>
           <CardContent className="text-center py-8">
-            <p className="text-muted-foreground">Nenhum fornecedor encontrado</p>
+            <p className="text-sicofe-gray">Nenhum fornecedor encontrado</p>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 }
