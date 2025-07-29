@@ -50,7 +50,7 @@ export function LancamentoDetalhe({ lancamento, isOpen, onClose }: LancamentoDet
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-white border-gray-200 focus:outline-none">
+      <DialogContent className="sm:max-w-lg bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {getIconForType(lancamento.tipo)}
