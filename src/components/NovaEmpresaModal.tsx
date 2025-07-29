@@ -65,8 +65,8 @@ export function NovaEmpresaModal({
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-2 gap-4 bg-transparent">
+            <div className="bg-white">
               <Label htmlFor="name">Nome da Empresa *</Label>
               <Input {...register('name')} placeholder="Nome da empresa" />
               {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
@@ -74,7 +74,7 @@ export function NovaEmpresaModal({
 
             <div>
               <Label htmlFor="grupo">Grupo</Label>
-              <Input {...register('grupo')} placeholder="Grupo da empresa" />
+              <Input placeholder="Grupo da empresa" className="bg-white" />
             </div>
           </div>
 
@@ -91,7 +91,7 @@ export function NovaEmpresaModal({
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="active">Ativo</SelectItem>
                   <SelectItem value="inactive">Inativo</SelectItem>
                 </SelectContent>
@@ -100,7 +100,7 @@ export function NovaEmpresaModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 bg-white">
             <div>
               <Label htmlFor="email">E-mail *</Label>
               <Input type="email" {...register('email')} placeholder="empresa@exemplo.com" />
@@ -108,20 +108,20 @@ export function NovaEmpresaModal({
             </div>
 
             <div>
-              <Label htmlFor="telefone">Telefone *</Label>
+              <Label htmlFor="telefone" className="bg-white">Telefone *</Label>
               <Input {...register('telefone')} placeholder="(11) 99999-9999" />
-              {errors.telefone && <p className="text-sm text-destructive mt-1">{errors.telefone.message}</p>}
+              {errors.telefone && <p className="text-sm text-destructive mt-1 bg-white">{errors.telefone.message}</p>}
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-primary">Endereço</h3>
+            <h3 className="text-lg font-medium text-primary bg-white">Endereço</h3>
             
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
                 <Label htmlFor="endereco_rua">Rua *</Label>
                 <Input {...register('endereco_rua')} placeholder="Nome da rua" />
-                {errors.endereco_rua && <p className="text-sm text-destructive mt-1">{errors.endereco_rua.message}</p>}
+                {errors.endereco_rua && <p className="text-sm mt-1 text-white bg-sicofe-blue">{errors.endereco_rua.message}</p>}
               </div>
 
               <div>
