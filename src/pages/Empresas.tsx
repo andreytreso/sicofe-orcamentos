@@ -14,16 +14,18 @@ interface Company {
   grupo?: string;
   created_at: string;
 }
-
 export default function Empresas() {
   const [modalOpen, setModalOpen] = useState(false);
-  const { data: companies = [], isLoading } = useCompaniesTable();
-  const { data: budgets = [] } = useBudgetsTable();
-  
+  const {
+    data: companies = [],
+    isLoading
+  } = useCompaniesTable();
+  const {
+    data: budgets = []
+  } = useBudgetsTable();
   const companiesData = companies as Company[];
   const activeCompanies = companiesData.filter(company => company.status === 'active');
   const activeBudgets = budgets.filter((budget: any) => budget.status === 'ativo');
-
   if (isLoading) {
     return <div className="space-y-6 animate-fade-in">
         <div className="flex justify-center items-center min-h-[400px]">
@@ -38,10 +40,7 @@ export default function Empresas() {
           <h1 className="text-3xl font-bold text-sicofe-navy">Empresas</h1>
           <p className="text-sicofe-gray mt-1">Gerencie todas as empresas do seu sistema</p>
         </div>
-        <Button 
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          onClick={() => setModalOpen(true)}
-        >
+        <Button onClick={() => setModalOpen(true)} className="text-white bg-sicofe-blue">
           <Plus className="h-4 w-4 mr-2" />
           Nova Empresa
         </Button>
@@ -99,13 +98,9 @@ export default function Empresas() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {companiesData.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Nenhuma empresa encontrada – Cadastre sua primeira empresa</p>
-              </div>
-            ) : (
-              companiesData.map(empresa => (
-                <div key={empresa.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            {companiesData.length === 0 ? <div className="text-center py-8">
+                <p className="text-sicofe-gray">Nenhuma empresa encontrada – Cadastre sua primeira empresa</p>
+              </div> : companiesData.map(empresa => <div key={empresa.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                       <Building2 className="h-5 w-5 text-primary-foreground" />
@@ -124,12 +119,7 @@ export default function Empresas() {
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    <Badge 
-                      className={empresa.status === 'active' 
-                        ? 'bg-accent text-accent-foreground' 
-                        : 'bg-secondary text-secondary-foreground'
-                      }
-                    >
+                    <Badge className={empresa.status === 'active' ? 'bg-accent text-accent-foreground' : 'bg-secondary text-secondary-foreground'}>
                       {empresa.status === 'active' ? 'Ativa' : 'Inativa'}
                     </Badge>
                     
@@ -151,9 +141,7 @@ export default function Empresas() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                </div>
-              ))
-            )}
+                </div>)}
           </div>
         </CardContent>
       </Card>
