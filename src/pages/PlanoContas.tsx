@@ -32,7 +32,7 @@ export default function PlanoContas() {
   return <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Plano de Contas</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-sicofe-navy">Plano de Contas</h1>
           <p className="text-sicofe-gray">
             Gerencie a estrutura contábil das empresas
           </p>
