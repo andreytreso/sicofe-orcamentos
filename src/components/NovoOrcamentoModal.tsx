@@ -112,7 +112,7 @@ export function NovoOrcamentoModal({
 
             <div>
               <Label htmlFor="name">Nome do Orçamento *</Label>
-              <Input {...register('name')} placeholder="Ex: Orçamento 2024 Q1" />
+              <Input placeholder="Ex: Orçamento 2024 Q1" className="bg-white" />
               {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
             </div>
           </div>
@@ -134,7 +134,7 @@ export function NovoOrcamentoModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rascunho">Rascunho</SelectItem>
-                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="ativo" className="bg-white text-sicofe-gray">Ativo</SelectItem>
                   <SelectItem value="fechado">Fechado</SelectItem>
                 </SelectContent>
               </Select>
