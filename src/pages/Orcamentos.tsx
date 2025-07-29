@@ -19,13 +19,16 @@ interface Budget {
   start_date: string;
   end_date: string;
   status: string;
-  companies?: { name: string };
+  companies?: {
+    name: string;
+  };
 }
-
 export default function Orcamentos() {
   const [modalOpen, setModalOpen] = useState(false);
-  const { data: budgets = [], isLoading } = useBudgetsTable();
-  
+  const {
+    data: budgets = [],
+    isLoading
+  } = useBudgetsTable();
   const budgetData = budgets as Budget[];
   const activeBudgets = budgetData.filter(budget => budget.status === 'ativo');
   const totalPlanned = budgetData.reduce((sum, budget) => sum + (budget.planned_amount || 0), 0);
@@ -65,10 +68,7 @@ export default function Orcamentos() {
           <h1 className="text-3xl font-bold text-sicofe-navy">Orçamentos</h1>
           <p className="text-sicofe-gray mt-1">Gerencie todos os orçamentos das suas empresas</p>
         </div>
-        <Button 
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          onClick={() => setModalOpen(true)}
-        >
+        <Button onClick={() => setModalOpen(true)} className="text-white bg-sicofe-blue">
           <Plus className="h-4 w-4 mr-2" />
           Novo Orçamento
         </Button>
@@ -133,36 +133,21 @@ export default function Orcamentos() {
           <CardTitle className="text-sicofe-navy">Lista de Orçamentos</CardTitle>
         </CardHeader>
         <CardContent>
-          {budgetData.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Nenhum orçamento encontrado – Crie seu primeiro orçamento</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {budgetData.map(budget => (
-                <div key={budget.id} className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+          {budgetData.length === 0 ? <div className="text-center py-8">
+              <p className="text-sicofe-gray">Nenhum orçamento encontrado – Crie seu primeiro orçamento</p>
+            </div> : <div className="space-y-6">
+              {budgetData.map(budget => <div key={budget.id} className="p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-primary">{budget.name}</h3>
                       <p className="text-sm text-muted-foreground">{budget.companies?.name || 'Empresa não informada'}</p>
                       <p className="text-sm text-muted-foreground">
-                        {budget.start_date && budget.end_date
-                          ? `${format(new Date(budget.start_date), 'dd/MM/yyyy')} - ${format(new Date(budget.end_date), 'dd/MM/yyyy')}`
-                          : 'Período não definido'
-                        }
+                        {budget.start_date && budget.end_date ? `${format(new Date(budget.start_date), 'dd/MM/yyyy')} - ${format(new Date(budget.end_date), 'dd/MM/yyyy')}` : 'Período não definido'}
                       </p>
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      <Badge 
-                        className={
-                          budget.status === 'ativo' 
-                            ? 'bg-accent text-accent-foreground' 
-                            : budget.status === 'fechado'
-                            ? 'bg-destructive text-destructive-foreground'
-                            : 'bg-secondary text-secondary-foreground'
-                        }
-                      >
+                      <Badge className={budget.status === 'ativo' ? 'bg-accent text-accent-foreground' : budget.status === 'fechado' ? 'bg-destructive text-destructive-foreground' : 'bg-secondary text-secondary-foreground'}>
                         {budget.status === 'ativo' ? 'Ativo' : budget.status === 'fechado' ? 'Fechado' : 'Rascunho'}
                       </Badge>
                       
@@ -196,10 +181,8 @@ export default function Orcamentos() {
                       </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </CardContent>
       </Card>
 
