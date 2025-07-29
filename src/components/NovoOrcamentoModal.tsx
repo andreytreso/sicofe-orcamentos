@@ -112,7 +112,7 @@ export function NovoOrcamentoModal({
 
             <div>
               <Label htmlFor="name">Nome do Orçamento *</Label>
-              <Input placeholder="Ex: Orçamento 2024 Q1" className="bg-white" />
+              <Input {...register('name')} placeholder="Ex: Orçamento 2024 Q1" className="bg-white" />
               {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
             </div>
           </div>
@@ -121,8 +121,8 @@ export function NovoOrcamentoModal({
             <div>
               <Label htmlFor="planned_amount">Valor Planejado *</Label>
               <Input type="number" step="0.01" {...register('planned_amount', {
-              valueAsNumber: true
-            })} placeholder="0,00" />
+                valueAsNumber: true
+              })} placeholder="0,00" className="bg-white" />
               {errors.planned_amount && <p className="text-sm text-destructive mt-1">{errors.planned_amount.message}</p>}
             </div>
 

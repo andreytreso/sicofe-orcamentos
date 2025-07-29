@@ -66,9 +66,9 @@ export function NovaEmpresaModal({
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4 bg-transparent">
-            <div className="bg-white">
+            <div>
               <Label htmlFor="name">Nome da Empresa *</Label>
-              <Input {...register('name')} placeholder="Nome da empresa" />
+              <Input {...register('name')} placeholder="Nome da empresa" className="bg-white" />
               {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
             </div>
 
@@ -81,7 +81,7 @@ export function NovaEmpresaModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="cnpj">CNPJ *</Label>
-              <Input {...register('cnpj')} placeholder="00.000.000/0000-00" />
+              <Input {...register('cnpj')} placeholder="00.000.000/0000-00" className="bg-white" />
               {errors.cnpj && <p className="text-sm text-destructive mt-1">{errors.cnpj.message}</p>}
             </div>
 
@@ -100,33 +100,33 @@ export function NovaEmpresaModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 bg-white">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="email">E-mail *</Label>
-              <Input type="email" {...register('email')} placeholder="empresa@exemplo.com" />
+              <Input type="email" {...register('email')} placeholder="empresa@exemplo.com" className="bg-white" />
               {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <Label htmlFor="telefone" className="bg-white">Telefone *</Label>
-              <Input {...register('telefone')} placeholder="(11) 99999-9999" />
-              {errors.telefone && <p className="text-sm text-destructive mt-1 bg-white">{errors.telefone.message}</p>}
+              <Label htmlFor="telefone">Telefone *</Label>
+              <Input {...register('telefone')} placeholder="(11) 99999-9999" className="bg-white" />
+              {errors.telefone && <p className="text-sm text-destructive mt-1">{errors.telefone.message}</p>}
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-primary bg-white">Endereço</h3>
+            <h3 className="text-lg font-medium text-primary">Endereço</h3>
             
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
                 <Label htmlFor="endereco_rua">Rua *</Label>
-                <Input {...register('endereco_rua')} placeholder="Nome da rua" />
-                {errors.endereco_rua && <p className="text-sm mt-1 text-white bg-sicofe-blue">{errors.endereco_rua.message}</p>}
+                <Input {...register('endereco_rua')} placeholder="Nome da rua" className="bg-white" />
+                {errors.endereco_rua && <p className="text-sm text-destructive mt-1">{errors.endereco_rua.message}</p>}
               </div>
 
               <div>
                 <Label htmlFor="endereco_numero">Número *</Label>
-                <Input {...register('endereco_numero')} placeholder="123" />
+                <Input {...register('endereco_numero')} placeholder="123" className="bg-white" />
                 {errors.endereco_numero && <p className="text-sm text-destructive mt-1">{errors.endereco_numero.message}</p>}
               </div>
             </div>
@@ -134,19 +134,19 @@ export function NovaEmpresaModal({
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="endereco_cidade">Cidade *</Label>
-                <Input {...register('endereco_cidade')} placeholder="São Paulo" />
+                <Input {...register('endereco_cidade')} placeholder="São Paulo" className="bg-white" />
                 {errors.endereco_cidade && <p className="text-sm text-destructive mt-1">{errors.endereco_cidade.message}</p>}
               </div>
 
               <div>
                 <Label htmlFor="endereco_estado">Estado *</Label>
-                <Input {...register('endereco_estado')} placeholder="SP" />
+                <Input {...register('endereco_estado')} placeholder="SP" className="bg-white" />
                 {errors.endereco_estado && <p className="text-sm text-destructive mt-1">{errors.endereco_estado.message}</p>}
               </div>
 
               <div>
                 <Label htmlFor="endereco_cep">CEP *</Label>
-                <Input {...register('endereco_cep')} placeholder="00000-000" />
+                <Input {...register('endereco_cep')} placeholder="00000-000" className="bg-white" />
                 {errors.endereco_cep && <p className="text-sm text-destructive mt-1">{errors.endereco_cep.message}</p>}
               </div>
             </div>
