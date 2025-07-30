@@ -15,6 +15,7 @@ import PlanoContas from "./pages/PlanoContas";
 import Fornecedores from "./pages/Fornecedores";
 import CentrosCusto from "./pages/CentrosCusto";
 import Usuarios from "./pages/Usuarios";
+import HealthCheck from "./pages/HealthCheck";
 import Login from "./pages/Login";
 import UserRegister from "./pages/UserRegister";
 import NotFound from "./pages/NotFound";
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/cadastros/fornecedores" element={<Fornecedores />} />
                 <Route path="/cadastros/centros-custo" element={<CentrosCusto />} />
                 <Route path="/cadastros/usuarios" element={<Usuarios />} />
+                <Route path="/dev/health" element={<HealthCheck />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>

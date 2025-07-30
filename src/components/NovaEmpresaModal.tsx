@@ -24,10 +24,12 @@ type FormData = z.infer<typeof formSchema>;
 interface NovaEmpresaModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 export function NovaEmpresaModal({
   open,
-  onOpenChange
+  onOpenChange,
+  onSuccess
 }: NovaEmpresaModalProps) {
   const {
     insert: insertCompany,
@@ -53,6 +55,7 @@ export function NovaEmpresaModal({
     try {
       await insertCompany(data);
       reset();
+      onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       console.error('Erro ao criar empresa:', error);
@@ -74,7 +77,7 @@ export function NovaEmpresaModal({
 
             <div>
               <Label htmlFor="grupo">Grupo</Label>
-              <Input placeholder="Grupo da empresa" className="bg-white" />
+              <Input {...register('grupo')} placeholder="Grupo da empresa" className="bg-white" />
             </div>
           </div>
 

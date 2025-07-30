@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
-import { useSupabaseTable } from "@/hooks/useSupabaseTable";
+import { useAccountHierarchy } from "@/hooks/useAccountHierarchy";
 interface ChartOfAccount {
   id: string;
   code: string;
@@ -15,15 +15,7 @@ interface ChartOfAccount {
 }
 export default function PlanoContas() {
   const [showModal, setShowModal] = useState(false);
-  const {
-    data: accounts,
-    isLoading
-  } = useSupabaseTable<ChartOfAccount>('chart_of_accounts', {
-    orderBy: {
-      column: 'code',
-      ascending: true
-    }
-  });
+  const { data: accounts, isLoading } = useAccountHierarchy();
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -48,9 +40,9 @@ export default function PlanoContas() {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg">{account.code} - {account.name}</CardTitle>
+                  <CardTitle className="text-lg">{account.analytical_account}</CardTitle>
                   <CardDescription>
-                    Tipo: {account.type} | Status: {account.status}
+                    {account.level_1} → {account.level_2}
                   </CardDescription>
                 </div>
               </div>

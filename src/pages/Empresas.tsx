@@ -146,6 +146,12 @@ export default function Empresas() {
         </CardContent>
       </Card>
 
-      <NovaEmpresaModal open={modalOpen} onOpenChange={setModalOpen} />
+      <NovaEmpresaModal 
+        open={modalOpen} 
+        onOpenChange={setModalOpen}
+        onSuccess={() => {
+          // Refresh will happen automatically due to React Query
+        }}
+      />
     </div>;
 }

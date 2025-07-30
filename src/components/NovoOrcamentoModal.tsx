@@ -34,10 +34,12 @@ type FormData = z.infer<typeof formSchema>;
 interface NovoOrcamentoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 export function NovoOrcamentoModal({
   open,
-  onOpenChange
+  onOpenChange,
+  onSuccess
 }: NovoOrcamentoModalProps) {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -72,16 +74,18 @@ export function NovoOrcamentoModal({
   const watchedStatus = watch('status');
   const onSubmit = async (data: FormData) => {
     try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: userData } = await supabase.auth.getUser();
+      
       await insertBudget({
         ...data,
         actual_amount: 0,
-        user_id: (await import('@/integrations/supabase/client')).supabase.auth.getUser().then(({
-          data
-        }) => data.user?.id)
+        user_id: userData.user?.id
       });
       reset();
       setStartDate(undefined);
       setEndDate(undefined);
+      onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       console.error('Erro ao criar orçamento:', error);

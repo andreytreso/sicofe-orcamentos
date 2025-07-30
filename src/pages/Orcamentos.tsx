@@ -186,6 +186,12 @@ export default function Orcamentos() {
         </CardContent>
       </Card>
 
-      <NovoOrcamentoModal open={modalOpen} onOpenChange={setModalOpen} />
+      <NovoOrcamentoModal 
+        open={modalOpen} 
+        onOpenChange={setModalOpen}
+        onSuccess={() => {
+          // Refresh will happen automatically due to React Query
+        }}
+      />
     </div>;
 }
