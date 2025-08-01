@@ -11,7 +11,7 @@ import {
   SelectContent, SelectItem
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 function toMessage(e: unknown): string {
