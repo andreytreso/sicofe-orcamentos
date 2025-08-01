@@ -112,3 +112,54 @@
     border-image: linear-gradient(135deg, #2563eb, #3b82f6) 1;
   }
 }
+
+/* ────────────────────────────────────────────────────────────
+   Ajustes globais de inputs e autofill
+   ──────────────────────────────────────────────────────────── */
+@layer base {
+  /* Mantém o fundo branco quando o input está focado */
+  input:focus,
+  select:focus {
+    background-color: #fff !important;
+  }
+
+  /* Corrige o autofill amarelo do Chrome */
+  input:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    -webkit-text-fill-color: rgb(var(--foreground) / 1);
+  }
+
+  /* Borda vermelha nativa em campos obrigatórios não preenchidos */
+  input:invalid,
+  select:invalid {
+    @apply border-red-500;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   Classes utilitárias para Modais (Dialog do shadcn/ui)
+   ──────────────────────────────────────────────────────────── */
+@layer components {
+  /* Container principal (DialogContent)  */
+  .modal-wrapper {
+    @apply bg-white max-w-5xl max-h-[90vh] overflow-y-auto
+            border-0 shadow-lg sm:rounded-lg p-0;
+  }
+
+  /* Header padrão do modal */
+  .modal-header {
+    @apply px-6 pt-6 pb-4;
+  }
+
+  /* Título e descrição em cinza-700 */
+  .modal-title,
+  .modal-desc {
+    @apply text-gray-700;
+  }
+
+  /* Rodapé alinhado à direita (flex-row em telas ≥ sm) */
+  .modal-footer {
+    @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-6 px-6 pb-6;
+  }
+}
