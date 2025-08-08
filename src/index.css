@@ -1,150 +1,149 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================
+   Tokens em HSL (shadcn/ui)
+   =========================== */
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 15 23 42;
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 11 41 123; /* #0B297B - azul principal */
-    --primary-foreground: 248 250 252;
+    /* #0B297B */
+    --primary: 224 84% 26%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 241 245 249;
-    --secondary-foreground: 51 65 85;
+    /* #F1F5F9 */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 27%;
 
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 0 148 94; /* #00945E - verde destaque */
-    --accent-foreground: 248 250 252;
+    /* #00945E */
+    --accent: 158 100% 29%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 176 0 32; /* #B00020 - vermelho */
-    --destructive-foreground: 248 250 252;
+    /* #B00020 */
+    --destructive: 349 100% 35%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 11 41 123;
+    /* #E2E8F0 */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
 
-    --success: 0 148 94; /* #00945E - verde sucesso */
-    --success-foreground: 248 250 252;
+    /* usa o mesmo do primary */
+    --ring: 224 84% 26%;
+
+    /* sucesso */
+    --success: 158 100% 29%;
+    --success-foreground: 210 40% 98%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 51 65 85;
-    --sidebar-primary: 37 99 235;
-    --sidebar-primary-foreground: 248 250 252;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 51 65 85;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 37 99 235;
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 215 25% 27%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
-    --background: 15 23 42;
-    --foreground: 248 250 252;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 30 41 59;
-    --card-foreground: 248 250 252;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 59 130 246;
-    --primary-foreground: 15 23 42;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
+    --secondary: 215 25% 27%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
+    --muted: 215 25% 27%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 51 65 85;
-    --accent-foreground: 248 250 252;
+    --accent: 215 25% 27%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 239 68 68;
-    --destructive-foreground: 248 250 252;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 59 130 246;
+    --border: 215 25% 27%;
+    --input: 215 25% 27%;
+    --ring: 217 91% 60%;
 
-    --sidebar-background: 30 41 59;
-    --sidebar-foreground: 203 213 225;
-    --sidebar-primary: 59 130 246;
-    --sidebar-primary-foreground: 15 23 42;
-    --sidebar-accent: 51 65 85;
-    --sidebar-accent-foreground: 203 213 225;
-    --sidebar-border: 51 65 85;
-    --sidebar-ring: 59 130 246;
+    --sidebar-background: 217 33% 17%;
+    --sidebar-foreground: 213 27% 84%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 215 25% 27%;
+    --sidebar-accent-foreground: 213 27% 84%;
+    --sidebar-border: 215 25% 27%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
+/* Base global */
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
   body {
     @apply bg-white text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
+/* Utilitários próprios */
 @layer components {
   .sicofe-gradient {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   }
-  
   .sicofe-card-shadow {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
-  
   .sicofe-border-gradient {
     border-image: linear-gradient(135deg, #2563eb, #3b82f6) 1;
   }
 }
 
-/* ────────────────────────────────────────────────────────────
-   Ajustes globais de inputs e autofill
-   ──────────────────────────────────────────────────────────── */
+/* Ajustes inputs / autofill */
 @layer base {
-  /* Mantém o fundo branco quando o input está focado */
   input:focus,
-  select:focus {
-    background-color: #fff !important;
-  }
+  select:focus { background-color: #fff !important; }
 
-  /* Corrige o autofill amarelo do Chrome */
   input:-webkit-autofill,
   select:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 1000px #fff inset;
-    -webkit-text-fill-color: rgb(var(--foreground) / 1);
+    -webkit-text-fill-color: hsl(var(--foreground));
   }
 
-  /* Borda vermelha nativa em campos obrigatórios não preenchidos */
   input:invalid,
-  select:invalid {
-    @apply border-red-500;
-  }
+  select:invalid { @apply border-red-500; }
 }
 
 /* ────────────────────────────────────────────────────────────
-   Classes utilitárias para Modais (Dialog do shadcn/ui)
+   Padrão para modais (Dialog do shadcn/ui)
    ──────────────────────────────────────────────────────────── */
 @layer components {
   /* Container principal (DialogContent)  */
   .modal-wrapper {
-    @apply bg-white max-w-5xl max-h-[90vh] overflow-y-auto
-            border-0 shadow-lg sm:rounded-lg p-0;
+    @apply bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg sm:rounded-lg p-0;
   }
 
   /* Header padrão do modal */
@@ -152,14 +151,15 @@
     @apply px-6 pt-6 pb-4;
   }
 
-  /* Título e descrição em cinza-700 */
+  /* Título e descrição */
   .modal-title,
   .modal-desc {
     @apply text-gray-700;
   }
 
-  /* Rodapé alinhado à direita (flex-row em telas ≥ sm) */
+  /* Rodapé alinhado à direita */
   .modal-footer {
     @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-6 px-6 pb-6;
   }
 }
+
