@@ -421,26 +421,41 @@ export type Database = {
       }
       profiles: {
         Row: {
+          aprovador: boolean | null
+          cargo: string | null
           created_at: string
           first_name: string | null
           id: string
           last_name: string | null
+          pacoteiro: boolean | null
+          role: string | null
+          status: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          aprovador?: boolean | null
+          cargo?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          pacoteiro?: boolean | null
+          role?: string | null
+          status?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          aprovador?: boolean | null
+          cargo?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          pacoteiro?: boolean | null
+          role?: string | null
+          status?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -584,50 +599,15 @@ export type Database = {
           },
         ]
       }
-      user_profiles: {
-        Row: {
-          company_id: string | null
-          created_at: string | null
-          full_name: string | null
-          role: string | null
-          status: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          role?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          role?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_profiles_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { uid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
