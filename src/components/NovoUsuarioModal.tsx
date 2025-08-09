@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   open: boolean;
@@ -33,6 +34,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
     role: "user",
   });
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
   const handleChange = (field: keyof typeof form, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value as any }));
@@ -40,7 +42,12 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!form.email.trim() || !form.password.trim()) {
-      return alert("Email e senha são obrigatórios.");
+      toast({
+        title: "Campos obrigatórios",
+        description: "Informe e-mail e senha.",
+        variant: "destructive",
+      });
+      return;
     }
 
     setSaving(true);
@@ -77,9 +84,27 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
       if (error) throw error;
       onSuccess?.();
       onOpenChange(false);
-      alert("Usuário criado. O usuário receberá um email para confirmar o cadastro.");
+      toast({
+        title: "Usuário criado",
+        description: "O usuário receberá um e-mail para confirmar o cadastro.",
+      });
     } catch (err: any) {
-      alert(err?.message || "Erro ao criar usuário.");
+      {
+        let description = err?.message || "Erro ao criar usuário.";
+        const lower = String(description).toLowerCase();
+        if (lower.includes("breach") || lower.includes("exposed") || lower.includes("leaked")) {
+          description = "Senha comprometida. Escolha uma senha forte e única (letras, números e símbolos).";
+        } else if (lower.includes("already") || lower.includes("exists")) {
+          description = "Já existe um usuário com este e-mail.";
+        } else if (lower.includes("weak") || lower.includes("short")) {
+          description = "Senha fraca. Use pelo menos 8 caracteres com variedade.";
+        }
+        toast({
+          title: "Não foi possível criar o usuário",
+          description,
+          variant: "destructive",
+        });
+      }
     } finally {
       setSaving(false);
     }
