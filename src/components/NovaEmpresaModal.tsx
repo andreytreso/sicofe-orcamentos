@@ -1,137 +1,151 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription, DialogFooter, DialogClose
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectTrigger, SelectValue,
-  SelectContent, SelectItem
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
-function toMessage(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  if (typeof e === "string") return e;
-  try { return JSON.stringify(e); } catch { return String(e); }
-}
+type CompanyForm = {
+  id?: string;
+  name: string;
+  grupo: string;
+  status: "active" | "inactive";
+};
 
 type Props = {
+  /** se `undefined` abre em modo _criar_; caso contrário, _editar_ */
+  initialData?: CompanyForm;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (v: boolean) => void;
+  /** callback para atualizar a lista do React-Query */
   onSuccess?: () => void;
 };
 
-export function NovaEmpresaModal({ open, onOpenChange, onSuccess }: Props) {
-  const [name, setName] = useState("");
-  const [grupo, setGrupo] = useState("");
-  const [status, setStatus] = useState<"active" | "inactive">("active");
-  const [saving, setSaving] = useState(false);
+export default function NovaEmpresaModal({
+  initialData,
+  open,
+  onOpenChange,
+  onSuccess,
+}: Props) {
   const queryClient = useQueryClient();
 
-  async function handleSave(e?: React.FormEvent<HTMLFormElement>) {
+  const [form, setForm] = useState<CompanyForm>({
+    id: initialData?.id,
+    name: initialData?.name ?? "",
+    grupo: initialData?.grupo ?? "",
+    status: initialData?.status ?? "active",
+  });
+  const [saving, setSaving] = useState(false);
+
+  /* se abrir para editar, popula o formulário */
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        id: initialData.id,
+        name: initialData.name,
+        grupo: initialData.grupo,
+        status: initialData.status,
+      });
+    }
+  }, [initialData]);
+
+  /* helpers ---------------------------------------------------------------- */
+
+  const toMessage = (e: unknown) =>
+    e instanceof Error ? e.message : String(e);
+
+  const handleChange = (field: keyof CompanyForm, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+  /* submit ----------------------------------------------------------------- */
+
+  async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!name.trim() || !grupo.trim()) return;
+    if (!form.name.trim()) return alert("Nome é obrigatório.");
 
     setSaving(true);
     try {
-      // 1) garantir que está logado
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user) {
-        throw new Error("Faça login para criar a empresa.");
-      }
+      const { id, ...payload } = form;
 
-      // 2) inserir na companies (trigger cria vínculo admin)
-      const { error: e1 } = await supabase
-        .from("companies")
-        .insert({ name, grupo, status });
-      if (e1) throw e1;
+      const { error } = id
+        ? await supabase.from("companies").update(payload).eq("id", id)
+        : await supabase.from("companies").insert(payload);
 
-      // 3) atualizar lista e fechar
+      if (error) throw error;
+
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       onSuccess?.();
       onOpenChange(false);
-
-      // 4) reset
-      setName("");
-      setGrupo("");
-      setStatus("active");
-    } catch (err: unknown) {
-      alert(toMessage(err) || "Erro ao salvar empresa.");
+    } catch (err) {
+      alert(toMessage(err));
     } finally {
       setSaving(false);
     }
   }
 
+  /* ----------------------------------------------------------------------- */
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg sm:rounded-lg p-0">
-        {/* Header */}
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <DialogTitle className="text-gray-700">Nova Empresa</DialogTitle>
-          <DialogDescription className="text-gray-700">
-            Preencha os dados abaixo para criar uma nova empresa
+      <DialogContent className="modal-wrapper">
+        <DialogHeader className="modal-header">
+          <DialogTitle className="modal-title">
+            {form.id ? "Editar Empresa" : "Nova Empresa"}
+          </DialogTitle>
+          <DialogDescription className="modal-desc">
+            Preencha os dados abaixo
           </DialogDescription>
         </DialogHeader>
 
-        {/* Corpo como <form> para suportar Enter */}
-        <form onSubmit={handleSave} className="px-6 pb-6">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <Label htmlFor="name" className="text-gray-700">Nome</Label>
-              <Input
-                id="name"
-                placeholder="Ex.: Sicofe Loja 1"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="off"
-                required
-                className="
-                  bg-white border border-gray-200
-                  text-gray-900 placeholder:text-gray-400
-                  focus:bg-white focus-visible:bg-white
-                  focus:outline-none focus-visible:outline-none
-                  focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0
-                "
-                autoFocus
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
+          <div>
+            <Label htmlFor="name">Nome *</Label>
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              required
+            />
+          </div>
 
+          <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="grupo" className="text-gray-700">Grupo</Label>
+              <Label htmlFor="grupo">Grupo</Label>
               <Input
                 id="grupo"
-                placeholder="Ex.: Sicofe"
-                value={grupo}
-                onChange={(e) => setGrupo(e.target.value)}
-                autoComplete="off"
-                required
-                className="
-                  bg-white border border-gray-200
-                  text-gray-900 placeholder:text-gray-400
-                  focus:bg-white focus-visible:bg-white
-                  focus:outline-none focus-visible:outline-none
-                  focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0
-                "
+                value={form.grupo}
+                onChange={(e) => handleChange("grupo", e.target.value)}
               />
             </div>
-
             <div>
-              <Label className="text-gray-700">Status</Label>
+              <Label>Status</Label>
               <Select
-                value={status}
-                onValueChange={(v: "active" | "inactive") => setStatus(v)}
+                value={form.status}
+                onValueChange={(v) =>
+                  handleChange("status", v as "active" | "inactive")
+                }
               >
-                <SelectTrigger className="bg-white border border-gray-200 text-gray-900 focus:ring-0 focus-visible:ring-sicofe-blue focus-visible:ring-2 focus-visible:outline-none">
-                  <SelectValue placeholder="Selecione o status" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border border-gray-200 text-gray-900
-                                          focus:outline-none focus-visible:outline-none
-                                          focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0">
+                <SelectContent>
                   <SelectItem value="active">Ativa</SelectItem>
                   <SelectItem value="inactive">Inativa</SelectItem>
                 </SelectContent>
@@ -139,25 +153,14 @@ export function NovaEmpresaModal({ open, onOpenChange, onSuccess }: Props) {
             </div>
           </div>
 
-          {/* Footer */}
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-6 px-0">
+          <DialogFooter className="modal-footer">
             <DialogClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                disabled={saving}
-              >
+              <Button variant="outline" type="button">
                 Cancelar
               </Button>
             </DialogClose>
 
-            <Button
-              type="submit"
-              disabled={saving || !name.trim() || !grupo.trim()}
-              className="bg-primary hover:bg-primary/90 text-white"
-              style={{ backgroundColor: '#0047FF' }} // use se quiser travar o tom
-            >
+            <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar
             </Button>
