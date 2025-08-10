@@ -31,7 +31,6 @@ import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -68,7 +67,7 @@ export default function Empresas() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Company | undefined>();
-
+  const [toDelete, setToDelete] = useState<Company | undefined>();
   /* dados ----------------------------------------------------------------- */
   const {
     data: companies = [],
@@ -240,35 +239,13 @@ async function reallyDelete(id: string) {
                         </DropdownMenuItem>
 
 
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Confirmar exclusão
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta ação não pode ser desfeita. Deseja excluir
-                                <b> {e.name}</b>?
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => reallyDelete(e.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => setToDelete(e)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -278,6 +255,38 @@ async function reallyDelete(id: string) {
           )}
         </CardContent>
       </Card>
+
+      {/* CONFIRM DELETE --------------------------------------------------- */}
+      <AlertDialog
+        open={!!toDelete}
+        onOpenChange={(o) => {
+          if (!o) setToDelete(undefined);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Deseja excluir
+              <b> {toDelete?.name}</b>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (toDelete) {
+                  reallyDelete(toDelete.id)
+                }
+                setToDelete(undefined)
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* MODAL ------------------------------------------------------------ */}
       <NovaEmpresaModal

@@ -103,7 +103,7 @@ export default function NovaEmpresaModal({
   /* ----------------------------------------------------------------------- */
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
           <DialogTitle className="modal-title">
