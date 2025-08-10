@@ -28,10 +28,8 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
     first_name: "",
     last_name: "",
     email: "",
-    password: "",
     aprovador: false,
     pacoteiro: false,
-    role: "user",
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -41,21 +39,27 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!form.email.trim() || !form.password.trim()) {
+    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Informe e-mail e senha.",
+        description: "Informe nome, sobrenome e e-mail.",
         variant: "destructive",
       });
       return;
     }
+
+    // Gera uma senha temporária forte (não exibida ao usuário)
+    const tempPassword = Array.from(crypto.getRandomValues(new Uint32Array(4)))
+      .map((n) => n.toString(36))
+      .join("")
+      .slice(0, 16) + "#A9";
 
     setSaving(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
-        password: form.password,
+        password: tempPassword,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
@@ -63,7 +67,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
             last_name: form.last_name,
             aprovador: form.aprovador,
             pacoteiro: form.pacoteiro,
-            role: form.role,
+            role: "user",
           },
         },
       });
@@ -74,7 +78,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
             .update({
               aprovador: form.aprovador,
               pacoteiro: form.pacoteiro,
-              role: form.role,
+              role: "user",
             })
             .eq("user_id", data.user.id);
         } catch {
@@ -123,38 +127,24 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="first_name">Nome</Label>
-              <Input id="first_name" value={form.first_name} onChange={(e) => handleChange("first_name", e.target.value)} />
+              <Label htmlFor="first_name">Nome *</Label>
+              <Input id="first_name" value={form.first_name} onChange={(e) => handleChange("first_name", e.target.value)} required />
             </div>
             <div>
-              <Label htmlFor="last_name">Sobrenome</Label>
-              <Input id="last_name" value={form.last_name} onChange={(e) => handleChange("last_name", e.target.value)} />
+              <Label htmlFor="last_name">Sobrenome *</Label>
+              <Input id="last_name" value={form.last_name} onChange={(e) => handleChange("last_name", e.target.value)} required />
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="password">Senha *</Label>
-              <Input id="password" type="password" value={form.password} onChange={(e) => handleChange("password", e.target.value)} required />
-            </div>
+          <div>
+            <Label htmlFor="email">Email *</Label>
+            <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} required />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-3">
             <div>
-              <Label htmlFor="role">Permissão (role)</Label>
-              <Select value={form.role} onValueChange={(v) => handleChange("role", v)}>
-                <SelectTrigger id="role">
-                  <SelectValue placeholder="Selecione a permissão" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Usuário</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Permissão</Label>
+              <div className="text-sm text-muted-foreground mt-2">Usuário</div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="aprovador" checked={form.aprovador} onCheckedChange={(v) => handleChange("aprovador", Boolean(v))} />
