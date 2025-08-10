@@ -226,12 +226,11 @@ async function reallyDelete(id: string) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => {
-                            
                             setEditing({
                               ...e,
                               status: isActive(e.status) ? "active" : "inactive",
                             });
-                            setModalOpen(true);
+                            setTimeout(() => setModalOpen(true), 0);
                           }}
                         >
                           <Edit className="h-4 w-4 mr-2" />
@@ -241,7 +240,7 @@ async function reallyDelete(id: string) {
 
                         <DropdownMenuItem
                           className="text-destructive"
-                          onClick={() => setToDelete(e)}
+                          onClick={() => setTimeout(() => setToDelete(e), 0)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
