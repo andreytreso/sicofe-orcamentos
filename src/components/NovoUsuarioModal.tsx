@@ -199,7 +199,18 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess, initia
 
           <div>
             <Label htmlFor="cargo">Cargo *</Label>
-            <Input id="cargo" value={form.cargo} onChange={(e) => handleChange("cargo", e.target.value)} required />
+            <Select value={form.cargo} onValueChange={(v) => handleChange("cargo", v)}>
+              <SelectTrigger id="cargo">
+                <SelectValue placeholder="Selecione o cargo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="socio">Sócio</SelectItem>
+                <SelectItem value="diretor">Diretor</SelectItem>
+                <SelectItem value="gerente">Gerente</SelectItem>
+                <SelectItem value="supervisor">Supervisor/Coordenador</SelectItem>
+                <SelectItem value="analista">Analista</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-3">
