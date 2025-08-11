@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,42 +21,98 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSuccess?: () => void;
+  initialData?: {
+    id: string;
+    user_id: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    role?: string | null;
+    aprovador?: boolean | null;
+    pacoteiro?: boolean | null;
+    cargo?: string | null;
+    email?: string | null;
+  };
 }
 
-export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Props) {
+export default function NovoUsuarioModal({ open, onOpenChange, onSuccess, initialData }: Props) {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
     role: "user",
+    cargo: "",
     aprovador: false,
     pacoteiro: false,
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (open && initialData) {
+      setForm({
+        first_name: initialData.first_name ?? "",
+        last_name: initialData.last_name ?? "",
+        email: initialData.email ?? "",
+        role: initialData.role ?? "user",
+        cargo: initialData.cargo ?? "",
+        aprovador: Boolean(initialData.aprovador),
+        pacoteiro: Boolean(initialData.pacoteiro),
+      });
+    } else if (!open) {
+      // reset when closing
+      setForm({ first_name: "", last_name: "", email: "", role: "user", cargo: "", aprovador: false, pacoteiro: false });
+    }
+  }, [open, initialData]);
+
   const handleChange = (field: keyof typeof form, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value as any }));
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim()) {
+
+    const isEdit = Boolean(initialData?.id);
+    const missingEmail = !isEdit && !form.email.trim();
+
+    if (!form.first_name.trim() || !form.last_name.trim() || missingEmail || !form.role.trim() || !form.cargo.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Informe nome, sobrenome e e-mail.",
+        description: isEdit
+          ? "Informe nome, sobrenome, cargo e permissão."
+          : "Informe nome, sobrenome, e-mail, cargo e permissão.",
         variant: "destructive",
       });
       return;
     }
 
-    // Gera uma senha temporária forte (não exibida ao usuário)
-    const tempPassword = Array.from(crypto.getRandomValues(new Uint32Array(4)))
-      .map((n) => n.toString(36))
-      .join("")
-      .slice(0, 16) + "#A9";
-
     setSaving(true);
     try {
+      if (isEdit && initialData) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            first_name: form.first_name,
+            last_name: form.last_name,
+            role: form.role,
+            aprovador: form.aprovador,
+            pacoteiro: form.pacoteiro,
+            cargo: form.cargo,
+          })
+          .eq("id", initialData.id);
+
+        if (error) throw error;
+
+        onSuccess?.();
+        onOpenChange(false);
+        toast({ title: "Usuário atualizado", description: "As alterações foram salvas." });
+        return;
+      }
+
+      // Criação de usuário: gera senha temporária forte (não exibida ao usuário)
+      const tempPassword = Array.from(crypto.getRandomValues(new Uint32Array(4)))
+        .map((n) => n.toString(36))
+        .join("")
+        .slice(0, 16) + "#A9";
+
       const redirectUrl = `${window.location.origin}/`;
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
@@ -69,9 +125,11 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
             aprovador: form.aprovador,
             pacoteiro: form.pacoteiro,
             role: form.role,
+            cargo: form.cargo,
           },
         },
       });
+
       if (!error && data?.user?.id) {
         try {
           await supabase
@@ -80,6 +138,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
               aprovador: form.aprovador,
               pacoteiro: form.pacoteiro,
               role: form.role,
+              cargo: form.cargo,
             })
             .eq("user_id", data.user.id);
         } catch {
@@ -94,22 +153,16 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
         description: "O usuário receberá um e-mail para confirmar o cadastro.",
       });
     } catch (err: any) {
-      {
-        let description = err?.message || "Erro ao criar usuário.";
-        const lower = String(description).toLowerCase();
-        if (lower.includes("breach") || lower.includes("exposed") || lower.includes("leaked")) {
-          description = "Senha comprometida. Escolha uma senha forte e única (letras, números e símbolos).";
-        } else if (lower.includes("already") || lower.includes("exists")) {
-          description = "Já existe um usuário com este e-mail.";
-        } else if (lower.includes("weak") || lower.includes("short")) {
-          description = "Senha fraca. Use pelo menos 8 caracteres com variedade.";
-        }
-        toast({
-          title: "Não foi possível criar o usuário",
-          description,
-          variant: "destructive",
-        });
+      let description = err?.message || "Erro ao salvar usuário.";
+      const lower = String(description).toLowerCase();
+      if (lower.includes("breach") || lower.includes("exposed") || lower.includes("leaked")) {
+        description = "Senha comprometida. Escolha uma senha forte e única (letras, números e símbolos).";
+      } else if (lower.includes("already") || lower.includes("exists")) {
+        description = "Já existe um usuário com este e-mail.";
+      } else if (lower.includes("weak") || lower.includes("short")) {
+        description = "Senha fraca. Use pelo menos 8 caracteres com variedade.";
       }
+      toast({ title: "Não foi possível salvar", description, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -137,9 +190,16 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
             </div>
           </div>
 
+          {!initialData && (
+            <div>
+              <Label htmlFor="email">Email *</Label>
+              <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} required />
+            </div>
+          )}
+
           <div>
-            <Label htmlFor="email">Email *</Label>
-            <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} required />
+            <Label htmlFor="cargo">Cargo *</Label>
+            <Input id="cargo" value={form.cargo} onChange={(e) => handleChange("cargo", e.target.value)} required />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-3">

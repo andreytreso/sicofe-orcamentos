@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, MoreVertical, Edit, Trash2 } from "lucide-react";
 import { useSupabaseTable } from "@/hooks/useSupabaseTable";
 import NovoUsuarioModal from "@/components/NovoUsuarioModal";
 
