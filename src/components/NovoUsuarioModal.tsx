@@ -28,6 +28,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
     first_name: "",
     last_name: "",
     email: "",
+    role: "user",
     aprovador: false,
     pacoteiro: false,
   });
@@ -67,7 +68,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
             last_name: form.last_name,
             aprovador: form.aprovador,
             pacoteiro: form.pacoteiro,
-            role: "user",
+            role: form.role,
           },
         },
       });
@@ -78,7 +79,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
             .update({
               aprovador: form.aprovador,
               pacoteiro: form.pacoteiro,
-              role: "user",
+              role: form.role,
             })
             .eq("user_id", data.user.id);
         } catch {
@@ -143,8 +144,16 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess }: Prop
 
           <div className="grid gap-6 sm:grid-cols-3">
             <div>
-              <Label>Permissão</Label>
-              <div className="text-sm text-muted-foreground mt-2">Usuário</div>
+              <Label htmlFor="role">Permissão *</Label>
+              <Select value={form.role} onValueChange={(v) => handleChange("role", v)}>
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Usuário</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="aprovador" checked={form.aprovador} onCheckedChange={(v) => handleChange("aprovador", Boolean(v))} />
