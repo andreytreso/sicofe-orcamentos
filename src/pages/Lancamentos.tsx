@@ -32,7 +32,7 @@ export default function Lancamentos() {
   const [showForm, setShowForm] = useState(false);
   const [editingLancamento, setEditingLancamento] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEmpresa, setSelectedEmpresa] = useState("");
+  const [selectedEmpresa, setSelectedEmpresa] = useState("all");
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lancamentoToDelete, setLancamentoToDelete] = useState<string | null>(null);
@@ -90,7 +90,7 @@ export default function Lancamentos() {
   }, (_, i) => currentYear + i);
 
   // Transform companies for compatibility
-  const empresas = companies.map(company => company.name);
+  const companyOptions = companies.map(company => ({ id: company.id, name: company.name }));
   const meses = [{
     key: "jan",
     label: "Janeiro"
@@ -336,7 +336,7 @@ export default function Lancamentos() {
     };
 
     // Find the selected company ID
-    const selectedCompany = companies.find(c => c.name === formData.empresa);
+    const selectedCompany = companies.find(c => c.id === formData.empresa);
     if (!selectedCompany) {
       toast({
         title: "Erro",
@@ -457,9 +457,11 @@ export default function Lancamentos() {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
                   <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-gray-500">Todas as empresas</SelectItem>
-                  {empresas.map(empresa => <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                      {empresa}
-                    </SelectItem>)}
+                  {companyOptions.map(c => (
+                    <SelectItem key={c.id} value={c.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
+                      {c.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -564,9 +566,11 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {empresas.map(empresa => <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                        {empresa}
-                      </SelectItem>)}
+                    {companyOptions.map(c => (
+                      <SelectItem key={c.id} value={c.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                        {c.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
