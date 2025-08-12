@@ -38,6 +38,7 @@ export interface TransactionFormData {
   amount: number;
   observations: string;
   competency_months: string[];
+  transaction_date?: string; // optional: allows aligning period with date
 }
 
 export function useTransactions(filters: TransactionFilters) {
@@ -59,9 +60,7 @@ export function useTransactions(filters: TransactionFilters) {
         query = query.eq('company_id', filters.companyId);
       }
 
-      if (filters.period && filters.period !== 'all') {
-        query = query.contains('competency_months', [filters.period]);
-      }
+      
 
       const { data, error } = await query;
 
@@ -70,6 +69,21 @@ export function useTransactions(filters: TransactionFilters) {
       }
 
       let result = data || [];
+
+      // Client-side filter by month based on transaction_date
+      if (filters.period && filters.period !== 'all') {
+        const monthMap: Record<string, number> = {
+          jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6,
+          jul: 7, ago: 8, set: 9, out: 10, nov: 11, dez: 12,
+        };
+        const m = monthMap[filters.period] ?? 0;
+        if (m > 0) {
+          result = result.filter((t) => {
+            const d = new Date(t.transaction_date);
+            return d instanceof Date && !isNaN(d.getTime()) && (d.getMonth() + 1) === m;
+          });
+        }
+      }
 
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -97,7 +111,7 @@ export function useTransactions(filters: TransactionFilters) {
         .insert([{
           ...data,
           user_id: user.user.id,
-          transaction_date: new Date().toISOString().split('T')[0],
+          transaction_date: data.transaction_date ?? new Date().toISOString().split('T')[0],
           description: data.observations || ''
         }])
         .select()

@@ -355,7 +355,8 @@ export default function Lancamentos() {
         analytical_account: formData.contaAnalitica,
         amount: valorFormatado,
         observations: formData.observacoes,
-        competency_months: [mes]
+        competency_months: [mes],
+        transaction_date: `${formData.ano}-${monthMap[mes]}-01`,
       };
       if (editingLancamento) {
         updateTransaction(editingLancamento.id, transactionData);
