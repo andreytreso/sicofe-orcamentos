@@ -16,6 +16,7 @@ import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cargoOptions } from "@/constants/cargoOptions";
 
 interface Props {
   open: boolean;
@@ -203,12 +204,12 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess, initia
               <SelectTrigger id="cargo">
                 <SelectValue placeholder="Selecione o cargo" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="socio">Sócio</SelectItem>
-                <SelectItem value="diretor">Diretor</SelectItem>
-                <SelectItem value="gerente">Gerente</SelectItem>
-                <SelectItem value="supervisor">Supervisor/Coordenador</SelectItem>
-                <SelectItem value="analista">Analista</SelectItem>
+              <SelectContent className="z-50 bg-background">
+                {cargoOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

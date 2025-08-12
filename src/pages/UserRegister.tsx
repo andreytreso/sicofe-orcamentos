@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "@/components/ui/use-toast";
 import { registerUser } from "@/services/authService";
 import { Loader2 } from "lucide-react";
+import { cargoOptions } from "@/constants/cargoOptions";
 interface FormData {
   name: string;
   email: string;
@@ -121,22 +122,7 @@ const UserRegister = () => {
       setIsLoading(false);
     }
   };
-  const roleOptions = [{
-    value: 'socio',
-    label: 'Sócio'
-  }, {
-    value: 'diretor',
-    label: 'Diretor'
-  }, {
-    value: 'gerente',
-    label: 'Gerente'
-  }, {
-    value: 'supervisor',
-    label: 'Supervisor/Coordenador'
-  }, {
-    value: 'analista',
-    label: 'Analista'
-  }];
+  
   return <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg rounded-xl bg-white border-0">
         <CardHeader className="text-center">
@@ -182,8 +168,8 @@ const UserRegister = () => {
               }} aria-invalid={!!errors.role}>
                   <SelectValue placeholder="Selecione seu cargo" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-0">
-                  {roleOptions.map(option => <SelectItem key={option.value} value={option.value} className="hover:bg-[#EEF4FF] text-black focus:bg-[#EEF4FF] focus:text-black data-[state=checked]:text-black">
+                <SelectContent className="z-50 bg-background border-0">
+                  {cargoOptions.map(option => <SelectItem key={option.value} value={option.value} className="hover:bg-[#EEF4FF] text-black focus:bg-[#EEF4FF] focus:text-black data-[state=checked]:text-black">
                       {option.label}
                     </SelectItem>)}
                 </SelectContent>
