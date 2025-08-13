@@ -17,6 +17,7 @@ export type Database = {
       account_hierarchy: {
         Row: {
           analytical_account: string
+          company_id: string
           created_at: string
           id: string
           level_1: string
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           analytical_account: string
+          company_id: string
           created_at?: string
           id?: string
           level_1: string
@@ -31,12 +33,21 @@ export type Database = {
         }
         Update: {
           analytical_account?: string
+          company_id?: string
           created_at?: string
           id?: string
           level_1?: string
           level_2?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_account_hierarchy_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       approval_history: {
         Row: {

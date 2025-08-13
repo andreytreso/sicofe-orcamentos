@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
@@ -36,18 +37,46 @@ export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props)
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!form.level_1.trim() || !form.level_2.trim() || !form.analytical_account.trim()) {
-      return alert("Todos os campos são obrigatórios.");
+      toast.error("Todos os campos são obrigatórios");
+      return;
     }
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("account_hierarchy").insert(form);
+      // Get user's first company
+      const { data: userCompanies, error: companiesError } = await supabase
+        .from('user_company_access')
+        .select('company_id')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .limit(1);
+
+      if (companiesError) throw companiesError;
+      if (!userCompanies || userCompanies.length === 0) {
+        throw new Error("Usuário não tem acesso a nenhuma empresa");
+      }
+
+      const { error } = await supabase.from("account_hierarchy").insert({
+        ...form,
+        company_id: userCompanies[0].company_id
+      });
+      
       if (error) throw error;
+      
       queryClient.invalidateQueries({ queryKey: ["account-hierarchy"] });
+      toast.success("Conta criada com sucesso!");
+      
+      // Reset form
+      setForm({
+        level_1: "",
+        level_2: "",
+        analytical_account: "",
+      });
+      
       onSuccess?.();
       onOpenChange(false);
     } catch (err: any) {
-      alert(err?.message || "Erro ao criar conta.");
+      console.error('Error creating account:', err);
+      toast.error("Erro ao criar conta: " + (err?.message || "Erro desconhecido"));
     } finally {
       setSaving(false);
     }
