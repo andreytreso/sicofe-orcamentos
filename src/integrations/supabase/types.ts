@@ -465,7 +465,7 @@ export type Database = {
         Row: {
           address: string | null
           cnpj: string | null
-          company_id: string | null
+          company_id: string
           created_at: string | null
           email: string | null
           id: string
@@ -477,7 +477,7 @@ export type Database = {
         Insert: {
           address?: string | null
           cnpj?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string | null
           email?: string | null
           id?: string
@@ -489,7 +489,7 @@ export type Database = {
         Update: {
           address?: string | null
           cnpj?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string | null
           email?: string | null
           id?: string
@@ -499,6 +499,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
