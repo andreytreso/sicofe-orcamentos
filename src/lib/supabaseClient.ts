@@ -1,7 +1,7 @@
-import { createClient as _createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@/integrations/supabase/types'
 
-export const createClient = () => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return _createClient(url, key);
-};
+export const supabase = createClient<Database>(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+)

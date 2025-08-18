@@ -19,6 +19,7 @@ import HealthCheck from "./pages/HealthCheck";
 import Login from "./pages/Login";
 import UserRegister from "./pages/UserRegister";
 import NotFound from "./pages/NotFound";
+import UsuarioFormPage from "@/pages/UsuarioFormPage";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,8 @@ const App = () => (
                 <Route path="/cadastros/usuarios" element={<Usuarios />} />
                 <Route path="/dev/health" element={<HealthCheck />} />
                 <Route path="*" element={<NotFound />} />
+                 <Route path="/usuarios/novo" element={<UsuarioFormPage />} />
+                <Route path="/usuarios/:id/editar" element={<UsuarioFormPage />} />
               </Routes>
             </Layout>
           </ProtectedRoute>

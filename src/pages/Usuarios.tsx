@@ -3,11 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, MoreVertical, Edit, Trash2 } from "lucide-react";
 import { useSupabaseTable } from "@/hooks/useSupabaseTable";
-import NovoUsuarioModal from "@/components/NovoUsuarioModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Profile {
   id: string;
@@ -23,10 +26,9 @@ interface Profile {
 }
 
 export default function Usuarios() {
-  const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<Profile | undefined>();
   const [toDelete, setToDelete] = useState<Profile | undefined>();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: users, isLoading, refetch } = useSupabaseTable<Profile>("profiles", {
     select: "id, user_id, first_name, last_name, role, status, cargo, aprovador, pacoteiro, created_at",
@@ -49,7 +51,7 @@ export default function Usuarios() {
             <h1 className="text-3xl font-bold tracking-tight text-sicofe-navy">Usuários</h1>
             <p className="text-sicofe-gray">Gerencie os usuários do sistema</p>
           </div>
-          <Button onClick={() => { setEditing(undefined); setShowModal(true); }} className="text-white bg-sicofe-blue">
+          <Button onClick={() => navigate("/usuarios/novo")} className="text-white bg-sicofe-blue">
             <Plus className="mr-2 h-4 w-4" />
             Novo Usuário
           </Button>
@@ -57,7 +59,9 @@ export default function Usuarios() {
 
         <div className="grid gap-4">
           {users?.map((user) => {
-            const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ") || "Nome não informado";
+            const fullName =
+              [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+              "Nome não informado";
             return (
               <Card key={user.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
@@ -76,18 +80,13 @@ export default function Usuarios() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setEditing(user);
-                              setTimeout(() => setShowModal(true), 0);
-                            }}
-                          >
+                          <DropdownMenuItem onClick={() => navigate(`/usuarios/${user.id}/editar`)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => setTimeout(() => setToDelete(user), 0)}
+                            onClick={() => setToDelete(user)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Excluir
@@ -138,8 +137,9 @@ export default function Usuarios() {
                   toast({ title: "Usuário excluído", description: "O usuário foi removido com sucesso." });
                   setToDelete(undefined);
                   refetch();
-                } catch (e: any) {
-                  toast({ title: "Erro ao excluir", description: e?.message || "Tente novamente mais tarde.", variant: "destructive" });
+                } catch (e) {
+                  const message = (e as { message?: string })?.message ?? "Tente novamente mais tarde.";
+                  toast({ title: "Erro ao excluir", description: message, variant: "destructive" });
                 }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -149,27 +149,6 @@ export default function Usuarios() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <NovoUsuarioModal
-        open={showModal}
-        onOpenChange={(v) => {
-          if (!v) setEditing(undefined);
-          setShowModal(v);
-        }}
-        onSuccess={() => refetch()}
-        initialData={
-          editing && {
-            id: editing.id,
-            user_id: editing.user_id,
-            first_name: editing.first_name,
-            last_name: editing.last_name,
-            role: editing.role,
-            aprovador: editing.aprovador,
-            pacoteiro: editing.pacoteiro,
-            cargo: editing.cargo,
-          }
-        }
-      />
     </>
   );
 }

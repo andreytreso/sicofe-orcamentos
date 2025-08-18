@@ -139,12 +139,7 @@
     -webkit-text-fill-color: rgb(var(--foreground) / 1);
   }
 
-  /* Borda vermelha nativa em campos obrigatórios não preenchidos */
-  input:invalid,
-  select:invalid {
-    @apply border-red-500;
   }
-}
 
 /* ────────────────────────────────────────────────────────────
    Classes utilitárias para Modais (Dialog do shadcn/ui)

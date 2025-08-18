@@ -1,188 +1,92 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { X, Filter } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
 import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from "@/hooks/useAccountHierarchy";
+import { useMemo, useState, useEffect } from "react";
 
-interface Filters {
-  level_1?: string;
-  level_2?: string;
-  analytical_account?: string;
-}
+const norm = (s?: string) =>
+  (s ?? "")
+    .normalize("NFC")
+    .replace(/\s+/g, " ")
+    .trim();
 
-interface PlanoContasFiltrosProps {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
-}
+const uniq = (arr: (string | undefined)[]) => {
+  const m = new Map<string, string>(); // chave normalizada -> rótulo exibido
+  arr.forEach((v, i) => {
+    const n = norm(v);
+    if (n) m.set(n, n);
+  });
+  return Array.from(m.values());
+};
 
-export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoContasFiltrosProps) {
-  const [localFilters, setLocalFilters] = useState<Filters>(filters);
-  
-  const level1Options = useLevel1Options();
-  const level2Options = useLevel2Options(localFilters.level_1);
-  const analyticalOptions = useAnalyticalAccountOptions(localFilters.level_1, localFilters.level_2);
+export default function PlanoContasFiltros({
+  onChange,
+}: {
+  onChange?: (f: { level1?: string; level2?: string; analytical?: string }) => void;
+}) {
+  const [level1, setLevel1] = useState<string>("");
+  const [level2, setLevel2] = useState<string>("");
+  const [analytical, setAnalytical] = useState<string>("");
 
-  const handleFilterChange = (key: keyof Filters, value?: string) => {
-    const newFilters = { ...localFilters };
-    
-    if (value) {
-      newFilters[key] = value;
-    } else {
-      delete newFilters[key];
-    }
+  const l1Raw = useLevel1Options();
+  const l2Raw = useLevel2Options(level1);
+  const aRaw  = useAnalyticalAccountOptions(level1, level2);
 
-    // Clear dependent filters when parent changes
-    if (key === 'level_1') {
-      delete newFilters.level_2;
-      delete newFilters.analytical_account;
-    } else if (key === 'level_2') {
-      delete newFilters.analytical_account;
-    }
+  const l1 = useMemo(() => uniq(l1Raw), [l1Raw]);
+  const l2 = useMemo(() => uniq(l2Raw), [l2Raw]);
+  const a  = useMemo(() => uniq(aRaw),  [aRaw]);
 
-    setLocalFilters(newFilters);
-  };
+  // se a opção selecionada sumir após normalização, limpa
+  useEffect(() => {
+  if (level1 && !l1.includes(level1)) setLevel1("");
+  if (level2 && !l2.includes(level2)) setLevel2("");
+  if (analytical && !a.includes(analytical)) setAnalytical("");
+}, [l1, l2, a, level1, level2, analytical]);
 
-  const applyFilters = () => {
-    onFiltersChange(localFilters);
-  };
 
-  const clearFilters = () => {
-    setLocalFilters({});
-    onFiltersChange({});
-  };
-
-  const hasActiveFilters = Object.keys(filters).length > 0;
+  useEffect(() => { onChange?.({ level1, level2, analytical }); }, [level1, level2, analytical, onChange]);
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros
-          </CardTitle>
-          {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={clearFilters}
-              className="text-xs"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Limpar
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Nível 1 (Grupo)</label>
-            <Select 
-              value={localFilters.level_1 || "all"} 
-              onValueChange={(value) => handleFilterChange('level_1', value === "all" ? undefined : value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar grupo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os grupos</SelectItem>
-                {level1Options.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Nível 2 (Subgrupo)</label>
-            <Select 
-              value={localFilters.level_2 || "all"} 
-              onValueChange={(value) => handleFilterChange('level_2', value === "all" ? undefined : value)}
-              disabled={!localFilters.level_1}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar subgrupo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os subgrupos</SelectItem>
-                {level2Options.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Conta Analítica</label>
-            <Select 
-              value={localFilters.analytical_account || "all"} 
-              onValueChange={(value) => handleFilterChange('analytical_account', value === "all" ? undefined : value)}
-              disabled={!localFilters.level_2}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar conta" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as contas</SelectItem>
-                {analyticalOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Nível 1 */}
+        <div>
+          <Label>Nível 1</Label>
+          <Select value={level1} onValueChange={(v) => { setLevel1(v); setLevel2(""); setAnalytical(""); }}>
+            <SelectTrigger><SelectValue placeholder="Selecione o nível 1" /></SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              {l1.map((opt, idx) => (
+                <SelectItem key={`l1-${idx}`} value={opt}>{opt}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex flex-wrap gap-2">
-            {filters.level_1 && (
-              <Badge variant="secondary" className="text-xs">
-                Grupo: {filters.level_1}
-                <button 
-                  onClick={() => handleFilterChange('level_1')}
-                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            )}
-            {filters.level_2 && (
-              <Badge variant="secondary" className="text-xs">
-                Subgrupo: {filters.level_2}
-                <button 
-                  onClick={() => handleFilterChange('level_2')}
-                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            )}
-            {filters.analytical_account && (
-              <Badge variant="secondary" className="text-xs">
-                Conta: {filters.analytical_account}
-                <button 
-                  onClick={() => handleFilterChange('analytical_account')}
-                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            )}
-          </div>
-          
-          <Button onClick={applyFilters} size="sm">
-            Aplicar Filtros
-          </Button>
+        {/* Nível 2 */}
+        <div>
+          <Label>Nível 2</Label>
+          <Select value={level2} onValueChange={(v) => { setLevel2(v); setAnalytical(""); }} disabled={!level1}>
+            <SelectTrigger><SelectValue placeholder="Selecione o nível 2" /></SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              {l2.map((opt, idx) => (
+                <SelectItem key={`l2-${idx}`} value={opt}>{opt}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Analítica */}
+        <div>
+          <Label>Nível 3 (Analítica)</Label>
+          <Select value={analytical} onValueChange={setAnalytical} disabled={!level2}>
+            <SelectTrigger><SelectValue placeholder="Escolha a analítica" /></SelectTrigger>
+            <SelectContent className="z-50 bg-background">
+              {a.map((opt, idx) => (
+                <SelectItem key={`a-${idx}`} value={opt}>{opt}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
   );
 }
