@@ -1,91 +1,113 @@
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
-import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from "@/hooks/useAccountHierarchy";
-import { useMemo, useState, useEffect } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  useLevel1Options,
+  useLevel2Options,
+  useAnalyticalAccountOptions,
+} from "@/hooks/useAccountHierarchy";
+import { Dispatch, SetStateAction } from "react";
 
-const norm = (s?: string) =>
-  (s ?? "")
-    .normalize("NFC")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const uniq = (arr: (string | undefined)[]) => {
-  const m = new Map<string, string>(); // chave normalizada -> rótulo exibido
-  arr.forEach((v, i) => {
-    const n = norm(v);
-    if (n) m.set(n, n);
-  });
-  return Array.from(m.values());
+export type Filters = {
+  level1?: string;
+  level2?: string;
+  analytical?: string;
 };
 
-export default function PlanoContasFiltros({
-  onChange,
-}: {
-  onChange?: (f: { level1?: string; level2?: string; analytical?: string }) => void;
-}) {
-  const [level1, setLevel1] = useState<string>("");
-  const [level2, setLevel2] = useState<string>("");
-  const [analytical, setAnalytical] = useState<string>("");
+type Props = {
+  filters: Filters;
+  onFiltersChange: Dispatch<SetStateAction<Filters>>;
+};
 
-  const l1Raw = useLevel1Options();
-  const l2Raw = useLevel2Options(level1);
-  const aRaw  = useAnalyticalAccountOptions(level1, level2);
+export default function PlanoContasFiltros({ filters, onFiltersChange }: Props) {
+  const level1Options = useLevel1Options();
+  const level2Options = useLevel2Options(filters.level1);
+  const analyticalOptions = useAnalyticalAccountOptions(
+    filters.level1,
+    filters.level2
+  );
 
-  const l1 = useMemo(() => uniq(l1Raw), [l1Raw]);
-  const l2 = useMemo(() => uniq(l2Raw), [l2Raw]);
-  const a  = useMemo(() => uniq(aRaw),  [aRaw]);
+  const setLevel1 = (v: string) =>
+    onFiltersChange({ level1: v, level2: undefined, analytical: undefined });
 
-  // se a opção selecionada sumir após normalização, limpa
-  useEffect(() => {
-  if (level1 && !l1.includes(level1)) setLevel1("");
-  if (level2 && !l2.includes(level2)) setLevel2("");
-  if (analytical && !a.includes(analytical)) setAnalytical("");
-}, [l1, l2, a, level1, level2, analytical]);
+  const setLevel2 = (v: string) =>
+    onFiltersChange((prev) => ({ ...prev, level2: v, analytical: undefined }));
 
-
-  useEffect(() => { onChange?.({ level1, level2, analytical }); }, [level1, level2, analytical, onChange]);
+  const setAnalytical = (v: string) =>
+    onFiltersChange((prev) => ({ ...prev, analytical: v }));
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-3">
-        {/* Nível 1 */}
-        <div>
-          <Label>Nível 1</Label>
-          <Select value={level1} onValueChange={(v) => { setLevel1(v); setLevel2(""); setAnalytical(""); }}>
-            <SelectTrigger><SelectValue placeholder="Selecione o nível 1" /></SelectTrigger>
-            <SelectContent className="z-50 bg-background">
-              {l1.map((opt, idx) => (
-                <SelectItem key={`l1-${idx}`} value={opt}>{opt}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="grid gap-6 md:grid-cols-3">
+      {/* Nível 1 */}
+      <div className="space-y-2">
+        <Label className="text-gray-700">Nível 1</Label>
+        <Select value={filters.level1 ?? ""} onValueChange={setLevel1}>
+          <SelectTrigger className="bg-white border-gray-300">
+            <SelectValue placeholder="Selecione o nível 1" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-gray-300 z-50">
+            {level1Options.map((opt) => (
+              <SelectItem key={opt} value={opt}>
+                {opt}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Nível 2 */}
-        <div>
-          <Label>Nível 2</Label>
-          <Select value={level2} onValueChange={(v) => { setLevel2(v); setAnalytical(""); }} disabled={!level1}>
-            <SelectTrigger><SelectValue placeholder="Selecione o nível 2" /></SelectTrigger>
-            <SelectContent className="z-50 bg-background">
-              {l2.map((opt, idx) => (
-                <SelectItem key={`l2-${idx}`} value={opt}>{opt}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Nível 2 */}
+      <div className="space-y-2">
+        <Label className="text-gray-700">Nível 2</Label>
+        <Select
+          value={filters.level2 ?? ""}
+          onValueChange={setLevel2}
+          disabled={!filters.level1}
+        >
+          <SelectTrigger className="bg-white border-gray-300">
+            <SelectValue
+              placeholder={
+                filters.level1 ? "Selecione o nível 2" : "Escolha o nível 1"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-gray-300 z-50">
+            {level2Options.map((opt) => (
+              <SelectItem key={opt} value={opt}>
+                {opt}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Analítica */}
-        <div>
-          <Label>Nível 3 (Analítica)</Label>
-          <Select value={analytical} onValueChange={setAnalytical} disabled={!level2}>
-            <SelectTrigger><SelectValue placeholder="Escolha a analítica" /></SelectTrigger>
-            <SelectContent className="z-50 bg-background">
-              {a.map((opt, idx) => (
-                <SelectItem key={`a-${idx}`} value={opt}>{opt}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Nível 3 (Analítica) */}
+      <div className="space-y-2">
+        <Label className="text-gray-700">Nível 3 (Analítica)</Label>
+        <Select
+          value={filters.analytical ?? ""}
+          onValueChange={setAnalytical}
+          disabled={!filters.level2}
+        >
+          <SelectTrigger className="bg-white border-gray-300">
+            <SelectValue
+              placeholder={
+                filters.level2 ? "Escolha o nível 2" : "Escolha o nível 2"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-gray-300 z-50">
+            {analyticalOptions.map((opt) => (
+              <SelectItem key={opt} value={opt}>
+                {opt}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
