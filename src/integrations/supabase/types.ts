@@ -54,13 +54,6 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_account_hierarchy_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
         ]
       }
       approval_history: {
@@ -162,13 +155,6 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "approval_items_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
         ]
       }
       budgets: {
@@ -239,13 +225,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "budgets_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -404,13 +383,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cost_centers_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "cost_centers_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
@@ -562,6 +534,45 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -615,13 +626,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_suppliers_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
@@ -633,13 +637,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "suppliers_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -708,13 +705,6 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "transactions_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_company_access: {
@@ -754,13 +744,6 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "user_company_access_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
@@ -789,37 +772,29 @@ export type Database = {
           },
         ]
       }
-      companies_with_group: {
-        Row: {
-          cnpj: string | null
-          created_at: string | null
-          email: string | null
-          endereco_cep: string | null
-          endereco_cidade: string | null
-          endereco_estado: string | null
-          endereco_numero: string | null
-          endereco_rua: string | null
-          group_code: string | null
-          group_id: string | null
-          group_name: string | null
-          id: string | null
-          name: string | null
-          status: string | null
-          telefone: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "companies_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "company_groups"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Functions: {
+      get_companies_with_group: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cnpj: string
+          created_at: string
+          email: string
+          endereco_cep: string
+          endereco_cidade: string
+          endereco_estado: string
+          endereco_numero: string
+          endereco_rua: string
+          group_code: string
+          group_id: string
+          group_name: string
+          id: string
+          name: string
+          status: string
+          telefone: string
+          updated_at: string
+        }[]
+      }
       is_admin: {
         Args: { uid: string }
         Returns: boolean
