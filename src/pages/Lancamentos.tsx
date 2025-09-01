@@ -37,7 +37,7 @@ export default function Lancamentos() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lancamentoToDelete, setLancamentoToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    empresa: "",
+    company_id: "",
     ano: new Date().getFullYear().toString(),
     grupoContas1: "",
     grupoContas2: "",
@@ -89,8 +89,8 @@ export default function Lancamentos() {
     length: 6
   }, (_, i) => currentYear + i);
 
-  // Transform companies for compatibility
-  const empresas = companies.map(company => company.name);
+  // Transform companies for selects (id + name)
+  const empresas = companies.map(company => ({ id: company.id, name: company.name }));
   const meses = [{
     key: "jan",
     label: "Janeiro"
@@ -349,7 +349,7 @@ export default function Lancamentos() {
     // Create transaction data for each selected month
     mesesSelecionados.forEach(mes => {
       const transactionData = {
-        company_id: selectedCompany.id,
+        company_id: formData.company_id,
         year: parseInt(formData.ano),
         level_1_group: formData.grupoContas1,
         level_2_group: formData.grupoContas2,
@@ -457,9 +457,11 @@ export default function Lancamentos() {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
                   <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-gray-500">Todas as empresas</SelectItem>
-                  {empresas.map(empresa => <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
-                      {empresa}
-                    </SelectItem>)}
+                  {empresas.map(e => (
+                    <SelectItem key={e.id} value={e.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
+                      {e.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -556,17 +558,19 @@ export default function Lancamentos() {
             <div className="grid grid-cols-1">
               <div className="space-y-2">
                 <Label htmlFor="empresa" className="text-gray-700 font-medium">Empresa *</Label>
-                <Select value={formData.empresa} onValueChange={value => setFormData(prev => ({
+                <Select value={formData.company_id} onValueChange={value => setFormData(prev => ({
                 ...prev,
-                empresa: value
+                company_id: value
               }))}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {empresas.map(empresa => <SelectItem key={empresa} value={empresa} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                        {empresa}
-                      </SelectItem>)}
+                    {empresas.map(e => (
+                      <SelectItem key={e.id} value={e.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                        {e.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -707,3 +711,4 @@ export default function Lancamentos() {
       </AlertDialog>
     </div>;
 }
+

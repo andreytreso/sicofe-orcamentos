@@ -1,97 +1,71 @@
 import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 
-type CompanyForm = {
+export type CompanyForm = {
   id?: string;
   name: string;
-  grupo: string;
-  status: "active" | "inactive";
+  grupo: string | null;
+  status: 'active' | 'inactive';
 };
 
 type Props = {
-  /** se `undefined` abre em modo _criar_; caso contrário, _editar_ */
-  initialData?: CompanyForm;
   open: boolean;
-  onOpenChange: (v: boolean) => void;
-  /** callback para atualizar a lista do React-Query */
+  onOpenChange: (open: boolean) => void;
+  initialData?: CompanyForm;  
   onSuccess?: () => void;
 };
 
-export default function NovaEmpresaModal({
-  initialData,
-  open,
-  onOpenChange,
-  onSuccess,
-}: Props) {
-  const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<CompanyForm>({
-    id: initialData?.id,
-    name: initialData?.name ?? "",
-    grupo: initialData?.grupo ?? "",
-    status: initialData?.status ?? "active",
-  });
+const EMPTY: CompanyForm = {
+  name: "",
+  grupo: null,
+  status: "active",
+};
+
+function toMessage(e: unknown) {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "string") return e;
+  try { return JSON.stringify(e); } catch { return "Erro desconhecido"; }
+}
+
+export default function NovaEmpresaModal({ open, onOpenChange, initialData, onSuccess }: Props) {
   const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<CompanyForm>(EMPTY);
 
-  /* se abrir para editar, popula o formulário */
+  // sempre que abrir/editar, sincroniza o formulário
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        id: initialData.id,
-        name: initialData.name,
-        grupo: initialData.grupo,
-        status: initialData.status,
-      });
-    }
-  }, [initialData]);
+    if (!open) return; // só reseta ao abrir
+    setForm(initialData ? { ...initialData } : { ...EMPTY });
+  }, [open, initialData]);
 
-  /* helpers ---------------------------------------------------------------- */
-
-  const toMessage = (e: unknown) =>
-    e instanceof Error ? e.message : String(e);
-
-  const handleChange = (field: keyof CompanyForm, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
-
-  /* submit ----------------------------------------------------------------- */
-
-  async function handleSubmit(e?: React.FormEvent) {
-    e?.preventDefault();
-    if (!form.name.trim()) return alert("Nome é obrigatório.");
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
 
     setSaving(true);
     try {
-      const { id, ...payload } = form;
+      const payload = {
+        name: form.name.trim(),
+        grupo: form.grupo,
+        status: form.status,
+      };
 
-      const { error } = id
-        ? await supabase.from("companies").update(payload).eq("id", id)
-        : await supabase.from("companies").insert(payload);
+      if (form.id) {
+        const { error } = await supabase.from("companies").update(payload).eq("id", form.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("companies").insert(payload);
+        if (error) throw error;
+      }
 
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
       onSuccess?.();
+      // feche SEM desmontar imediatamente; quem controla é o pai
       onOpenChange(false);
     } catch (err) {
       alert(toMessage(err));
@@ -100,52 +74,51 @@ export default function NovaEmpresaModal({
     }
   }
 
-  /* ----------------------------------------------------------------------- */
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="modal-wrapper">
-        <DialogHeader className="modal-header">
-          <DialogTitle className="modal-title">
-            {form.id ? "Editar Empresa" : "Nova Empresa"}
-          </DialogTitle>
-          <DialogDescription className="modal-desc">
-            Preencha os dados abaixo
+      <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg sm:rounded-lg p-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
+          <DialogTitle className="text-gray-700">{form.id ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
+          <DialogDescription className="text-gray-700">
+            Preencha os dados abaixo e clique em salvar
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
-          <div>
-            <Label htmlFor="name">Nome *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-gray-700">Nome *</Label>
             <Input
               id="name"
+              placeholder="Ex.: Sicofe Loja 1"
               value={form.name}
-              onChange={(e) => handleChange("name", e.target.value)}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              autoComplete="off"
               required
             />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="grupo">Grupo</Label>
+            <div className="space-y-2">
+              <Label htmlFor="grupo" className="text-gray-700">Grupo</Label>
               <Input
                 id="grupo"
-                value={form.grupo}
-                onChange={(e) => handleChange("grupo", e.target.value)}
+                placeholder="Ex.: Sicofe"
+                value={form.grupo ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, grupo: e.target.value || null }))}
+                autoComplete="off"
               />
             </div>
-            <div>
-              <Label>Status</Label>
+
+            <div className="space-y-2">
+              <Label className="text-gray-700">Status</Label>
               <Select
                 value={form.status}
-                onValueChange={(v) =>
-                  handleChange("status", v as "active" | "inactive")
-                }
+                onValueChange={(v: "active" | "inactive") => setForm((f) => ({ ...f, status: v }))}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
+                <SelectTrigger className="bg-white border border-gray-200 text-gray-900 focus:ring-0 focus-visible:ring-2">
+                  <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-gray-900 border border-gray-200">
                   <SelectItem value="active">Ativa</SelectItem>
                   <SelectItem value="inactive">Inativa</SelectItem>
                 </SelectContent>
@@ -153,18 +126,26 @@ export default function NovaEmpresaModal({
             </div>
           </div>
 
-          <DialogFooter className="modal-footer">
-            <DialogClose asChild>
-              <Button variant="outline" type="button">
-                Cancelar
-              </Button>
-            </DialogClose>
+          <div className="flex justify-end gap-2 pt-6">
+            <Button
+              type="button"
+              variant="outline"
+              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              disabled={saving}
+              onClick={() => onOpenChange(false)}
+            >
+              Cancelar
+            </Button>
 
-            <Button type="submit" disabled={saving}>
+            <Button
+              type="submit"
+              disabled={saving || !form.name.trim()}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

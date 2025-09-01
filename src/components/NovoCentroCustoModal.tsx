@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,10 +30,11 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
   const [form, setForm] = useState({
     code: "",
     name: "",
-    status: "ativo" as "ativo" | "inativo",
+    status: "active" as "active" | "inactive",
     company_id: "",
   });
   const [saving, setSaving] = useState(false);
+  const [generatingCode, setGeneratingCode] = useState(false);
 
   const handleChange = (field: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -58,6 +59,83 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
     }
   }
 
+  // Novo fluxo: gera código automaticamente e envia campos conforme schema
+  async function onSubmitForm(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (!form.name.trim() || !form.company_id) {
+      return alert("Nome e empresa são obrigatórios.");
+    }
+
+    setSaving(true);
+    try {
+      let codeToUse = form.code;
+      if (!codeToUse) {
+        codeToUse = await generateNextCode(form.company_id);
+      }
+
+      const payload = {
+        code: codeToUse,
+        name: form.name.trim(),
+        status: form.status,
+        company_id: form.company_id,
+      } as const;
+
+      const { error } = await supabase.from('cost_centers').insert(payload);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['cost_centers'] });
+      onSuccess?.();
+      onOpenChange(false);
+    } catch (err: any) {
+      alert(err?.message || 'Erro ao criar centro de custo.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function generateNextCode(companyId: string) {
+    if (!companyId) return '';
+    try {
+      setGeneratingCode(true);
+      const { data, error } = await supabase
+        .from('cost_centers')
+        .select('code')
+        .eq('company_id', companyId)
+        .order('code', { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      const lastCode = data?.[0]?.code ?? '000';
+      const next = (parseInt(String(lastCode), 10) || 0) + 1;
+      return String(next).padStart(3, '0');
+    } finally {
+      setGeneratingCode(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      if (form.company_id) {
+        const next = await generateNextCode(form.company_id);
+        setForm(prev => ({ ...prev, code: next }));
+      } else if (companies.length > 0) {
+        const first = companies[0];
+        setForm(prev => ({ ...prev, company_id: first.id }));
+        const next = await generateNextCode(first.id);
+        setForm(prev => ({ ...prev, code: next }));
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !form.company_id) return;
+    (async () => {
+      const next = await generateNextCode(form.company_id);
+      setForm(prev => ({ ...prev, code: next }));
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.company_id]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-wrapper">
@@ -68,11 +146,11 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
+        <form onSubmit={onSubmitForm} className="px-6 pb-6 space-y-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <Label htmlFor="code">Código *</Label>
-              <Input id="code" value={form.code} onChange={(e) => handleChange("code", e.target.value)} required />
+              <Input id="code" value={form.code} disabled readOnly placeholder={generatingCode ? 'gerando...' : ''} />
             </div>
             <div>
               <Label htmlFor="name">Nome *</Label>
@@ -80,7 +158,7 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-3">
             <div>
               <Label>Empresa *</Label>
               <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)}>
@@ -94,15 +172,16 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
                 </SelectContent>
               </Select>
             </div>
+            
             <div>
               <Label>Status</Label>
               <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ativo">Ativo</SelectItem>
-                  <SelectItem value="inativo">Inativo</SelectItem>
+              <SelectContent>
+                  <SelectItem value="active">Ativo</SelectItem>
+                  <SelectItem value="inactive">Inativo</SelectItem>
                 </SelectContent>
               </Select>
             </div>

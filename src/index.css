@@ -172,3 +172,16 @@
     @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-6 px-6 pb-6;
   }
 }
+
+/* ===== Anti-overlay zumbi (Radix/ Dialog / AlertDialog) ===== */
+[data-radix-portal] .fixed.inset-0[data-state='closed'],
+[data-radix-portal] [role='dialog'][data-state='closed'] {
+  pointer-events: none !important;
+}
+
+/* Se o remove-scroll deixar o body travado, libere */
+html[data-scroll-locked] body {
+  overflow: auto !important;
+}
+
+

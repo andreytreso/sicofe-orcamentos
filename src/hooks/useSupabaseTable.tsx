@@ -1,6 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import type { CompanyForm } from '@/components/NovaEmpresaModal';
+import type { Database } from '@/integrations/supabase/types';
+
+type BudgetRow = Database['public']['Tables']['budgets']['Row'] & {
+  companies?: { name: string };
+};
+
+type CategoryRow = Database['public']['Tables']['categories']['Row'];
+
+type EntryRow = Database['public']['Tables']['entries']['Row'] & {
+  budgets?: { name: string };
+  categories?: { name: string; type: string };
+};
 
 interface UseSupabaseTableOptions {
   select?: string;
@@ -151,12 +164,12 @@ export function useSupabaseTable<T = any>(
 }
 
 // Hook específico para companies
-export const useCompaniesTable = () => 
-  useSupabaseTable('companies', { orderBy: { column: 'name' } });
+export const useCompaniesTable = () =>
+  useSupabaseTable<CompanyForm>('companies', { orderBy: { column: 'name' } });
 
 // Hook específico para budgets  
 export const useBudgetsTable = () => 
-  useSupabaseTable('budgets', { 
+  useSupabaseTable<BudgetRow>('budgets', { 
     select: `
       *,
       companies(name)
@@ -166,11 +179,11 @@ export const useBudgetsTable = () =>
 
 // Hook específico para categories
 export const useCategoriesTable = () => 
-  useSupabaseTable('categories', { orderBy: { column: 'name' } });
+  useSupabaseTable<CategoryRow>('categories', { orderBy: { column: 'name' } });
 
 // Hook específico para entries
 export const useEntriesTable = () => 
-  useSupabaseTable('entries', { 
+  useSupabaseTable<EntryRow>('entries', { 
     select: `
       *,
       budgets(name),

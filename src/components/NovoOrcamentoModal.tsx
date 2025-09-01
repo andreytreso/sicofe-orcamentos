@@ -14,6 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useSupabaseTable } from '@/hooks/useSupabaseTable';
+import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
   company_id: z.string().min(1, 'Empresa é obrigatória'),
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -74,7 +75,6 @@ export function NovoOrcamentoModal({
   const watchedStatus = watch('status');
   const onSubmit = async (data: FormData) => {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
       const { data: userData } = await supabase.auth.getUser();
       
       await insertBudget({
