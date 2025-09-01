@@ -12,9 +12,9 @@ export interface Transaction {
   level_1_group: string;
   level_2_group: string;
   analytical_account: string;
-  description: string;
+  description: string | null;
   amount: number;
-  observations: string;
+  observations: string | null;
   competency_months: string[];
   created_at: string;
   updated_at: string;

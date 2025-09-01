@@ -177,7 +177,7 @@ export default function Lancamentos() {
   };
   const handleSelectAllCompetencia = (checked: boolean) => {
     const newCompetencia = Object.keys(formData.competencia).reduce((acc, mes) => {
-      acc[mes] = checked;
+      (acc as any)[mes] = checked;
       return acc;
     }, {} as typeof formData.competencia);
     setFormData(prev => ({

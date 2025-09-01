@@ -43,11 +43,15 @@ export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props)
 
     setSaving(true);
     try {
-      // Get user's first company
+      // Get current user and their first company
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { data: userCompanies, error: companiesError } = await supabase
         .from('user_company_access')
         .select('company_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('user_id', user.id)
         .limit(1);
 
       if (companiesError) throw companiesError;
