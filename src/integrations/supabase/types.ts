@@ -7,14 +7,14 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
-      account_hierarchy: {
+      account_hierarchy_legacy: {
         Row: {
           analytical_account: string
           company_id: string
@@ -44,7 +44,21 @@ export type Database = {
             foreignKeyName: "fk_account_hierarchy_company_id"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "fk_account_hierarchy_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_account_hierarchy_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -138,7 +152,21 @@ export type Database = {
             foreignKeyName: "approval_items_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "approval_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -203,7 +231,21 @@ export type Database = {
             foreignKeyName: "budgets_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -232,57 +274,6 @@ export type Database = {
         }
         Relationships: []
       }
-      chart_of_accounts: {
-        Row: {
-          code: string
-          company_id: string | null
-          created_at: string | null
-          id: string
-          name: string
-          parent_id: string | null
-          status: string | null
-          type: string
-          updated_at: string | null
-        }
-        Insert: {
-          code: string
-          company_id?: string | null
-          created_at?: string | null
-          id?: string
-          name: string
-          parent_id?: string | null
-          status?: string | null
-          type: string
-          updated_at?: string | null
-        }
-        Update: {
-          code?: string
-          company_id?: string | null
-          created_at?: string | null
-          id?: string
-          name?: string
-          parent_id?: string | null
-          status?: string | null
-          type?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chart_of_accounts_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chart_of_accounts_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       companies: {
         Row: {
           cnpj: string | null
@@ -293,7 +284,7 @@ export type Database = {
           endereco_estado: string | null
           endereco_numero: string | null
           endereco_rua: string | null
-          grupo: string | null
+          group_id: string | null
           id: string
           name: string
           status: string
@@ -309,7 +300,7 @@ export type Database = {
           endereco_estado?: string | null
           endereco_numero?: string | null
           endereco_rua?: string | null
-          grupo?: string | null
+          group_id?: string | null
           id?: string
           name: string
           status?: string
@@ -325,18 +316,50 @@ export type Database = {
           endereco_estado?: string | null
           endereco_numero?: string | null
           endereco_rua?: string | null
-          grupo?: string | null
+          group_id?: string | null
           id?: string
           name?: string
           status?: string
           telefone?: string | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_groups: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
         Relationships: []
       }
       cost_centers: {
         Row: {
-          code: string
+          code: string | null
           company_id: string | null
           created_at: string | null
           id: string
@@ -346,7 +369,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          code: string
+          code?: string | null
           company_id?: string | null
           created_at?: string | null
           id?: string
@@ -356,7 +379,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          code?: string
+          code?: string | null
           company_id?: string | null
           created_at?: string | null
           id?: string
@@ -370,7 +393,21 @@ export type Database = {
             foreignKeyName: "cost_centers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "cost_centers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
           {
@@ -426,6 +463,59 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_chart_of_accounts: {
+        Row: {
+          cod_conta_resultado_a1: string
+          cod_conta_resultado_s1: string
+          cod_conta_resultado_s2: string
+          created_at: string | null
+          group_id: string
+          id: string
+          nome_conta_resultado_a1: string
+          nome_conta_resultado_s1: string
+          nome_conta_resultado_s2: string
+          status: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cod_conta_resultado_a1: string
+          cod_conta_resultado_s1: string
+          cod_conta_resultado_s2: string
+          created_at?: string | null
+          group_id: string
+          id?: string
+          nome_conta_resultado_a1: string
+          nome_conta_resultado_s1: string
+          nome_conta_resultado_s2: string
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cod_conta_resultado_a1?: string
+          cod_conta_resultado_s1?: string
+          cod_conta_resultado_s2?: string
+          created_at?: string | null
+          group_id?: string
+          id?: string
+          nome_conta_resultado_a1?: string
+          nome_conta_resultado_s1?: string
+          nome_conta_resultado_s2?: string
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_chart_of_accounts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -514,6 +604,34 @@ export type Database = {
             foreignKeyName: "fk_suppliers_company_id"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -521,7 +639,7 @@ export type Database = {
             foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -580,7 +698,21 @@ export type Database = {
             foreignKeyName: "transactions_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -612,14 +744,80 @@ export type Database = {
             foreignKeyName: "user_company_access_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      account_hierarchy: {
+        Row: {
+          analytical_account: string | null
+          code_analytical: string | null
+          code_level_1: string | null
+          code_level_2: string | null
+          company_id: string | null
+          created_at: string | null
+          group_id: string | null
+          level_1: string | null
+          level_2: string | null
+          status: string | null
+          type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_chart_of_accounts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies_with_group: {
+        Row: {
+          cnpj: string | null
+          created_at: string | null
+          email: string | null
+          endereco_cep: string | null
+          endereco_cidade: string | null
+          endereco_estado: string | null
+          endereco_numero: string | null
+          endereco_rua: string | null
+          group_code: string | null
+          group_id: string | null
+          group_name: string | null
+          id: string | null
+          name: string | null
+          status: string | null
+          telefone: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       is_admin: {
