@@ -16,6 +16,8 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUserCompanies } from "@/hooks/useCompanies";
+import { useCompanyGroups, useCompaniesByGroup } from "@/hooks/useCompanyGroups";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
@@ -26,49 +28,93 @@ interface Props {
 export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: Props) {
   const queryClient = useQueryClient();
   const { data: companies = [] } = useUserCompanies();
+  const { data: companyGroups = [] } = useCompanyGroups();
 
   const [form, setForm] = useState({
-    code: "",
     name: "",
     status: "ativo" as "ativo" | "inativo",
+    type: "company" as "company" | "group",
     company_id: "",
+    group_id: "",
   });
   const [saving, setSaving] = useState(false);
+  
+  const { data: companiesInGroup = [] } = useCompaniesByGroup(
+    form.type === "group" ? form.group_id : null
+  );
 
   const handleChange = (field: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const resetForm = () => {
     setForm({
-      code: "",
       name: "",
       status: "ativo",
+      type: "company",
       company_id: "",
+      group_id: "",
     });
   };
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!form.name.trim() || !form.company_id) {
-      return alert("Nome e empresa são obrigatórios.");
+    
+    if (!form.name.trim()) {
+      toast.error("Nome é obrigatório.");
+      return;
+    }
+    
+    if (form.type === "company" && !form.company_id) {
+      toast.error("Empresa é obrigatória.");
+      return;
+    }
+    
+    if (form.type === "group" && !form.group_id) {
+      toast.error("Grupo é obrigatório.");
+      return;
     }
 
     setSaving(true);
     try {
-      const payload = {
-        ...form,
-        code: form.code.trim() || null, // Permite código vazio (será null no banco)
-      };
-      
-      const { error } = await supabase.from("cost_centers").insert(payload);
-      if (error) throw error;
+      if (form.type === "company") {
+        // Criar para uma empresa específica
+        const payload = {
+          name: form.name,
+          status: form.status,
+          company_id: form.company_id,
+          code: null,
+        };
+        
+        const { error } = await supabase.from("cost_centers").insert(payload);
+        if (error) throw error;
+        
+        toast.success("Centro de custo criado com sucesso!");
+      } else {
+        // Criar para todas as empresas do grupo
+        if (companiesInGroup.length === 0) {
+          toast.error("Nenhuma empresa encontrada no grupo selecionado.");
+          return;
+        }
+        
+        const payloads = companiesInGroup.map(companyId => ({
+          name: form.name,
+          status: form.status,
+          company_id: companyId,
+          code: null,
+        }));
+        
+        const { error } = await supabase.from("cost_centers").insert(payloads);
+        if (error) throw error;
+        
+        toast.success(`Centro de custo criado para ${companiesInGroup.length} empresa(s) do grupo!`);
+      }
       
       queryClient.invalidateQueries({ queryKey: ["cost_centers"] });
       resetForm();
       onSuccess?.();
       onOpenChange(false);
     } catch (err: any) {
-      alert(err?.message || "Erro ao criar centro de custo.");
+      toast.error(err?.message || "Erro ao criar centro de custo.");
     } finally {
       setSaving(false);
     }
@@ -88,33 +134,21 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="code">Código</Label>
-              <Input 
-                id="code" 
-                value={form.code} 
-                onChange={(e) => handleChange("code", e.target.value)} 
-                placeholder="Deixe vazio para auto-gerar"
-              />
-            </div>
-            <div>
-              <Label htmlFor="name">Nome *</Label>
-              <Input id="name" value={form.name} onChange={(e) => handleChange("name", e.target.value)} required />
-            </div>
+          <div>
+            <Label htmlFor="name">Nome *</Label>
+            <Input id="name" value={form.name} onChange={(e) => handleChange("name", e.target.value)} required />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label>Empresa *</Label>
-              <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)}>
+              <Label>Tipo *</Label>
+              <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a empresa" />
+                  <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {companies.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
+                  <SelectItem value="company">Empresa Individual</SelectItem>
+                  <SelectItem value="group">Grupo de Empresas</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -131,6 +165,43 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
               </Select>
             </div>
           </div>
+
+          {form.type === "company" && (
+            <div>
+              <Label>Empresa *</Label>
+              <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {form.type === "group" && (
+            <div>
+              <Label>Grupo *</Label>
+              <Select value={form.group_id} onValueChange={(v) => handleChange("group_id", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o grupo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companyGroups.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.group_id && companiesInGroup.length > 0 && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Será criado em {companiesInGroup.length} empresa(s) do grupo
+                </p>
+              )}
+            </div>
+          )}
 
           <DialogFooter className="modal-footer">
             <DialogClose asChild>
