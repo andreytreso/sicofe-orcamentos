@@ -38,17 +38,33 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
   const handleChange = (field: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const resetForm = () => {
+    setForm({
+      code: "",
+      name: "",
+      status: "ativo",
+      company_id: "",
+    });
+  };
+
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!form.code.trim() || !form.name.trim() || !form.company_id) {
-      return alert("Código, nome e empresa são obrigatórios.");
+    if (!form.name.trim() || !form.company_id) {
+      return alert("Nome e empresa são obrigatórios.");
     }
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("cost_centers").insert(form);
+      const payload = {
+        ...form,
+        code: form.code.trim() || null, // Permite código vazio (será null no banco)
+      };
+      
+      const { error } = await supabase.from("cost_centers").insert(payload);
       if (error) throw error;
+      
       queryClient.invalidateQueries({ queryKey: ["cost_centers"] });
+      resetForm();
       onSuccess?.();
       onOpenChange(false);
     } catch (err: any) {
@@ -59,7 +75,10 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(open) => {
+      if (!open) resetForm();
+      onOpenChange(open);
+    }}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
           <DialogTitle className="modal-title">Novo Centro de Custo</DialogTitle>
@@ -71,8 +90,13 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="code">Código *</Label>
-              <Input id="code" value={form.code} onChange={(e) => handleChange("code", e.target.value)} required />
+              <Label htmlFor="code">Código</Label>
+              <Input 
+                id="code" 
+                value={form.code} 
+                onChange={(e) => handleChange("code", e.target.value)} 
+                placeholder="Deixe vazio para auto-gerar"
+              />
             </div>
             <div>
               <Label htmlFor="name">Nome *</Label>
