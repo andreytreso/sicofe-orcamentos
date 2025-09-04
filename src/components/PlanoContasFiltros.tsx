@@ -89,11 +89,11 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os grupos</SelectItem>
-                {level1Options.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
+                 {level1Options.map((option) => (
+                   <SelectItem key={option || ""} value={option || ""}>
+                     {option}
+                   </SelectItem>
+                 ))}
               </SelectContent>
             </Select>
           </div>
@@ -110,11 +110,11 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os subgrupos</SelectItem>
-                {level2Options.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
+                 {level2Options.map((option) => (
+                   <SelectItem key={option || ""} value={option || ""}>
+                     {option}
+                   </SelectItem>
+                 ))}
               </SelectContent>
             </Select>
           </div>
@@ -131,11 +131,11 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as contas</SelectItem>
-                {analyticalOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
+                 {analyticalOptions.map((option) => (
+                   <SelectItem key={option || ""} value={option || ""}>
+                     {option}
+                   </SelectItem>
+                 ))}
               </SelectContent>
             </Select>
           </div>

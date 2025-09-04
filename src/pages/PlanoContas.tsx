@@ -49,8 +49,8 @@ return <>
      />
 
     <div className="grid gap-4">
-      {accounts?.map(account => (
-        <Card key={account.id} className="hover:shadow-md transition-shadow">
+       {accounts?.map((account, index) => (
+         <Card key={`${account.level_1}-${account.level_2}-${account.analytical_account}-${index}`} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
               <div>

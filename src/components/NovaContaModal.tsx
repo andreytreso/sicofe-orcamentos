@@ -59,7 +59,7 @@ export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props)
         throw new Error("Usuário não tem acesso a nenhuma empresa");
       }
 
-      const { error } = await supabase.from("account_hierarchy").insert({
+      const { error } = await supabase.from("account_hierarchy_legacy").insert({
         ...form,
         company_id: userCompanies[0].company_id
       });
