@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUserCompanies } from "@/hooks/useCompanies";
+import { useUserCompanies, CompanyWithGroup } from "@/hooks/useCompanies";
 import { useCompanyGroups, useCompaniesByGroup } from "@/hooks/useCompanyGroups";
 import { toast } from "sonner";
 
@@ -82,7 +82,6 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
           name: form.name,
           status: form.status,
           company_id: form.company_id,
-          code: null,
         };
         
         const { error } = await supabase.from("cost_centers").insert(payload);
@@ -100,7 +99,6 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
           name: form.name,
           status: form.status,
           company_id: companyId,
-          code: null,
         }));
         
         const { error } = await supabase.from("cost_centers").insert(payloads);
