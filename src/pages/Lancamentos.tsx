@@ -633,9 +633,15 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                     {level1Options.map(grupo => <SelectItem key={grupo || ""} value={grupo || ""} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                     {level1Options.map((grupo, i) => (
+                       <SelectItem
+                         key={`l1-${i}`}
+                         value={grupo || ""}
+                         className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                       >
                          {grupo}
-                       </SelectItem>)}
+                       </SelectItem>
+                     ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -647,9 +653,17 @@ export default function Lancamentos() {
                     <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                     {level2Options.length > 0 ? level2Options.map(grupo => <SelectItem key={grupo || ""} value={grupo || ""} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                           {grupo}
-                         </SelectItem>) : null}
+                     {level2Options.length > 0
+                       ? level2Options.map((grupo, i) => (
+                           <SelectItem
+                             key={`l2-${i}`}
+                             value={grupo || ""}
+                             className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                           >
+                             {grupo}
+                           </SelectItem>
+                         ))
+                       : null}
                   </SelectContent>
                 </Select>
               </div>
@@ -667,9 +681,17 @@ export default function Lancamentos() {
                     <SelectValue placeholder={formData.grupoContas2 ? "Selecione a conta analítica" : "Primeiro selecione o 2º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                     {analyticalOptions.length > 0 ? analyticalOptions.map(conta => <SelectItem key={conta || ""} value={conta || ""} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                           {conta}
-                         </SelectItem>) : null}
+                     {analyticalOptions.length > 0
+                       ? analyticalOptions.map((conta, i) => (
+                           <SelectItem
+                             key={`a-${i}`}
+                             value={conta || ""}
+                             className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                           >
+                             {conta}
+                           </SelectItem>
+                         ))
+                       : null}
                   </SelectContent>
                 </Select>
               </div>

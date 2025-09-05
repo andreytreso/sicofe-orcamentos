@@ -51,33 +51,46 @@ export function useAccountHierarchy(filters?: {
 
 export function useLevel1Options() {
   const { data: hierarchy = [] } = useAccountHierarchy();
-  
-  const level1Options = [...new Set(hierarchy.map(item => item.level_1).filter(Boolean))];
+  const norm = (s?: string | null) => (s ?? "").normalize("NFC").replace(/\s+/g, " ").trim();
+  const level1Options = Array.from(
+    new Set(
+      hierarchy
+        .map((item) => norm(item.level_1))
+        .filter((v) => v.length > 0)
+    )
+  );
   return level1Options;
 }
 
 export function useLevel2Options(level1?: string) {
   const { data: hierarchy = [] } = useAccountHierarchy();
-  
-  const level2Options = hierarchy
-    .filter(item => !level1 || item.level_1 === level1)
-    .map(item => item.level_2)
-    .filter(Boolean)
-    .filter((value, index, array) => array.indexOf(value) === index);
-    
+  const norm = (s?: string | null) => (s ?? "").normalize("NFC").replace(/\s+/g, " ").trim();
+  const l1 = norm(level1);
+  const level2Options = Array.from(
+    new Set(
+      hierarchy
+        .filter((item) => !l1 || norm(item.level_1) === l1)
+        .map((item) => norm(item.level_2))
+        .filter((v) => v.length > 0)
+    )
+  );
   return level2Options;
 }
 
 export function useAnalyticalAccountOptions(level1?: string, level2?: string) {
   const { data: hierarchy = [] } = useAccountHierarchy();
-  
-  const analyticalOptions = hierarchy
-    .filter(item => 
-      (!level1 || item.level_1 === level1) && 
-      (!level2 || item.level_2 === level2)
+  const norm = (s?: string | null) => (s ?? "").normalize("NFC").replace(/\s+/g, " ").trim();
+  const l1 = norm(level1);
+  const l2 = norm(level2);
+  const analyticalOptions = Array.from(
+    new Set(
+      hierarchy
+        .filter(
+          (item) => (!l1 || norm(item.level_1) === l1) && (!l2 || norm(item.level_2) === l2)
+        )
+        .map((item) => norm(item.analytical_account))
+        .filter((v) => v.length > 0)
     )
-    .map(item => item.analytical_account)
-    .filter(Boolean);
-    
+  );
   return analyticalOptions;
 }
