@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,10 +22,16 @@ import { toast } from "sonner";
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  initialData?: {
+    id?: string;
+    name: string;
+    status: string;
+    company_id?: string;
+  };
   onSuccess?: () => void;
 }
 
-export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: Props) {
+export default function NovoCentroCustoModal({ open, onOpenChange, initialData, onSuccess }: Props) {
   const queryClient = useQueryClient();
   const { data: companies = [] } = useUserCompanies();
   const { data: companyGroups = [] } = useCompanyGroups();
@@ -37,6 +43,21 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
     company_id: "",
     group_id: "",
   });
+
+  // Reset form when modal opens/closes or initialData changes
+  useEffect(() => {
+    if (open && initialData) {
+      setForm({
+        name: initialData.name,
+        status: initialData.status as "ativo" | "inativo",
+        type: "company",
+        company_id: initialData.company_id || "",
+        group_id: "",
+      });
+    } else if (open) {
+      resetForm();
+    }
+  }, [open, initialData]);
   const [saving, setSaving] = useState(false);
   
   const { data: companiesInGroup = [] } = useCompaniesByGroup(
@@ -64,20 +85,35 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
       return;
     }
     
-    if (form.type === "company" && !form.company_id) {
+    if (!initialData && form.type === "company" && !form.company_id) {
       toast.error("Empresa é obrigatória.");
       return;
     }
     
-    if (form.type === "group" && !form.group_id) {
+    if (!initialData && form.type === "group" && !form.group_id) {
       toast.error("Grupo é obrigatório.");
       return;
     }
 
     setSaving(true);
     try {
-      if (form.type === "company") {
-        // Criar para uma empresa específica
+      if (initialData?.id) {
+        // Editing existing cost center
+        const payload = {
+          name: form.name,
+          status: form.status,
+        };
+        
+        const { error } = await supabase
+          .from("cost_centers")
+          .update(payload)
+          .eq("id", initialData.id);
+        
+        if (error) throw error;
+        
+        toast.success("Centro de custo atualizado com sucesso!");
+      } else if (form.type === "company") {
+        // Creating for specific company
         const payload = {
           name: form.name,
           status: form.status,
@@ -89,7 +125,7 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
         
         toast.success("Centro de custo criado com sucesso!");
       } else {
-        // Criar para todas as empresas do grupo
+        // Creating for all companies in group
         if (companiesInGroup.length === 0) {
           toast.error("Nenhuma empresa encontrada no grupo selecionado.");
           return;
@@ -112,7 +148,7 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
       onSuccess?.();
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err?.message || "Erro ao criar centro de custo.");
+      toast.error(err?.message || "Erro ao salvar centro de custo.");
     } finally {
       setSaving(false);
     }
@@ -125,7 +161,9 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
     }}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
-          <DialogTitle className="modal-title">Novo Centro de Custo</DialogTitle>
+          <DialogTitle className="modal-title">
+            {initialData ? 'Editar Centro de Custo' : 'Novo Centro de Custo'}
+          </DialogTitle>
           <DialogDescription className="modal-desc">
             Informe os dados do centro de custo
           </DialogDescription>
@@ -138,18 +176,21 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label>Tipo *</Label>
-              <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="company">Empresa Individual</SelectItem>
-                  <SelectItem value="group">Grupo de Empresas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Tipo - só mostra para criação */}
+            {!initialData && (
+              <div>
+                <Label>Tipo *</Label>
+                <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="company">Empresa Individual</SelectItem>
+                    <SelectItem value="group">Grupo de Empresas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label>Status</Label>
               <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
@@ -164,7 +205,8 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
             </div>
           </div>
 
-          {form.type === "company" && (
+          {/* Empresa/Grupo - só mostra para criação */}
+          {!initialData && form.type === "company" && (
             <div>
               <Label>Empresa *</Label>
               <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)}>
@@ -180,7 +222,7 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
             </div>
           )}
 
-          {form.type === "group" && (
+          {!initialData && form.type === "group" && (
             <div>
               <Label>Grupo *</Label>
               <Select value={form.group_id} onValueChange={(v) => handleChange("group_id", v)}>
@@ -206,7 +248,8 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess }: 
               <Button variant="outline" type="button">Cancelar</Button>
             </DialogClose>
             <Button type="submit" disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Salvar
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {initialData ? 'Atualizar' : 'Salvar'}
             </Button>
           </DialogFooter>
         </form>
