@@ -16,6 +16,8 @@ import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from 
 import { useTransactions, TransactionFilters } from '@/hooks/useTransactions';
 import { useCostCenters } from '@/hooks/useCostCenters';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCompanySuppliers } from '@/hooks/useSuppliers';
+import { useCompanyCollaborators } from '@/hooks/useCollaborators';
 interface Lancamento {
   id: string;
   data: string;
@@ -66,6 +68,8 @@ export default function Lancamentos() {
     data: companies = []
   } = useCompanies();
   const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(formData.empresa);
+  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(formData.empresa);
+  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCompanyCollaborators(formData.empresa);
   const level1Options = useLevel1Options();
   const level2Options = useLevel2Options(formData.grupoContas1);
   const analyticalOptions = useAnalyticalAccountOptions(formData.grupoContas1, formData.grupoContas2);
@@ -73,11 +77,20 @@ export default function Lancamentos() {
   // Centros de custo (multi seleção)
   const [allCostCenters, setAllCostCenters] = useState(true);
   const [selectedCostCenters, setSelectedCostCenters] = useState<string[]>([]);
+  const [useSupplier, setUseSupplier] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("");
+  const [useCollaborator, setUseCollaborator] = useState(false);
+  const [selectedCollaborator, setSelectedCollaborator] = useState<string>("");
 
   useEffect(() => {
     // Ao trocar empresa, reset seleção de centros de custo
     setAllCostCenters(true);
     setSelectedCostCenters([]);
+    // Reset suppliers/collaborators
+    setUseSupplier(false);
+    setSelectedSupplier("");
+    setUseCollaborator(false);
+    setSelectedCollaborator("");
   }, [formData.empresa]);
   const filters: TransactionFilters = {
     companyId: selectedEmpresa || undefined,
@@ -198,6 +211,14 @@ export default function Lancamentos() {
     setAllCostCenters(isAll);
     const selected = (transaction.transaction_cost_centers || []).map((tcc: any) => tcc.cost_center_id);
     setSelectedCostCenters(isAll ? [] : selected);
+
+    // Prefill supplier/collaborator
+    const supplierId = (transaction as any).supplier_id as string | undefined;
+    const collaboratorId = (transaction as any).collaborator_id as string | undefined;
+    setUseSupplier(!!supplierId);
+    setSelectedSupplier(supplierId || "");
+    setUseCollaborator(!!collaboratorId);
+    setSelectedCollaborator(collaboratorId || "");
 
     setShowForm(true);
   };
@@ -415,6 +436,8 @@ export default function Lancamentos() {
         transaction_date: `${formData.ano}-${monthMap[mes]}-01`,
         all_cost_centers: allCostCenters,
         cost_center_ids: allCostCenters ? [] : selectedCostCenters,
+        ...(useSupplier && selectedSupplier ? { supplier_id: selectedSupplier } : {}),
+        ...(useCollaborator && selectedCollaborator ? { collaborator_id: selectedCollaborator } : {}),
       };
       if (editingLancamento) {
         updateTransaction(editingLancamento.id, transactionData);
@@ -718,6 +741,72 @@ export default function Lancamentos() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Fornecedores (opcional, dependente da empresa) */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="toggle-supplier"
+                  checked={useSupplier}
+                  disabled={!formData.empresa}
+                  onCheckedChange={(c) => setUseSupplier(!!c)}
+                />
+                <Label htmlFor="toggle-supplier" className="text-gray-700 font-medium">Fornecedores</Label>
+              </div>
+              {useSupplier && (
+                <div className="space-y-2">
+                  <Label className="text-gray-700">Selecionar fornecedor</Label>
+                  <Select
+                    value={selectedSupplier}
+                    onValueChange={(v) => setSelectedSupplier(v)}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 h-11">
+                      <SelectValue placeholder={isLoadingSuppliers ? "Carregando..." : "Selecione o fornecedor"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-300 z-50">
+                      {suppliers.map(s => (
+                        <SelectItem key={s.id} value={s.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Colaboradores (opcional, dependente da empresa) */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="toggle-collaborator"
+                  checked={useCollaborator}
+                  disabled={!formData.empresa}
+                  onCheckedChange={(c) => setUseCollaborator(!!c)}
+                />
+                <Label htmlFor="toggle-collaborator" className="text-gray-700 font-medium">Colaboradores</Label>
+              </div>
+              {useCollaborator && (
+                <div className="space-y-2">
+                  <Label className="text-gray-700">Selecionar colaborador</Label>
+                  <Select
+                    value={selectedCollaborator}
+                    onValueChange={(v) => setSelectedCollaborator(v)}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 h-11">
+                      <SelectValue placeholder={isLoadingCollaborators ? "Carregando..." : "Selecione o colaborador"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-300 z-50">
+                      {collaborators.map(col => (
+                        <SelectItem key={col.id} value={col.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {col.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Segunda linha - Ano */}

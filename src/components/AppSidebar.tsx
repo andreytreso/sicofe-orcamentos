@@ -61,6 +61,11 @@ const cadastrosItems = [
     icon: Truck,
   },
   {
+    title: "Colaboradores",
+    url: "/cadastros/colaboradores",
+    icon: Users,
+  },
+  {
     title: "Centros de Custo",
     url: "/cadastros/centros-custo",
     icon: FileText,

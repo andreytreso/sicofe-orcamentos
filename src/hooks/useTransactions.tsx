@@ -17,6 +17,8 @@ export interface Transaction {
   observations: string | null;
   competency_months: string[];
   all_cost_centers?: boolean;
+  supplier_id?: string | null;
+  collaborator_id?: string | null;
   created_at: string;
   updated_at: string;
   companies?: {
@@ -50,6 +52,8 @@ export interface TransactionFormData {
   transaction_date?: string; // optional: allows aligning period with date
   all_cost_centers?: boolean; // if false, use cost_center_ids below
   cost_center_ids?: string[]; // optional list when not applying to all
+  supplier_id?: string; // optional
+  collaborator_id?: string; // optional
 }
 
 export function useTransactions(filters: TransactionFilters) {
@@ -64,6 +68,8 @@ export function useTransactions(filters: TransactionFilters) {
         .select(`
           *,
           companies(name),
+          suppliers:supplier_id(id, name),
+          collaborators:collaborator_id(id, name),
           transaction_cost_centers(
             cost_center_id,
             cost_centers(id, name, code)
