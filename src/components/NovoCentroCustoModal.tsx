@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,140 +11,191 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUserCompanies, CompanyWithGroup } from "@/hooks/useCompanies";
+import { useCompanyGroups, useCompaniesByGroup } from "@/hooks/useCompanyGroups";
+import { toast } from "sonner";
 
-// Evitar value="" em SelectItem (Radix quebra). Usamos este sentinel.
-const CLEAR_VALUE = "__CLEAR__" as const;
-
-type Company = { id: string; name: string | null; group_id: string | null };
-type Group = { id: string; name: string | null };
-
-type Props = {
+interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  initialData?: {
+    id?: string;
+    name: string;
+    status: string;
+    company_id?: string;
+  };
   onSuccess?: () => void;
-  initialData?: { id: string; name?: string | null; status?: "ativo" | "inativo" | null; company_id?: string | null };
-};
+}
 
-export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess, initialData }: Props) {
-  const { toast } = useToast();
-  const isEdit = Boolean(initialData?.id);
-
-  const [saving, setSaving] = useState(false);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
+export default function NovoCentroCustoModal({ open, onOpenChange, initialData, onSuccess }: Props) {
+  const queryClient = useQueryClient();
+  const { data: companies = [] } = useUserCompanies();
+  const { data: companyGroups = [] } = useCompanyGroups();
 
   const [form, setForm] = useState({
     name: "",
-    group_id: "", // string vazia no estado é OK (não usar em SelectItem)
-    company_id: "",
     status: "ativo" as "ativo" | "inativo",
+    type: "company" as "company" | "group",
+    company_id: "",
+    group_id: "",
   });
 
-  // Carrega dados ao abrir
+  // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
-    if (!open) return;
+    if (open && initialData) {
+      setForm({
+        name: initialData.name,
+        status: initialData.status as "ativo" | "inativo",
+        type: "company",
+        company_id: initialData.company_id || "",
+        group_id: "",
+      });
+    } else if (open) {
+      resetForm();
+    }
+  }, [open, initialData]);
+  const [saving, setSaving] = useState(false);
+  
+  const { data: companiesInGroup = [] } = useCompaniesByGroup(
+    form.type === "group" ? form.group_id : null
+  );
 
-    (async () => {
-      try {
-        const [g, c] = await Promise.all([
-          supabase.from("company_groups").select("id,name").order("name", { ascending: true }),
-          supabase.from("companies").select("id,name,group_id").order("name", { ascending: true }),
-        ]);
+  const handleChange = (field: keyof typeof form, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
-        if (g.error) throw g.error;
-        if (c.error) throw c.error;
-
-        setGroups(g.data ?? []);
-        setCompanies((c.data ?? []) as Company[]);
-
-        if (isEdit && initialData) {
-          const comp = (c.data ?? []).find((x) => x.id === initialData.company_id) as Company | undefined;
-          setForm({
-            name: initialData.name ?? "",
-            group_id: comp?.group_id ?? "",
-            company_id: initialData.company_id ?? "",
-            status: (initialData.status ?? "ativo") as "ativo" | "inativo",
-          });
-        } else {
-          setForm({ name: "", group_id: "", company_id: "", status: "ativo" });
-        }
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Erro ao salvar.";
-        toast({ title: "Erro ao carregar dados", description: msg, variant: "destructive" });
-      }
-    })();
-  }, [open, isEdit, initialData, toast]);
-
-  // Filtra empresas pelo grupo (se houver)
-  const filteredCompanies = useMemo(() => {
-    if (!form.group_id) return companies;
-    return companies.filter((c) => c.group_id === form.group_id);
-  }, [companies, form.group_id]);
-
-  const handleGroupChange = (v: string) => {
-    const gid = v === CLEAR_VALUE ? "" : v; // sentinel -> limpa
-    setForm((p) => ({ ...p, group_id: gid, company_id: "" })); // ao mudar grupo, limpa empresa
+  const resetForm = () => {
+    setForm({
+      name: "",
+      status: "ativo",
+      type: "company",
+      company_id: "",
+      group_id: "",
+    });
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!form.name.trim() || !form.company_id) {
-      toast({ title: "Campos obrigatórios", description: "Informe o nome e selecione a empresa.", variant: "destructive" });
+    
+    if (!form.name.trim()) {
+      toast.error("Nome é obrigatório.");
+      return;
+    }
+    
+    if (!initialData && form.type === "company" && !form.company_id) {
+      toast.error("Empresa é obrigatória.");
+      return;
+    }
+    
+    if (!initialData && form.type === "group" && !form.group_id) {
+      toast.error("Grupo é obrigatório.");
       return;
     }
 
     setSaving(true);
     try {
-      if (isEdit && initialData) {
+      if (initialData?.id) {
+        // Editing existing cost center
+        const payload = {
+          name: form.name,
+          status: form.status,
+        };
+        
         const { error } = await supabase
           .from("cost_centers")
-          .update({ name: form.name.trim(), company_id: form.company_id, status: form.status })
+          .update(payload)
           .eq("id", initialData.id);
+        
         if (error) throw error;
-        toast({ title: "Centro de custo atualizado" });
+        
+        toast.success("Centro de custo atualizado com sucesso!");
+      } else if (form.type === "company") {
+        // Creating for specific company
+        const payload = {
+          name: form.name,
+          status: form.status,
+          company_id: form.company_id,
+        };
+        
+        const { error } = await supabase.from("cost_centers").insert(payload);
+        if (error) throw error;
+        
+        toast.success("Centro de custo criado com sucesso!");
       } else {
-        // `code` é obrigatório no schema atual → geramos automaticamente
-        const genCode = `CC-${Date.now()}`;
-        const { error } = await supabase
-          .from("cost_centers")
-          .insert({ code: genCode, name: form.name.trim(), company_id: form.company_id, status: form.status });
+        // Creating for all companies in group
+        if (companiesInGroup.length === 0) {
+          toast.error("Nenhuma empresa encontrada no grupo selecionado.");
+          return;
+        }
+        
+        const payloads = companiesInGroup.map(companyId => ({
+          name: form.name,
+          status: form.status,
+          company_id: companyId,
+        }));
+        
+        const { error } = await supabase.from("cost_centers").insert(payloads);
         if (error) throw error;
-        toast({ title: "Centro de custo criado" });
+        
+        toast.success(`Centro de custo criado para ${companiesInGroup.length} empresa(s) do grupo!`);
       }
+      
+      queryClient.invalidateQueries({ queryKey: ["cost_centers"] });
+      resetForm();
       onSuccess?.();
       onOpenChange(false);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Erro ao salvar.";
-      toast({ title: "Não foi possível salvar", description: msg, variant: "destructive" });
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao salvar centro de custo.");
     } finally {
       setSaving(false);
     }
-  };
+  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(open) => {
+      if (!open) resetForm();
+      onOpenChange(open);
+    }}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
-          <DialogTitle className="modal-title">{isEdit ? "Editar Centro de Custo" : "Novo Centro de Custo"}</DialogTitle>
-          <DialogDescription className="modal-desc">Informe os dados do centro de custo</DialogDescription>
+          <DialogTitle className="modal-title">
+            {initialData ? 'Editar Centro de Custo' : 'Novo Centro de Custo'}
+          </DialogTitle>
+          <DialogDescription className="modal-desc">
+            Informe os dados do centro de custo
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="name">Nome *</Label>
-              <Input id="name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required />
-            </div>
+          <div>
+            <Label htmlFor="name">Nome *</Label>
+            <Input id="name" value={form.name} onChange={(e) => handleChange("name", e.target.value)} required />
+          </div>
 
+          <div className="grid gap-6 sm:grid-cols-2">
+            {/* Tipo - só mostra para criação */}
+            {!initialData && (
+              <div>
+                <Label>Tipo *</Label>
+                <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="company">Empresa Individual</SelectItem>
+                    <SelectItem value="group">Grupo de Empresas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm((p) => ({ ...p, status: v as "ativo" | "inativo" }))}>
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Selecione o status" />
+              <Label>Status</Label>
+              <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ativo">Ativo</SelectItem>
@@ -154,55 +205,51 @@ export default function NovoCentroCustoModal({ open, onOpenChange, onSuccess, in
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          {/* Empresa/Grupo - só mostra para criação */}
+          {!initialData && form.type === "company" && (
             <div>
-              <Label htmlFor="group">Grupo (opcional)</Label>
-              <Select
-                // evita value="" no Select controlado
-                value={form.group_id ? form.group_id : CLEAR_VALUE}
-                onValueChange={handleGroupChange}
-              >
-                <SelectTrigger id="group">
-                  <SelectValue placeholder="Nenhum (limpar)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={CLEAR_VALUE}>Nenhum (limpar)</SelectItem>
-                  {groups.map((g) => (
-                    <SelectItem key={g.id} value={g.id!}>
-                      {g.name || "Sem nome"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="company">Empresa *</Label>
-              <Select
-                // aqui podemos usar undefined para exibir o placeholder quando vazio
-                value={form.company_id || undefined}
-                onValueChange={(v) => setForm((p) => ({ ...p, company_id: v }))}
-              >
-                <SelectTrigger id="company">
+              <Label>Empresa *</Label>
+              <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)}>
+                <SelectTrigger>
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredCompanies.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name || "Sem nome"}
-                    </SelectItem>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          )}
+
+          {!initialData && form.type === "group" && (
+            <div>
+              <Label>Grupo *</Label>
+              <Select value={form.group_id} onValueChange={(v) => handleChange("group_id", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o grupo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companyGroups.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.group_id && companiesInGroup.length > 0 && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Será criado em {companiesInGroup.length} empresa(s) do grupo
+                </p>
+              )}
+            </div>
+          )}
 
           <DialogFooter className="modal-footer">
             <DialogClose asChild>
               <Button variant="outline" type="button">Cancelar</Button>
             </DialogClose>
             <Button type="submit" disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Salvar
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {initialData ? 'Atualizar' : 'Salvar'}
             </Button>
           </DialogFooter>
         </form>

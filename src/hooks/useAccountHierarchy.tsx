@@ -2,12 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AccountHierarchy {
-  id: string;
-  level_1: string;
-  level_2: string;
-  analytical_account: string;
-  company_id: string;
-  created_at: string;
+  level_1: string | null;
+  level_2: string | null;
+  analytical_account: string | null;
+  company_id: string | null;
+  created_at: string | null;
+  group_id: string | null;
+  type: string | null;
+  code_analytical: string | null;
+  code_level_1: string | null;
+  code_level_2: string | null;
+  status: string | null;
 }
 
 export function useAccountHierarchy(filters?: {
@@ -47,7 +52,7 @@ export function useAccountHierarchy(filters?: {
 export function useLevel1Options() {
   const { data: hierarchy = [] } = useAccountHierarchy();
   
-  const level1Options = [...new Set(hierarchy.map(item => item.level_1))];
+  const level1Options = [...new Set(hierarchy.map(item => item.level_1).filter(Boolean))];
   return level1Options;
 }
 
@@ -57,6 +62,7 @@ export function useLevel2Options(level1?: string) {
   const level2Options = hierarchy
     .filter(item => !level1 || item.level_1 === level1)
     .map(item => item.level_2)
+    .filter(Boolean)
     .filter((value, index, array) => array.indexOf(value) === index);
     
   return level2Options;
@@ -70,7 +76,8 @@ export function useAnalyticalAccountOptions(level1?: string, level2?: string) {
       (!level1 || item.level_1 === level1) && 
       (!level2 || item.level_2 === level2)
     )
-    .map(item => item.analytical_account);
+    .map(item => item.analytical_account)
+    .filter(Boolean);
     
   return analyticalOptions;
 }

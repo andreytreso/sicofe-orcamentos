@@ -27,27 +27,31 @@ export function useCompanies() {
   });
 }
 
+export interface CompanyWithGroup {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+  group_id: string | null;
+  group_name: string | null;
+  group_code: string | null;
+}
+
 export function useUserCompanies() {
   return useQuery({
     queryKey: ['user-companies'],
-    queryFn: async (): Promise<Company[]> => {
+    queryFn: async (): Promise<CompanyWithGroup[]> => {
       const { data, error } = await supabase
-        .from('companies')
-        .select(`
-          id,
-          name,
-          status,
-          created_at,
-          updated_at,
-          user_company_access!inner(user_id)
-        `)
+        .from('companies_with_group')
+        .select('*')
         .order('name');
 
       if (error) {
         throw new Error(`Failed to fetch user companies: ${error.message}`);
       }
 
-      return (data || []) as Company[];
+      return (data || []) as CompanyWithGroup[];
     }
   });
 }

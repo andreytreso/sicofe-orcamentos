@@ -25,7 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 type CompanyForm = {
   id?: string;
   name: string;
-  grupo: string;
+  grupo: string | null;
   status: "active" | "inactive";
 };
 
@@ -130,7 +130,7 @@ export default function NovaEmpresaModal({
               <Label htmlFor="grupo">Grupo</Label>
               <Input
                 id="grupo"
-                value={form.grupo}
+                value={form.grupo || ""}
                 onChange={(e) => handleChange("grupo", e.target.value)}
               />
             </div>
