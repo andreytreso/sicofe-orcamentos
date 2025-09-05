@@ -22,6 +22,14 @@ export interface Transaction {
   companies?: {
     name: string;
   };
+  transaction_cost_centers?: Array<{
+    cost_center_id: string;
+    cost_centers?: {
+      id: string;
+      name: string | null;
+      code: string | null;
+    } | null;
+  }>;
 }
 
 export interface TransactionFilters {
@@ -55,7 +63,11 @@ export function useTransactions(filters: TransactionFilters) {
         .from('transactions')
         .select(`
           *,
-          companies(name)
+          companies(name),
+          transaction_cost_centers(
+            cost_center_id,
+            cost_centers(id, name, code)
+          )
         `)
         .order('transaction_date', { ascending: false });
 

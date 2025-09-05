@@ -171,6 +171,34 @@ export default function Lancamentos() {
   };
   const handleEdit = (transaction: any) => {
     setEditingLancamento(transaction);
+    // Preencher formulário com dados existentes
+    const yearStr = (transaction.year ?? new Date(transaction.transaction_date).getFullYear()).toString();
+    const amountStr = (Math.abs(transaction.amount) || 0).toFixed(2).replace('.', ',');
+
+    const months = {
+      jan: false, fev: false, mar: false, abr: false, mai: false, jun: false,
+      jul: false, ago: false, set: false, out: false, nov: false, dez: false
+    } as Record<string, boolean>;
+    (transaction.competency_months || []).forEach((m: string) => {
+      if (m in months) months[m as keyof typeof months] = true;
+    });
+
+    setFormData({
+      empresa: transaction.company_id,
+      ano: yearStr,
+      grupoContas1: transaction.level_1_group,
+      grupoContas2: transaction.level_2_group,
+      contaAnalitica: transaction.analytical_account,
+      valor: amountStr,
+      observacoes: transaction.observations || '',
+      competencia: months as any
+    });
+
+    const isAll = !!transaction.all_cost_centers;
+    setAllCostCenters(isAll);
+    const selected = (transaction.transaction_cost_centers || []).map((tcc: any) => tcc.cost_center_id);
+    setSelectedCostCenters(isAll ? [] : selected);
+
     setShowForm(true);
   };
   const handleDelete = (id: string) => {
@@ -558,7 +586,19 @@ export default function Lancamentos() {
                       <TableCell className="text-sm">{new Date(transaction.transaction_date).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell className="text-sm">{companyName}</TableCell>
                       <TableCell className="text-sm">{transaction.analytical_account}</TableCell>
-                      <TableCell className="text-sm">{transaction.description}</TableCell>
+                      <TableCell className="text-sm">
+                        <div className="text-xs text-gray-600">
+                          Centros: {transaction.all_cost_centers ? (
+                            'Todos'
+                          ) : (
+                            (transaction.transaction_cost_centers || [])
+                              .map((tcc: any) => tcc.cost_centers?.name || '')
+                              .filter(Boolean)
+                              .join(', ') || '-'
+                          )}
+                        </div>
+                        <div>{transaction.description}</div>
+                      </TableCell>
                       <TableCell className={`text-sm text-right font-medium ${colorClass}`}>
                         {isPositive ? '' : '-'}{formatCurrency(value)}
                       </TableCell>
