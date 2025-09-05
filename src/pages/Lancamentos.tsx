@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCompanies } from '@/hooks/useCompanies';
 import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from '@/hooks/useAccountHierarchy';
 import { useTransactions, TransactionFilters } from '@/hooks/useTransactions';
+import { useCostCenters } from '@/hooks/useCostCenters';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 interface Lancamento {
   id: string;
   data: string;
@@ -63,9 +65,20 @@ export default function Lancamentos() {
   const {
     data: companies = []
   } = useCompanies();
+  const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(formData.empresa);
   const level1Options = useLevel1Options();
   const level2Options = useLevel2Options(formData.grupoContas1);
   const analyticalOptions = useAnalyticalAccountOptions(formData.grupoContas1, formData.grupoContas2);
+  
+  // Centros de custo (multi seleção)
+  const [allCostCenters, setAllCostCenters] = useState(true);
+  const [selectedCostCenters, setSelectedCostCenters] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Ao trocar empresa, reset seleção de centros de custo
+    setAllCostCenters(true);
+    setSelectedCostCenters([]);
+  }, [formData.empresa]);
   const filters: TransactionFilters = {
     companyId: selectedEmpresa || undefined,
     period: selectedPeriodo || undefined,
@@ -350,6 +363,16 @@ export default function Lancamentos() {
       return;
     }
 
+    // Centros de custo: exigir seleção quando não for "Todos"
+    if (!allCostCenters && selectedCostCenters.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Selecione pelo menos um centro de custo ou marque 'Todos os centros'.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Create transaction data for each selected month
     mesesSelecionados.forEach(mes => {
       const transactionData = {
@@ -586,6 +609,72 @@ export default function Lancamentos() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Centros de Custo (dependente da empresa) */}
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-medium">Centros de Custo</Label>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="cc-all"
+                    checked={allCostCenters}
+                    disabled={!formData.empresa}
+                    onCheckedChange={(checked) => {
+                      setAllCostCenters(!!checked);
+                      if (checked) setSelectedCostCenters([]);
+                    }}
+                  />
+                  <Label htmlFor="cc-all" className="text-sm text-gray-700">Todos os centros</Label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!formData.empresa || allCostCenters}
+                        className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        {isLoadingCostCenters
+                          ? 'Carregando...'
+                          : selectedCostCenters.length > 0
+                            ? `${selectedCostCenters.length} selecionado(s)`
+                            : 'Selecionar centros'}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-72">
+                      <DropdownMenuLabel>
+                        {isLoadingCostCenters ? 'Carregando...' : 'Selecione centros'}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {!isLoadingCostCenters && costCenters.length === 0 && (
+                        <div className="px-2 py-1.5 text-sm text-gray-600">Nenhum centro de custo para esta empresa</div>
+                      )}
+                      {costCenters.map((cc) => (
+                        <DropdownMenuCheckboxItem
+                          key={cc.id}
+                          checked={selectedCostCenters.includes(cc.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedCostCenters((prev) => {
+                              if (checked) return Array.from(new Set([...prev, cc.id]));
+                              return prev.filter((id) => id !== cc.id);
+                            });
+                          }}
+                          disabled={allCostCenters}
+                        >
+                          {cc.code ? `${cc.code} - ${cc.name}` : cc.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {!allCostCenters && selectedCostCenters.length > 0 && (
+                    <span className="text-xs text-gray-600">
+                      {selectedCostCenters.length} selecionado(s)
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
