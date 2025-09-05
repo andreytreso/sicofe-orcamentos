@@ -385,6 +385,8 @@ export default function Lancamentos() {
         observations: formData.observacoes,
         competency_months: [mes],
         transaction_date: `${formData.ano}-${monthMap[mes]}-01`,
+        all_cost_centers: allCostCenters,
+        cost_center_ids: allCostCenters ? [] : selectedCostCenters,
       };
       if (editingLancamento) {
         updateTransaction(editingLancamento.id, transactionData);
