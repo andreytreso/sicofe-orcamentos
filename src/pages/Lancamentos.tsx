@@ -151,6 +151,11 @@ export default function Lancamentos() {
     // Data is already filtered by the useTransactions hook
     // This function is kept for button compatibility but doesn't do anything
   };
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedEmpresa("all");
+    setSelectedPeriodo("");
+  };
   const handleEdit = (transaction: any) => {
     setEditingLancamento(transaction);
     setShowForm(true);
@@ -482,6 +487,14 @@ export default function Lancamentos() {
             <Button variant="outline" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900" onClick={handleFilter} disabled={isLoadingTransactions}>
               {isLoadingTransactions ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Filter className="h-4 w-4 mr-2" />}
               Filtrar
+            </Button>
+            <Button 
+              variant="outline" 
+              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              onClick={handleClearFilters}
+              disabled={isLoadingTransactions}
+            >
+              Limpar
             </Button>
           </div>
         </CardContent>
