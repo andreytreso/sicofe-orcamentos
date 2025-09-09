@@ -683,8 +683,45 @@ export type Database = {
           },
         ]
       }
+      transaction_cost_centers: {
+        Row: {
+          cost_center_id: string
+          created_at: string
+          id: string
+          transaction_id: string
+        }
+        Insert: {
+          cost_center_id: string
+          created_at?: string
+          id?: string
+          transaction_id: string
+        }
+        Update: {
+          cost_center_id?: string
+          created_at?: string
+          id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_cost_centers_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_cost_centers_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
+          all_cost_centers: boolean
           amount: number
           analytical_account: string
           company_id: string
@@ -701,6 +738,7 @@ export type Database = {
           year: number
         }
         Insert: {
+          all_cost_centers?: boolean
           amount: number
           analytical_account: string
           company_id: string
@@ -717,6 +755,7 @@ export type Database = {
           year: number
         }
         Update: {
+          all_cost_centers?: boolean
           amount?: number
           analytical_account?: string
           company_id?: string
