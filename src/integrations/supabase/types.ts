@@ -44,13 +44,6 @@ export type Database = {
             foreignKeyName: "fk_account_hierarchy_company_id"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "fk_account_hierarchy_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -152,13 +145,6 @@ export type Database = {
             foreignKeyName: "approval_items_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "approval_items_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -227,13 +213,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "budgets_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
           {
             foreignKeyName: "budgets_company_id_fkey"
             columns: ["company_id"]
@@ -328,6 +307,13 @@ export type Database = {
             foreignKeyName: "companies_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["group_id"]
+          },
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
             referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
@@ -389,13 +375,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "cost_centers_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
           {
             foreignKeyName: "cost_centers_company_id_fkey"
             columns: ["company_id"]
@@ -511,6 +490,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "group_chart_of_accounts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["group_id"]
+          },
           {
             foreignKeyName: "group_chart_of_accounts_group_id_fkey"
             columns: ["group_id"]
@@ -643,13 +629,6 @@ export type Database = {
             foreignKeyName: "fk_suppliers_company_id"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "fk_suppliers_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -659,13 +638,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "suppliers_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
           },
           {
             foreignKeyName: "suppliers_company_id_fkey"
@@ -776,13 +748,6 @@ export type Database = {
             foreignKeyName: "transactions_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "transactions_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -822,13 +787,6 @@ export type Database = {
             foreignKeyName: "user_company_access_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "user_company_access_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -859,10 +817,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "group_chart_of_accounts_group_id_fkey"
-            columns: ["group_id"]
+            foreignKeyName: "fk_account_hierarchy_company_id"
+            columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "company_groups"
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_account_hierarchy_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
@@ -887,6 +852,13 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["group_id"]
+          },
           {
             foreignKeyName: "companies_group_id_fkey"
             columns: ["group_id"]
