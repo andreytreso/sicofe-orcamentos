@@ -97,8 +97,8 @@ export function useDashboardKPIs(period: PeriodType) {
         return transactionDate >= prevStartDate && transactionDate <= prevEndDate;
       });
 
-      // Calcular valores
-      const currentRealized = currentTransactions.reduce((sum, t) => {
+      // Calcular valores - As transações são orçamento planejado, não realizado
+      const budget = currentTransactions.reduce((sum, t) => {
         // Considerar apenas despesas (valores negativos)
         if (t.level_1_group !== 'Receita Bruta') {
           return sum + Math.abs(Number(t.amount));
@@ -106,17 +106,16 @@ export function useDashboardKPIs(period: PeriodType) {
         return sum;
       }, 0);
 
-      const previousRealized = previousTransactions.reduce((sum, t) => {
+      const previousBudget = previousTransactions.reduce((sum, t) => {
         if (t.level_1_group !== 'Receita Bruta') {
           return sum + Math.abs(Number(t.amount));
         }
         return sum;
       }, 0);
 
-      // Para orçamento, vamos usar uma meta baseada no realizado * 1.5 (simulação)
-      // Em um sistema real, isso viria de uma tabela de orçamentos
-      const budget = currentRealized * 1.5;
-      const previousBudget = previousRealized * 1.5;
+      // Como não temos tabela de realizado ainda, realizado = 0
+      const currentRealized = 0;
+      const previousRealized = 0;
 
       const available = budget - currentRealized;
       const previousAvailable = previousBudget - previousRealized;
