@@ -18,6 +18,7 @@ interface ChartDataPoint {
 }
 interface ReceitasDespesasChartProps {
   selectedPeriod: PeriodType;
+  companyIds?: string[];
 }
 const chartConfig = {
   receitas: {
@@ -68,11 +69,12 @@ const CustomTooltip = ({
   return null;
 };
 export function ReceitasDespesasChart({
-  selectedPeriod
+  selectedPeriod,
+  companyIds
 }: ReceitasDespesasChartProps) {
   const [viewMode, setViewMode] = useState<'monthly' | 'ytd'>('monthly');
   const navigate = useNavigate();
-  const { data: chartData = [], isLoading } = useChartData(selectedPeriod);
+  const { data: chartData = [], isLoading } = useChartData(selectedPeriod, companyIds);
   const handleBarClick = (data: ChartDataPoint) => {
     navigate(`/analise-detalhada?mes=${data.monthKey}`);
   };

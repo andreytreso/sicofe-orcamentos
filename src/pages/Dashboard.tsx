@@ -1,13 +1,15 @@
 
 import { useState } from 'react';
 import { StatsCard } from "@/components/StatsCard";
-import { PeriodSelector, PeriodType } from "@/components/PeriodSelector";
+import { PeriodType } from "@/components/PeriodSelector";
+import { DashboardFilters } from "@/components/DashboardFilters";
 import { LancamentoDetalhe } from "@/components/LancamentoDetalhe";
 import { ReceitasDespesasChart } from "@/components/ReceitasDespesasChart";
 import { TrendingUp, TrendingDown, DollarSign, PieChart, ArrowUp, ArrowDown, Megaphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDashboardKPIs } from "@/hooks/useDashboardKPIs";
 import { useDashboardTransactions, DashboardTransaction } from "@/hooks/useDashboardTransactions";
+import { useCompaniesByGroup } from "@/hooks/useCompanyGroups";
 
 // Helper functions for real transactions
 const getIconForType = (level1Group?: string) => {
@@ -70,14 +72,34 @@ interface LancamentoDetalheType {
 }
 
 export default function Dashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month');
+  const [filters, setFilters] = useState<DashboardFilters>({
+    period: 'month',
+    groupId: null,
+    companyId: null
+  });
   const [selectedLancamento, setSelectedLancamento] = useState<LancamentoDetalheType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Get companies for the selected group
+  const { data: companiesInGroup = [] } = useCompaniesByGroup(filters.groupId);
+  
+  // Determine which company IDs to filter by
+  const getCompanyIdsForFilter = () => {
+    if (filters.companyId) {
+      return [filters.companyId];
+    }
+    if (filters.groupId && companiesInGroup.length > 0) {
+      return companiesInGroup;
+    }
+    return undefined; // No filter, show all companies user has access to
+  };
+
+  const companyIds = getCompanyIdsForFilter();
   
   // Usar hooks para dados do Supabase
-  const { data: kpiData, isLoading: kpiLoading } = useDashboardKPIs(selectedPeriod);
-  const { data: transactions = [], isLoading: transactionsLoading } = useDashboardTransactions(10);
+  const { data: kpiData, isLoading: kpiLoading } = useDashboardKPIs(filters.period, companyIds);
+  const { data: transactions = [], isLoading: transactionsLoading } = useDashboardTransactions(10, companyIds);
 
   const handleLancamentoClick = (transaction: DashboardTransaction) => {
     // Convert to the format expected by LancamentoDetalhe
@@ -111,9 +133,9 @@ export default function Dashboard() {
           </p>
         </div>
         
-        <PeriodSelector 
-          value={selectedPeriod} 
-          onChange={setSelectedPeriod}
+        <DashboardFilters 
+          filters={filters} 
+          onChange={setFilters}
           className="mt-1"
         />
       </div>
@@ -172,7 +194,7 @@ export default function Dashboard() {
 
       {/* Charts and Additional Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-        <ReceitasDespesasChart selectedPeriod={selectedPeriod} />
+        <ReceitasDespesasChart selectedPeriod={filters.period} companyIds={companyIds} />
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">

@@ -9,16 +9,23 @@ interface KPIData {
   variation: { value: string; trend: { value: string; absoluteValue: string; isPositive: boolean } };
 }
 
-export function useDashboardKPIs(period: PeriodType) {
+export function useDashboardKPIs(period: PeriodType, companyIds?: string[]) {
   return useQuery({
-    queryKey: ['dashboard-kpis', period],
+    queryKey: ['dashboard-kpis', period, companyIds],
     queryFn: async (): Promise<KPIData> => {
       try {
         // Obter dados das transações
-        const { data: transactions, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('transaction_date', { ascending: false });
+        let query = supabase
+          .from('transactions')
+          .select('*')
+          .order('transaction_date', { ascending: false });
+
+        // Apply company filter if specified
+        if (companyIds && companyIds.length > 0) {
+          query = query.in('company_id', companyIds);
+        }
+
+        const { data: transactions, error } = await query;
 
       if (error) {
         throw new Error(`Failed to fetch transactions: ${error.message}`);

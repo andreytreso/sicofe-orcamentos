@@ -14,11 +14,11 @@ export interface DashboardTransaction {
   companies?: { name: string };
 }
 
-export function useDashboardTransactions(limit = 10) {
+export function useDashboardTransactions(limit = 10, companyIds?: string[]) {
   return useQuery({
-    queryKey: ['dashboard-transactions', limit],
+    queryKey: ['dashboard-transactions', limit, companyIds],
     queryFn: async (): Promise<DashboardTransaction[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select(`
           *,
@@ -27,6 +27,13 @@ export function useDashboardTransactions(limit = 10) {
         .order('transaction_date', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(limit);
+
+      // Apply company filter if specified
+      if (companyIds && companyIds.length > 0) {
+        query = query.in('company_id', companyIds);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         throw new Error(`Failed to fetch transactions: ${error.message}`);

@@ -13,15 +13,23 @@ interface ChartDataPoint {
   metaAcum?: number;
 }
 
-export function useChartData(selectedPeriod: PeriodType) {
+export function useChartData(selectedPeriod: PeriodType, companyIds?: string[]) {
   return useQuery({
-    queryKey: ['chart-data', selectedPeriod],
+    queryKey: ['chart-data', selectedPeriod, companyIds],
     queryFn: async (): Promise<ChartDataPoint[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*')
         .gte('transaction_date', '2024-01-01')
-        .lte('transaction_date', '2024-12-31');
+        .lte('transaction_date', '2024-12-31')
+        .order('transaction_date', { ascending: true });
+
+      // Apply company filter if specified
+      if (companyIds && companyIds.length > 0) {
+        query = query.in('company_id', companyIds);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         throw new Error(`Failed to fetch chart data: ${error.message}`);
