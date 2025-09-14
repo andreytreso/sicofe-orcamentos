@@ -73,7 +73,6 @@ interface LancamentoDetalheType {
 
 export default function Dashboard() {
   const [filters, setFilters] = useState<DashboardFilters>({
-    period: 'month',
     groupId: null,
     companyId: null
   });
@@ -98,7 +97,7 @@ export default function Dashboard() {
   const companyIds = getCompanyIdsForFilter();
   
   // Usar hooks para dados do Supabase
-  const { data: kpiData, isLoading: kpiLoading } = useDashboardKPIs(filters.period, companyIds);
+  const { data: kpiData, isLoading: kpiLoading } = useDashboardKPIs(companyIds);
   const { data: transactions = [], isLoading: transactionsLoading } = useDashboardTransactions(10, companyIds);
 
   const handleLancamentoClick = (transaction: DashboardTransaction) => {
@@ -194,7 +193,7 @@ export default function Dashboard() {
 
       {/* Charts and Additional Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-        <ReceitasDespesasChart selectedPeriod={filters.period} companyIds={companyIds} />
+        <ReceitasDespesasChart companyIds={companyIds} />
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-sicofe-navy mb-4">

@@ -17,7 +17,6 @@ interface ChartDataPoint {
   metaAcum?: number;
 }
 interface ReceitasDespesasChartProps {
-  selectedPeriod: PeriodType;
   companyIds?: string[];
 }
 const chartConfig = {
@@ -69,118 +68,128 @@ const CustomTooltip = ({
   return null;
 };
 export function ReceitasDespesasChart({
-  selectedPeriod,
   companyIds
 }: ReceitasDespesasChartProps) {
   const [viewMode, setViewMode] = useState<'monthly' | 'ytd'>('monthly');
   const navigate = useNavigate();
-  const { data: chartData = [], isLoading } = useChartData(selectedPeriod, companyIds);
+  const { data: chartData = [], isLoading } = useChartData(companyIds);
   const handleBarClick = (data: ChartDataPoint) => {
     navigate(`/analise-detalhada?mes=${data.monthKey}`);
   };
-  const renderMonthlyChart = () => <BarChart data={chartData} onClick={data => data && handleBarClick(data.activePayload?.[0]?.payload)} style={{
-    background: 'transparent'
-  }}>
-      <XAxis dataKey="month" tick={{
-      fill: '#334155',
-      fontSize: 12,
-      fontWeight: 500
-    }} axisLine={{
-      stroke: '#334155'
-    }} />
-      <YAxis tick={{
-      fill: '#334155',
-      fontSize: 12,
-      fontWeight: 500
-    }} axisLine={{
-      stroke: '#334155'
-    }} tickFormatter={formatCurrency} />
+  const renderMonthlyChart = () => (
+    <BarChart 
+      data={chartData} 
+      onClick={data => data && handleBarClick(data.activePayload?.[0]?.payload)}
+      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      style={{ background: 'transparent' }}
+    >
+      <XAxis 
+        dataKey="month" 
+        tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} 
+        axisLine={{ stroke: '#334155' }}
+      />
+      <YAxis 
+        tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} 
+        axisLine={{ stroke: '#334155' }} 
+        tickFormatter={formatCurrency}
+      />
       <ChartTooltip content={<CustomTooltip />} />
       <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="3 3" />
-      <Bar dataKey="receitas" fill="var(--color-receitas)" style={{
-      cursor: 'pointer'
-    }} radius={[2, 2, 0, 0]}>
-        {chartData.map((entry, index) => <Cell key={`cell-receitas-${index}`} />)}
+      <Bar 
+        dataKey="receitas" 
+        fill="var(--color-receitas)" 
+        style={{ cursor: 'pointer' }} 
+        radius={[2, 2, 0, 0]}
+      >
+        {chartData.map((entry, index) => (
+          <Cell key={`cell-receitas-${index}`} />
+        ))}
       </Bar>
-      <Bar dataKey="despesas" fill="var(--color-despesas)" style={{
-      cursor: 'pointer'
-    }} radius={[2, 2, 0, 0]}>
-        {chartData.map((entry, index) => <Cell key={`cell-despesas-${index}`} stroke={entry.despesas > entry.meta ? "#F97316" : "transparent"} strokeWidth={entry.despesas > entry.meta ? 2 : 0} />)}
+      <Bar 
+        dataKey="despesas" 
+        fill="var(--color-despesas)" 
+        style={{ cursor: 'pointer' }} 
+        radius={[2, 2, 0, 0]}
+      >
+        {chartData.map((entry, index) => (
+          <Cell 
+            key={`cell-despesas-${index}`} 
+            stroke={entry.despesas > entry.meta ? "#F97316" : "transparent"} 
+            strokeWidth={entry.despesas > entry.meta ? 2 : 0} 
+          />
+        ))}
       </Bar>
-      <Line type="monotone" dataKey="meta" stroke="var(--color-meta)" strokeWidth={2} dot={{
-      fill: 'var(--color-meta)',
-      strokeWidth: 2,
-      r: 4
-    }} activeDot={{
-      r: 6,
-      stroke: 'var(--color-meta)',
-      strokeWidth: 2
-    }} />
-    </BarChart>;
-  const renderYTDChart = () => <LineChart data={chartData} onClick={data => data && handleBarClick(data.activePayload?.[0]?.payload)} style={{
-    background: 'transparent'
-  }}>
-      <XAxis dataKey="month" tick={{
-      fill: '#334155',
-      fontSize: 12,
-      fontWeight: 500
-    }} axisLine={{
-      stroke: '#334155'
-    }} />
-      <YAxis tick={{
-      fill: '#334155',
-      fontSize: 12,
-      fontWeight: 500
-    }} axisLine={{
-      stroke: '#334155'
-    }} tickFormatter={formatCurrency} />
+      <Line 
+        type="monotone" 
+        dataKey="meta" 
+        stroke="var(--color-meta)" 
+        strokeWidth={2} 
+        dot={{ fill: 'var(--color-meta)', strokeWidth: 2, r: 4 }} 
+        activeDot={{ r: 6, stroke: 'var(--color-meta)', strokeWidth: 2 }}
+      />
+    </BarChart>
+  );
+  const renderYTDChart = () => (
+    <LineChart 
+      data={chartData} 
+      onClick={data => data && handleBarClick(data.activePayload?.[0]?.payload)}
+      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      style={{ background: 'transparent' }}
+    >
+      <XAxis 
+        dataKey="month" 
+        tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} 
+        axisLine={{ stroke: '#334155' }}
+      />
+      <YAxis 
+        tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} 
+        axisLine={{ stroke: '#334155' }} 
+        tickFormatter={formatCurrency}
+      />
       <ChartTooltip content={<CustomTooltip />} />
-      <Line type="monotone" dataKey="receitasAcum" stroke="var(--color-receitas)" strokeWidth={3} dot={{
-      fill: 'var(--color-receitas)',
-      strokeWidth: 2,
-      r: 4
-    }} activeDot={{
-      r: 6,
-      stroke: 'var(--color-receitas)',
-      strokeWidth: 2
-    }} style={{
-      cursor: 'pointer'
-    }} />
-      <Line type="monotone" dataKey="despesasAcum" stroke="var(--color-despesas)" strokeWidth={3} dot={{
-      fill: 'var(--color-despesas)',
-      strokeWidth: 2,
-      r: 4
-    }} activeDot={{
-      r: 6,
-      stroke: 'var(--color-despesas)',
-      strokeWidth: 2
-    }} style={{
-      cursor: 'pointer'
-    }} />
-      <Line type="monotone" dataKey="metaAcum" stroke="var(--color-meta)" strokeWidth={2} strokeDasharray="5 5" dot={{
-      fill: 'var(--color-meta)',
-      strokeWidth: 2,
-      r: 4
-    }} activeDot={{
-      r: 6,
-      stroke: 'var(--color-meta)',
-      strokeWidth: 2
-    }} style={{
-      cursor: 'pointer'
-    }} />
-    </LineChart>;
+      <Line 
+        type="monotone" 
+        dataKey="receitasAcum" 
+        stroke="var(--color-receitas)" 
+        strokeWidth={3} 
+        dot={{ fill: 'var(--color-receitas)', strokeWidth: 2, r: 4 }} 
+        activeDot={{ r: 6, stroke: 'var(--color-receitas)', strokeWidth: 2 }}
+        style={{ cursor: 'pointer' }}
+      />
+      <Line 
+        type="monotone" 
+        dataKey="despesasAcum" 
+        stroke="var(--color-despesas)" 
+        strokeWidth={3} 
+        dot={{ fill: 'var(--color-despesas)', strokeWidth: 2, r: 4 }} 
+        activeDot={{ r: 6, stroke: 'var(--color-despesas)', strokeWidth: 2 }}
+        style={{ cursor: 'pointer' }}
+      />
+      <Line 
+        type="monotone" 
+        dataKey="metaAcum" 
+        stroke="var(--color-meta)" 
+        strokeWidth={2} 
+        strokeDasharray="5 5" 
+        dot={{ fill: 'var(--color-meta)', strokeWidth: 2, r: 4 }} 
+        activeDot={{ r: 6, stroke: 'var(--color-meta)', strokeWidth: 2 }}
+        style={{ cursor: 'pointer' }}
+      />
+    </LineChart>
+  );
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center h-80">
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center h-96">
         <Loader2 className="h-6 w-6 animate-spin text-sicofe-blue" />
       </div>
     );
   }
 
-  return <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       {/* Estilos CSS customizados para remover fundo amarelo */}
       <style dangerouslySetInnerHTML={{
-      __html: `
+        __html: `
           .recharts-active-bar,
           .recharts-bar:hover,
           .recharts-active-dot,
@@ -209,23 +218,34 @@ export function ReceitasDespesasChart({
             stroke: transparent !important;
           }
         `
-    }} />
+      }} />
       
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-sicofe-navy">
           Receitas vs Despesas
         </h3>
-        <ToggleGroup type="single" value={viewMode} onValueChange={value => value && setViewMode(value as 'monthly' | 'ytd')} className="border border-gray-200 rounded-md">
-          <ToggleGroupItem value="monthly" className="text-xs py-1 data-[state=on]:bg-sicofe-blue data-[state=on]:text-white px-[25px]">
+        <ToggleGroup 
+          type="single" 
+          value={viewMode} 
+          onValueChange={value => value && setViewMode(value as 'monthly' | 'ytd')} 
+          className="border border-gray-200 rounded-md"
+        >
+          <ToggleGroupItem 
+            value="monthly" 
+            className="text-xs py-1 data-[state=on]:bg-sicofe-blue data-[state=on]:text-white px-[25px]"
+          >
             Mês a Mês
           </ToggleGroupItem>
-          <ToggleGroupItem value="ytd" className="text-xs py-1 data-[state=on]:bg-sicofe-blue data-[state=on]:text-white px-[12px]">
+          <ToggleGroupItem 
+            value="ytd" 
+            className="text-xs py-1 data-[state=on]:bg-sicofe-blue data-[state=on]:text-white px-[12px]"
+          >
             Acumulado YTD
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
       
-      <ChartContainer config={chartConfig} className="h-64 sm:h-72">
+      <ChartContainer config={chartConfig} className="h-96 w-full">
         <ResponsiveContainer width="100%" height="100%">
           {viewMode === 'monthly' ? renderMonthlyChart() : renderYTDChart()}
         </ResponsiveContainer>
@@ -234,5 +254,6 @@ export function ReceitasDespesasChart({
       <div className="mt-3 text-xs text-gray-500">
         💡 Clique em uma coluna ou ponto para ver análise detalhada
       </div>
-    </div>;
+    </div>
+  );
 }

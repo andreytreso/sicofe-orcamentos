@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Building2, Building } from 'lucide-react';
+import { Building2, Building } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -7,12 +7,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PeriodType } from './PeriodSelector';
 import { useCompanyGroups } from '@/hooks/useCompanyGroups';
 import { useUserCompanies } from '@/hooks/useCompanies';
 
 export interface DashboardFilters {
-  period: PeriodType;
   groupId: string | null;
   companyId: string | null;
 }
@@ -23,13 +21,6 @@ interface DashboardFiltersProps {
   className?: string;
 }
 
-const periodOptions = [
-  { value: 'month' as const, label: 'Mês' },
-  { value: 'quarter' as const, label: 'Trimestre' },
-  { value: 'year' as const, label: 'Ano' },
-  { value: 'ytd' as const, label: 'YTD' },
-];
-
 export function DashboardFilters({ filters, onChange, className = "" }: DashboardFiltersProps) {
   const { data: companyGroups = [] } = useCompanyGroups();
   const { data: companies = [] } = useUserCompanies();
@@ -38,10 +29,6 @@ export function DashboardFilters({ filters, onChange, className = "" }: Dashboar
   const filteredCompanies = filters.groupId 
     ? companies.filter(company => company.group_id === filters.groupId)
     : companies;
-
-  const handlePeriodChange = (period: PeriodType) => {
-    onChange({ ...filters, period });
-  };
 
   const handleGroupChange = (groupId: string) => {
     const newGroupId = groupId === 'all' ? null : groupId;
@@ -59,46 +46,6 @@ export function DashboardFilters({ filters, onChange, className = "" }: Dashboar
 
   return (
     <div className={`flex flex-col sm:flex-row gap-2 ${className}`}>
-      {/* Period Selector */}
-      <div className="flex items-center">
-        <div className="hidden sm:block">
-          <Select value={filters.period} onValueChange={handlePeriodChange}>
-            <SelectTrigger className="w-36 h-9 text-sm border-gray-300 bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200 shadow-lg">
-              {periodOptions.map((option) => (
-                <SelectItem 
-                  key={option.value} 
-                  value={option.value}
-                  className="text-sicofe-gray hover:bg-blue-50 hover:text-sicofe-blue cursor-pointer"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="sm:hidden">
-          <Select value={filters.period} onValueChange={handlePeriodChange}>
-            <SelectTrigger className="w-10 h-9 p-0 border-gray-300 bg-white flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-sicofe-gray" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200 shadow-lg">
-              {periodOptions.map((option) => (
-                <SelectItem 
-                  key={option.value} 
-                  value={option.value}
-                  className="text-sicofe-gray hover:bg-blue-50 hover:text-sicofe-blue cursor-pointer"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
       {/* Group Selector */}
       {companyGroups.length > 0 && (
