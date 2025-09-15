@@ -138,8 +138,9 @@ export default function Usuarios() {
                   toast({ title: "Usuário excluído", description: "O usuário foi removido com sucesso." });
                   setToDelete(undefined);
                   refetch();
-                } catch (e: any) {
-                  toast({ title: "Erro ao excluir", description: e?.message || "Tente novamente mais tarde.", variant: "destructive" });
+                } catch (e: unknown) {
+                  const message = e instanceof Error ? e.message : String(e);
+                  toast({ title: "Erro ao excluir", description: message || "Tente novamente mais tarde.", variant: "destructive" });
                 }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

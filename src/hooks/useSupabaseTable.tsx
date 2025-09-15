@@ -2,14 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+type FilterOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'in';
+type FilterValue = string | number | boolean | null | Array<string | number | boolean>;
+
 interface UseSupabaseTableOptions {
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
-  filter?: { column: string; value: any; operator?: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'in' };
+  filter?: { column: string; value: FilterValue; operator?: FilterOperator };
 }
 
-export function useSupabaseTable<T = any>(
-  tableName: string, 
+export function useSupabaseTable<T extends Record<string, unknown> = Record<string, unknown>>(
+  tableName: string,
   options: UseSupabaseTableOptions = {}
 ) {
   const queryClient = useQueryClient();
@@ -20,12 +23,37 @@ export function useSupabaseTable<T = any>(
     queryKey: [tableName, options],
     queryFn: async (): Promise<T[]> => {
       let queryBuilder = supabase
-        .from(tableName as any)
+        .from(tableName)
         .select(select);
 
       if (filter) {
         const { column, value, operator = 'eq' } = filter;
-        queryBuilder = (queryBuilder as any)[operator](column, value);
+        switch (operator) {
+          case 'eq':
+            queryBuilder = queryBuilder.eq(column, value as unknown as string | number | boolean | null);
+            break;
+          case 'neq':
+            queryBuilder = queryBuilder.neq(column, value as unknown as string | number | boolean | null);
+            break;
+          case 'gt':
+            queryBuilder = queryBuilder.gt(column, value as unknown as string | number);
+            break;
+          case 'gte':
+            queryBuilder = queryBuilder.gte(column, value as unknown as string | number);
+            break;
+          case 'lt':
+            queryBuilder = queryBuilder.lt(column, value as unknown as string | number);
+            break;
+          case 'lte':
+            queryBuilder = queryBuilder.lte(column, value as unknown as string | number);
+            break;
+          case 'like':
+            queryBuilder = queryBuilder.like(column, value as unknown as string);
+            break;
+          case 'in':
+            queryBuilder = queryBuilder.in(column, value as unknown as (string | number | boolean)[]);
+            break;
+        }
       }
 
       if (orderBy) {
@@ -44,9 +72,9 @@ export function useSupabaseTable<T = any>(
 
   // Mutation para inserir
   const insertMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Partial<T> | Partial<T>[]) => {
       const { data: result, error } = await supabase
-        .from(tableName as any)
+        .from(tableName)
         .insert(data)
         .select()
         .single();
@@ -76,9 +104,9 @@ export function useSupabaseTable<T = any>(
 
   // Mutation para atualizar
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<T> }) => {
       const { data: result, error } = await supabase
-        .from(tableName as any)
+        .from(tableName)
         .update(data)
         .eq('id', id)
         .select()
@@ -111,7 +139,7 @@ export function useSupabaseTable<T = any>(
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from(tableName as any)
+        .from(tableName)
         .delete()
         .eq('id', id);
 

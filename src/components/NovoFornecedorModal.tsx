@@ -54,8 +54,9 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
       onSuccess?.();
       onOpenChange(false);
-    } catch (err: any) {
-      alert(err?.message || "Erro ao criar fornecedor.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      alert(message || "Erro ao criar fornecedor.");
     } finally {
       setSaving(false);
     }

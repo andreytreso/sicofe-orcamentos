@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCompanies } from '@/hooks/useCompanies';
 import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from '@/hooks/useAccountHierarchy';
-import { useTransactions, TransactionFilters } from '@/hooks/useTransactions';
+import { useTransactions, TransactionFilters, Transaction } from '@/hooks/useTransactions';
 import { useCostCenters } from '@/hooks/useCostCenters';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCompanySuppliers } from '@/hooks/useSuppliers';
@@ -34,7 +34,7 @@ export default function Lancamentos() {
     toast
   } = useToast();
   const [showForm, setShowForm] = useState(false);
-  const [editingLancamento, setEditingLancamento] = useState<any>(null);
+  const [editingLancamento, setEditingLancamento] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState("all");
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
@@ -182,7 +182,7 @@ export default function Lancamentos() {
     setSelectedEmpresa("all");
     setSelectedPeriodo("");
   };
-  const handleEdit = (transaction: any) => {
+  const handleEdit = (transaction: Transaction) => {
     setEditingLancamento(transaction);
     // Preencher formulário com dados existentes
     const yearStr = (transaction.year ?? new Date(transaction.transaction_date).getFullYear()).toString();
@@ -204,17 +204,17 @@ export default function Lancamentos() {
       contaAnalitica: transaction.analytical_account,
       valor: amountStr,
       observacoes: transaction.observations || '',
-      competencia: months as any
+      competencia: months as typeof formData.competencia
     });
 
     const isAll = !!transaction.all_cost_centers;
     setAllCostCenters(isAll);
-    const selected = (transaction.transaction_cost_centers || []).map((tcc: any) => tcc.cost_center_id);
+    const selected = (transaction.transaction_cost_centers ?? []).map((tcc) => tcc.cost_center_id);
     setSelectedCostCenters(isAll ? [] : selected);
 
     // Prefill supplier/collaborator
-    const supplierId = (transaction as any).supplier_id as string | undefined;
-    const collaboratorId = (transaction as any).collaborator_id as string | undefined;
+    const supplierId = transaction.supplier_id ?? undefined;
+    const collaboratorId = transaction.collaborator_id ?? undefined;
     setUseSupplier(!!supplierId);
     setSelectedSupplier(supplierId || "");
     setUseCollaborator(!!collaboratorId);
@@ -243,10 +243,9 @@ export default function Lancamentos() {
     }));
   };
   const handleSelectAllCompetencia = (checked: boolean) => {
-    const newCompetencia = Object.keys(formData.competencia).reduce((acc, mes) => {
-      (acc as any)[mes] = checked;
-      return acc;
-    }, {} as typeof formData.competencia);
+    const newCompetencia = Object.fromEntries(
+      Object.keys(formData.competencia).map((mes) => [mes, checked])
+    ) as typeof formData.competencia;
     setFormData(prev => ({
       ...prev,
       competencia: newCompetencia
@@ -615,7 +614,7 @@ export default function Lancamentos() {
                             'Todos'
                           ) : (
                             (transaction.transaction_cost_centers || [])
-                              .map((tcc: any) => tcc.cost_centers?.name || '')
+                              .map((tcc) => tcc.cost_centers?.name || '')
                               .filter(Boolean)
                               .join(', ') || '-'
                           )}

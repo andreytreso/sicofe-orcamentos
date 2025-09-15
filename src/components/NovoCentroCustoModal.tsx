@@ -147,8 +147,9 @@ export default function NovoCentroCustoModal({ open, onOpenChange, initialData, 
       resetForm();
       onSuccess?.();
       onOpenChange(false);
-    } catch (err: any) {
-      toast.error(err?.message || "Erro ao salvar centro de custo.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error(message || "Erro ao salvar centro de custo.");
     } finally {
       setSaving(false);
     }

@@ -20,7 +20,14 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight } from "lucide-react";
 
-const mainMenuItems = [
+type MenuItem = {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+  role?: string;
+};
+
+const mainMenuItems: MenuItem[] = [
   {
     title: "Dashboard",
     url: "/",
@@ -39,7 +46,7 @@ const mainMenuItems = [
   },
 ];
 
-const cadastrosItems = [
+const cadastrosItems: MenuItem[] = [
   {
     title: "Empresas",
     url: "/empresas",
@@ -87,7 +94,7 @@ export function AppSidebar() {
   const isItemActive = (url: string) => location.pathname === url;
   const isCadastrosActive = cadastrosItems.some(item => isItemActive(item.url));
 
-  const MenuButton = ({ item, isActive }: { item: any; isActive: boolean }) => (
+  const MenuButton = ({ item, isActive }: { item: MenuItem; isActive: boolean }) => (
     <SidebarMenuButton 
       asChild 
       className={`w-full justify-start transition-all duration-200 hover:text-white group ${

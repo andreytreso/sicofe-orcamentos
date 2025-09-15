@@ -62,10 +62,10 @@ export function useChartData(companyIds?: string[]) {
         acc[monthKey].meta = acc[monthKey].despesas * 1.2;
         
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, ChartDataPoint>);
 
       // Converter para array e ordenar por mês
-      const sortedData = Object.values(monthlyData).sort((a: any, b: any) => 
+      const sortedData = Object.values(monthlyData).sort((a, b) =>
         a.monthKey.localeCompare(b.monthKey)
       );
 
@@ -74,7 +74,7 @@ export function useChartData(companyIds?: string[]) {
       let despesasAcum = 0;
       let metaAcum = 0;
 
-      const dataWithAccumulated = sortedData.map((item: any) => {
+      const dataWithAccumulated = sortedData.map((item) => {
         receitasAcum += item.receitas;
         despesasAcum += item.despesas;
         metaAcum += item.meta;

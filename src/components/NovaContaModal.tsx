@@ -78,9 +78,10 @@ export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props)
       
       onSuccess?.();
       onOpenChange(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating account:', err);
-      toast.error("Erro ao criar conta: " + (err?.message || "Erro desconhecido"));
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error("Erro ao criar conta: " + (message || "Erro desconhecido"));
     } finally {
       setSaving(false);
     }

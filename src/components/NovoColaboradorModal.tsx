@@ -61,8 +61,9 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: 
       queryClient.invalidateQueries({ queryKey: ["collaborators"] });
       onSuccess?.();
       onOpenChange(false);
-    } catch (err: any) {
-      alert(err?.message || "Erro ao criar colaborador.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      alert(message || "Erro ao criar colaborador.");
     } finally {
       setSaving(false);
     }
@@ -145,4 +146,3 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: 
     </Dialog>
   );
 }
-
