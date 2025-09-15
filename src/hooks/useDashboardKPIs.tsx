@@ -9,96 +9,43 @@ interface KPIData {
   variation: { value: string; trend: { value: string; absoluteValue: string; isPositive: boolean } };
 }
 
-export function useDashboardKPIs(period: PeriodType) {
+export function useDashboardKPIs(companyIds?: string[]) {
   return useQuery({
-    queryKey: ['dashboard-kpis', period],
+    queryKey: ['dashboard-kpis', companyIds],
     queryFn: async (): Promise<KPIData> => {
       try {
         // Obter dados das transações
-        const { data: transactions, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('transaction_date', { ascending: false });
+        let query = supabase
+          .from('transactions')
+          .select('*')
+          .order('transaction_date', { ascending: false });
 
-      if (error) {
-        throw new Error(`Failed to fetch transactions: ${error.message}`);
-      }
+        // Apply company filter if specified
+        if (companyIds && companyIds.length > 0) {
+          query = query.in('company_id', companyIds);
+        }
 
-      // Filtrar transações por período
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      let startDate: Date;
-      let endDate = new Date(currentYear, 11, 31); // 31 de dezembro do ano atual
+        const { data: transactions, error } = await query;
 
-      switch (period) {
-        case 'month':
-          startDate = new Date(currentYear, now.getMonth(), 1);
-          endDate = new Date(currentYear, now.getMonth() + 1, 0);
-          break;
-        case 'quarter':
-          const quarter = Math.floor(now.getMonth() / 3);
-          startDate = new Date(currentYear, quarter * 3, 1);
-          endDate = new Date(currentYear, (quarter + 1) * 3, 0);
-          break;
-        case 'year':
-          startDate = new Date(currentYear, 0, 1);
-          endDate = new Date(currentYear, 11, 31);
-          break;
-        case 'ytd':
-          startDate = new Date(currentYear, 0, 1);
-          endDate = now;
-          break;
-        default:
-          startDate = new Date(currentYear, now.getMonth(), 1);
-          endDate = new Date(currentYear, now.getMonth() + 1, 0);
-      }
+        if (error) {
+          throw new Error(`Failed to fetch transactions: ${error.message}`);
+        }
 
-      // Filtrar transações do período atual
-      const currentTransactions = (transactions || []).filter(t => {
-        const transactionDate = new Date(t.transaction_date);
-        return transactionDate >= startDate && transactionDate <= endDate;
-      });
+        // Calcular valores do ano atual completo (2024)
+        const currentYear = new Date().getFullYear();
+        const currentTransactions = (transactions || []).filter(t => {
+          const transactionDate = new Date(t.transaction_date);
+          return transactionDate.getFullYear() === currentYear;
+        });
 
-      // Calcular período anterior para comparação
-      let prevStartDate: Date;
-      let prevEndDate: Date;
+        // Calcular valores do ano anterior para comparação
+        const previousTransactions = (transactions || []).filter(t => {
+          const transactionDate = new Date(t.transaction_date);
+          return transactionDate.getFullYear() === currentYear - 1;
+        });
 
-      switch (period) {
-        case 'month':
-          prevStartDate = new Date(currentYear, now.getMonth() - 1, 1);
-          prevEndDate = new Date(currentYear, now.getMonth(), 0);
-          break;
-        case 'quarter':
-          const prevQuarter = Math.floor(now.getMonth() / 3) - 1;
-          if (prevQuarter < 0) {
-            prevStartDate = new Date(currentYear - 1, 9, 1); // Q4 do ano anterior
-            prevEndDate = new Date(currentYear - 1, 11, 31);
-          } else {
-            prevStartDate = new Date(currentYear, prevQuarter * 3, 1);
-            prevEndDate = new Date(currentYear, (prevQuarter + 1) * 3, 0);
-          }
-          break;
-        case 'year':
-          prevStartDate = new Date(currentYear - 1, 0, 1);
-          prevEndDate = new Date(currentYear - 1, 11, 31);
-          break;
-        case 'ytd':
-          prevStartDate = new Date(currentYear - 1, 0, 1);
-          prevEndDate = new Date(currentYear - 1, now.getMonth(), now.getDate());
-          break;
-        default:
-          prevStartDate = new Date(currentYear, now.getMonth() - 1, 1);
-          prevEndDate = new Date(currentYear, now.getMonth(), 0);
-      }
-
-      // Filtrar transações do período anterior
-      const previousTransactions = (transactions || []).filter(t => {
-        const transactionDate = new Date(t.transaction_date);
-        return transactionDate >= prevStartDate && transactionDate <= prevEndDate;
-      });
-
-      // Calcular valores
-      const currentRealized = currentTransactions.reduce((sum, t) => {
+      // Calcular valores - As transações são orçamento planejado, não realizado
+      const budget = currentTransactions.reduce((sum, t) => {
         // Considerar apenas despesas (valores negativos)
         if (t.level_1_group !== 'Receita Bruta') {
           return sum + Math.abs(Number(t.amount));
@@ -106,17 +53,16 @@ export function useDashboardKPIs(period: PeriodType) {
         return sum;
       }, 0);
 
-      const previousRealized = previousTransactions.reduce((sum, t) => {
+      const previousBudget = previousTransactions.reduce((sum, t) => {
         if (t.level_1_group !== 'Receita Bruta') {
           return sum + Math.abs(Number(t.amount));
         }
         return sum;
       }, 0);
 
-      // Para orçamento, vamos usar uma meta baseada no realizado * 1.5 (simulação)
-      // Em um sistema real, isso viria de uma tabela de orçamentos
-      const budget = currentRealized * 1.5;
-      const previousBudget = previousRealized * 1.5;
+      // Como não temos tabela de realizado ainda, realizado = 0
+      const currentRealized = 0;
+      const previousRealized = 0;
 
       const available = budget - currentRealized;
       const previousAvailable = previousBudget - previousRealized;
