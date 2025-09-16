@@ -18,7 +18,7 @@ interface CollaboratorRow {
 
 export default function Colaboradores() {
   const [showModal, setShowModal] = useState(false);
-  const { data, isLoading } = useSupabaseTable<CollaboratorRow>('collaborators', {
+  const { data, isLoading } = useSupabaseTable('collaborators', {
     select: `*, companies(name), cost_centers(code, name)`,
     orderBy: { column: 'name', ascending: true }
   });

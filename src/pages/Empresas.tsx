@@ -90,8 +90,8 @@ export default function Empresas() {
     : "";
 
   const totalCompanies = companies.length;
-  const activeCompanies = companies.filter((c) => isActive(c.status)).length;
-  const activeBudgets = budgets.filter((b) => isActive(b.status)).length;
+  const activeCompanies = companies.filter((c: any) => isActive(c.status)).length;
+  const activeBudgets = budgets.filter((b: any) => isActive(b.status)).length;
 
   /* exclusão -------------------------------------------------------------- */
   async function reallyDelete(id: string) {
@@ -194,7 +194,7 @@ export default function Empresas() {
               Nenhuma empresa encontrada.
             </p>
           ) : (
-            companies.map((e) => {
+            companies.map((e: any) => {
               const created = (() => {
                 try {
                   const d = parseISO(e.created_at);
@@ -248,8 +248,11 @@ export default function Empresas() {
                         <DropdownMenuItem
                           onClick={() => {
                             setEditing({
-                              ...e,
+                              id: e.id,
+                              name: e.name,
                               status: isActive(e.status) ? "active" : "inactive",
+                              grupo: e.grupo,
+                              created_at: e.created_at,
                             });
                             setTimeout(() => setModalOpen(true), 0);
                           }}
@@ -261,7 +264,7 @@ export default function Empresas() {
 
                         <DropdownMenuItem
                           className="text-destructive"
-                          onClick={() => setTimeout(() => setToDelete(e), 0)}
+                          onClick={() => setTimeout(() => setToDelete(e as any), 0)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
@@ -312,10 +315,12 @@ export default function Empresas() {
       <NovaEmpresaModal
         initialData={
           editing && {
-            ...editing,
+            id: editing.id,
+            name: editing.name,
             status: editing.status && editing.status.toLowerCase() === "active"
               ? "active"
               : "inactive",
+            grupo: editing.grupo,
           }
         }
         open={modalOpen}

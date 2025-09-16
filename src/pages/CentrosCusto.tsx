@@ -40,7 +40,7 @@ export default function CentrosCusto() {
   const {
     data: costCenters,
     isLoading
-  } = useSupabaseTable<CostCenter>('cost_centers', {
+  } = useSupabaseTable('cost_centers', {
     orderBy: {
       column: 'code',
       ascending: true

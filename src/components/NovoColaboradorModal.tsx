@@ -56,7 +56,7 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: 
         company_id: form.company_id,
         cost_center_id: form.cost_center_id || null,
       };
-      const { error } = await supabase.from("collaborators").insert(payload);
+      const { error } = await supabase.from("collaborators" as any).insert(payload);
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["collaborators"] });
       onSuccess?.();

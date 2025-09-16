@@ -11,7 +11,7 @@ interface UseSupabaseTableOptions {
   filter?: { column: string; value: FilterValue; operator?: FilterOperator };
 }
 
-export function useSupabaseTable<T extends Record<string, unknown> = Record<string, unknown>>(
+export function useSupabaseTable(
   tableName: string,
   options: UseSupabaseTableOptions = {}
 ) {
@@ -21,37 +21,37 @@ export function useSupabaseTable<T extends Record<string, unknown> = Record<stri
   // Query para buscar dados
   const query = useQuery({
     queryKey: [tableName, options],
-    queryFn: async (): Promise<T[]> => {
+    queryFn: async (): Promise<any[]> => {
       let queryBuilder = supabase
-        .from(tableName)
+        .from(tableName as any)
         .select(select);
 
       if (filter) {
         const { column, value, operator = 'eq' } = filter;
         switch (operator) {
           case 'eq':
-            queryBuilder = queryBuilder.eq(column, value as unknown as string | number | boolean | null);
+            queryBuilder = queryBuilder.eq(column, value as any);
             break;
           case 'neq':
-            queryBuilder = queryBuilder.neq(column, value as unknown as string | number | boolean | null);
+            queryBuilder = queryBuilder.neq(column, value as any);
             break;
           case 'gt':
-            queryBuilder = queryBuilder.gt(column, value as unknown as string | number);
+            queryBuilder = queryBuilder.gt(column, value as any);
             break;
           case 'gte':
-            queryBuilder = queryBuilder.gte(column, value as unknown as string | number);
+            queryBuilder = queryBuilder.gte(column, value as any);
             break;
           case 'lt':
-            queryBuilder = queryBuilder.lt(column, value as unknown as string | number);
+            queryBuilder = queryBuilder.lt(column, value as any);
             break;
           case 'lte':
-            queryBuilder = queryBuilder.lte(column, value as unknown as string | number);
+            queryBuilder = queryBuilder.lte(column, value as any);
             break;
           case 'like':
-            queryBuilder = queryBuilder.like(column, value as unknown as string);
+            queryBuilder = queryBuilder.like(column, value as any);
             break;
           case 'in':
-            queryBuilder = queryBuilder.in(column, value as unknown as (string | number | boolean)[]);
+            queryBuilder = queryBuilder.in(column, value as any);
             break;
         }
       }
@@ -66,15 +66,15 @@ export function useSupabaseTable<T extends Record<string, unknown> = Record<stri
         throw new Error(`Error fetching ${tableName}: ${error.message}`);
       }
 
-      return (data || []) as T[];
+      return (data || []) as any;
     }
   });
 
   // Mutation para inserir
   const insertMutation = useMutation({
-    mutationFn: async (data: Partial<T> | Partial<T>[]) => {
+    mutationFn: async (data: any) => {
       const { data: result, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .insert(data)
         .select()
         .single();
@@ -104,9 +104,9 @@ export function useSupabaseTable<T extends Record<string, unknown> = Record<stri
 
   // Mutation para atualizar
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<T> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const { data: result, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .update(data)
         .eq('id', id)
         .select()
@@ -139,7 +139,7 @@ export function useSupabaseTable<T extends Record<string, unknown> = Record<stri
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .delete()
         .eq('id', id);
 

@@ -20,7 +20,7 @@ export default function Fornecedores() {
   const {
     data: suppliers,
     isLoading
-  } = useSupabaseTable<Supplier>('suppliers', {
+  } = useSupabaseTable('suppliers', {
     orderBy: {
       column: 'name',
       ascending: true

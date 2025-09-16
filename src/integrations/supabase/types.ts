@@ -253,6 +253,39 @@ export type Database = {
         }
         Relationships: []
       }
+      collaborators: {
+        Row: {
+          company_id: string
+          cost_center_id: string | null
+          created_at: string
+          group_name: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          cost_center_id?: string | null
+          created_at?: string
+          group_name?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          cost_center_id?: string | null
+          created_at?: string
+          group_name?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           cnpj: string | null
