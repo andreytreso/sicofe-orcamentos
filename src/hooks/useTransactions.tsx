@@ -24,6 +24,14 @@ export interface Transaction {
   companies?: {
     name: string;
   };
+  suppliers?: {
+    id: string;
+    name: string | null;
+  } | null;
+  collaborators?: {
+    id: string;
+    name: string | null;
+  } | null;
   transaction_cost_centers?: Array<{
     cost_center_id: string;
     cost_centers?: {
@@ -63,27 +71,38 @@ export function useTransactions(filters: TransactionFilters) {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ['transactions', filters],
     queryFn: async (): Promise<Transaction[]> => {
-      let query = supabase
-        .from('transactions')
-        .select(`
-          *,
-          companies(name),
-          suppliers:supplier_id(id, name),
-          collaborators:collaborator_id(id, name),
-          transaction_cost_centers(
-            cost_center_id,
-            cost_centers(id, name, code)
-          )
-        `)
-        .order('transaction_date', { ascending: false });
+      const buildSelect = (includeOptionalRelations: boolean) => {
+        const selectParts = [
+          '*',
+          'companies(name)',
+          'transaction_cost_centers(cost_center_id, cost_centers(id, name, code))',
+        ];
 
-      if (filters.companyId && filters.companyId !== 'all') {
-        query = query.eq('company_id', filters.companyId);
+        if (includeOptionalRelations) {
+          selectParts.splice(2, 0, 'suppliers:supplier_id(id, name)', 'collaborators:collaborator_id(id, name)');
+        }
+
+        return selectParts.join(',\n          ');
+      };
+
+      const fetchQuery = (includeOptionalRelations: boolean) => {
+        let query = supabase
+          .from('transactions')
+          .select(buildSelect(includeOptionalRelations))
+          .order('transaction_date', { ascending: false });
+
+        if (filters.companyId && filters.companyId !== 'all') {
+          query = query.eq('company_id', filters.companyId);
+        }
+
+        return query;
+      };
+
+      let { data, error } = await fetchQuery(true);
+
+      if (error && ((error.message || '').toLowerCase().includes('supplier') || (error.details || '').toLowerCase().includes('supplier') || (error.message || '').toLowerCase().includes('collaborator') || (error.details || '').toLowerCase().includes('collaborator'))) {
+        ({ data, error } = await fetchQuery(false));
       }
-
-      
-
-      const { data, error } = await query;
 
       if (error) {
         throw new Error(`Failed to fetch transactions: ${error.message}`);
@@ -279,3 +298,4 @@ export function useTransactions(filters: TransactionFilters) {
     isDeleting: deleteMutation.isPending
   };
 }
+

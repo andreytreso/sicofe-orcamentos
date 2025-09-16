@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useCompanies } from '@/hooks/useCompanies';
+import { useUserCompanies } from '@/hooks/useCompanies';
+import { useCompanyGroups } from '@/hooks/useCompanyGroups';
 import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from '@/hooks/useAccountHierarchy';
 import { useTransactions, TransactionFilters, Transaction } from '@/hooks/useTransactions';
 import { useCostCenters } from '@/hooks/useCostCenters';
@@ -40,7 +41,8 @@ export default function Lancamentos() {
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lancamentoToDelete, setLancamentoToDelete] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const createInitialFormData = () => ({
+    grupo: "",
     empresa: "",
     ano: new Date().getFullYear().toString(),
     grupoContas1: "",
@@ -63,27 +65,39 @@ export default function Lancamentos() {
       dez: false
     }
   });
+  const [formData, setFormData] = useState(createInitialFormData);
 
-  const {
-    data: companies = []
-  } = useCompanies();
-  const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(formData.empresa);
-  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(formData.empresa);
-  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCompanyCollaborators(formData.empresa);
-  const level1Options = useLevel1Options();
-  const level2Options = useLevel2Options(formData.grupoContas1);
-  const analyticalOptions = useAnalyticalAccountOptions(formData.grupoContas1, formData.grupoContas2);
-  
-  // Centros de custo (multi seleção)
   const [allCostCenters, setAllCostCenters] = useState(true);
   const [selectedCostCenters, setSelectedCostCenters] = useState<string[]>([]);
   const [useSupplier, setUseSupplier] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [useCollaborator, setUseCollaborator] = useState(false);
   const [selectedCollaborator, setSelectedCollaborator] = useState<string>("");
+  const [applyToAllGroupCompanies, setApplyToAllGroupCompanies] = useState(false);
+
+  const { data: companyGroups = [] } = useCompanyGroups();
+  const { data: companiesWithGroup = [] } = useUserCompanies();
+
+  const groupCompaniesForModal = formData.grupo
+    ? companiesWithGroup.filter(company => company.group_id === formData.grupo)
+    : [];
+  const modalCompanyOptions = groupCompaniesForModal.map(company => ({ id: company.id, name: company.name }));
+  const allCompanyOptions = companiesWithGroup.map(company => ({ id: company.id, name: company.name }));
+
+  const referenceCompanyId = applyToAllGroupCompanies
+    ? (formData.empresa || groupCompaniesForModal[0]?.id || '')
+    : formData.empresa;
+
+  const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(referenceCompanyId);
+  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(referenceCompanyId);
+  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCompanyCollaborators(referenceCompanyId);
+  const level1Options = useLevel1Options();
+  const level2Options = useLevel2Options(formData.grupoContas1);
+  const analyticalOptions = useAnalyticalAccountOptions(formData.grupoContas1, formData.grupoContas2);
+
 
   useEffect(() => {
-    // Ao trocar empresa, reset seleção de centros de custo
+    // Ao trocar empresa, reset sele��o de centros de custo
     setAllCostCenters(true);
     setSelectedCostCenters([]);
     // Reset suppliers/collaborators
@@ -91,7 +105,7 @@ export default function Lancamentos() {
     setSelectedSupplier("");
     setUseCollaborator(false);
     setSelectedCollaborator("");
-  }, [formData.empresa]);
+  }, [formData.empresa, setAllCostCenters, setSelectedCostCenters, setUseSupplier, setSelectedSupplier, setUseCollaborator, setSelectedCollaborator]);
   const filters: TransactionFilters = {
     companyId: selectedEmpresa || undefined,
     period: selectedPeriodo || undefined,
@@ -114,8 +128,7 @@ export default function Lancamentos() {
     length: 6
   }, (_, i) => currentYear + i);
 
-  // Transform companies for compatibility
-  const companyOptions = companies.map(company => ({ id: company.id, name: company.name }));
+
   const meses = [{
     key: "jan",
     label: "Janeiro"
@@ -196,7 +209,11 @@ export default function Lancamentos() {
       if (m in months) months[m as keyof typeof months] = true;
     });
 
+    const transactionCompany = companiesWithGroup.find(c => c.id === transaction.company_id);
+    const groupId = transactionCompany?.group_id ?? "";
+
     setFormData({
+      grupo: groupId,
       empresa: transaction.company_id,
       ano: yearStr,
       grupoContas1: transaction.level_1_group,
@@ -219,8 +236,9 @@ export default function Lancamentos() {
     setSelectedSupplier(supplierId || "");
     setUseCollaborator(!!collaboratorId);
     setSelectedCollaborator(collaboratorId || "");
+    setApplyToAllGroupCompanies(false);
 
-    setShowForm(true);
+    handleDialogChange(true);
   };
   const handleDelete = (id: string) => {
     setLancamentoToDelete(id);
@@ -250,6 +268,28 @@ export default function Lancamentos() {
       ...prev,
       competencia: newCompetencia
     }));
+  };
+  const handleAllGroupCompaniesToggle = (checked: boolean) => {
+    const isChecked = !!checked;
+    setApplyToAllGroupCompanies(isChecked);
+
+    if (isChecked) {
+      const fallbackCompanyId = formData.empresa || groupCompaniesForModal[0]?.id || '';
+
+      setFormData(prev => ({
+        ...prev,
+        empresa: fallbackCompanyId,
+      }));
+
+      if (!fallbackCompanyId) {
+        setAllCostCenters(true);
+        setSelectedCostCenters([]);
+        setUseSupplier(false);
+        setSelectedSupplier('');
+        setUseCollaborator(false);
+        setSelectedCollaborator('');
+      }
+    }
   };
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -361,24 +401,42 @@ export default function Lancamentos() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação dos campos obrigatórios
-    if (!formData.empresa || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
+    if (!formData.grupo || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
       toast({
         title: "Erro",
-        description: "Todos os campos são obrigatórios.",
+        description: "Todos os campos s�o obrigat�rios.",
         variant: "destructive"
       });
       return;
     }
 
-    // Remove formatação do valor para conversão
-    const valorLimpo = formData.valor.replace(/\./g, '').replace(',', '.');
+    if (!applyToAllGroupCompanies && !formData.empresa) {
+      toast({
+        title: "Erro",
+        description: "Selecione a empresa.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (applyToAllGroupCompanies && editingLancamento) {
+      toast({
+        title: "Erro",
+        description: "N�o � poss�vel aplicar para todas as empresas ao editar um lan�amento.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const valorLimpo = formData.valor.replace(/\./g, "").replace(",", ".");
     const valorFormatado = parseFloat(valorLimpo) || 0;
-    const mesesSelecionados = Object.entries(formData.competencia).filter(([_, selected]) => selected).map(([mes, _]) => mes);
+    const mesesSelecionados = Object.entries(formData.competencia)
+      .filter(([_, selected]) => selected)
+      .map(([mes]) => mes);
     if (mesesSelecionados.length === 0) {
       toast({
         title: "Erro",
-        description: "Selecione pelo menos um mês de competência.",
+        description: "Selecione pelo menos um m�s de compet�ncia.",
         variant: "destructive"
       });
       return;
@@ -400,18 +458,32 @@ export default function Lancamentos() {
       dez: '12'
     };
 
-    // Find the selected company ID
-    const selectedCompany = companies.find(c => c.id === formData.empresa);
-    if (!selectedCompany) {
-      toast({
-        title: "Erro",
-        description: "Empresa não encontrada.",
-        variant: "destructive"
-      });
-      return;
+    const groupCompanyIds = groupCompaniesForModal.map(company => company.id);
+    let targetCompanyIds: string[] = [];
+
+    if (applyToAllGroupCompanies) {
+      targetCompanyIds = groupCompanyIds;
+      if (targetCompanyIds.length === 0) {
+        toast({
+          title: "Erro",
+          description: "Nenhuma empresa encontrada para o grupo selecionado.",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else {
+      const selectedCompany = companiesWithGroup.find(company => company.id === formData.empresa);
+      if (!selectedCompany) {
+        toast({
+          title: "Erro",
+          description: "Empresa n�o encontrada.",
+          variant: "destructive"
+        });
+        return;
+      }
+      targetCompanyIds = [selectedCompany.id];
     }
 
-    // Centros de custo: exigir seleção quando não for "Todos"
     if (!allCostCenters && selectedCostCenters.length === 0) {
       toast({
         title: "Erro",
@@ -421,84 +493,50 @@ export default function Lancamentos() {
       return;
     }
 
-    // Create transaction data for each selected month
-    mesesSelecionados.forEach(mes => {
-      const transactionData = {
-        company_id: selectedCompany.id,
-        year: parseInt(formData.ano),
-        level_1_group: formData.grupoContas1,
-        level_2_group: formData.grupoContas2,
-        analytical_account: formData.contaAnalitica,
-        amount: valorFormatado,
-        observations: formData.observacoes,
-        competency_months: [mes],
-        transaction_date: `${formData.ano}-${monthMap[mes]}-01`,
-        all_cost_centers: allCostCenters,
-        cost_center_ids: allCostCenters ? [] : selectedCostCenters,
-        ...(useSupplier && selectedSupplier ? { supplier_id: selectedSupplier } : {}),
-        ...(useCollaborator && selectedCollaborator ? { collaborator_id: selectedCollaborator } : {}),
-      };
-      if (editingLancamento) {
-        updateTransaction(editingLancamento.id, transactionData);
-      } else {
-        createTransaction(transactionData);
-      }
+    targetCompanyIds.forEach(companyId => {
+      mesesSelecionados.forEach(mes => {
+        const transactionData = {
+          company_id: companyId,
+          year: parseInt(formData.ano),
+          level_1_group: formData.grupoContas1,
+          level_2_group: formData.grupoContas2,
+          analytical_account: formData.contaAnalitica,
+          amount: valorFormatado,
+          observations: formData.observacoes,
+          competency_months: [mes],
+          transaction_date: `${formData.ano}-${monthMap[mes]}-01`,
+          all_cost_centers: allCostCenters,
+          cost_center_ids: allCostCenters ? [] : selectedCostCenters,
+          ...(useSupplier && selectedSupplier ? { supplier_id: selectedSupplier } : {}),
+          ...(useCollaborator && selectedCollaborator ? { collaborator_id: selectedCollaborator } : {}),
+        };
+        if (editingLancamento) {
+          updateTransaction(editingLancamento.id, transactionData);
+        } else {
+          createTransaction(transactionData);
+        }
+      });
     });
-    setShowForm(false);
-    setEditingLancamento(null);
 
-    // Reset form
-    setFormData({
-      empresa: "",
-      ano: new Date().getFullYear().toString(),
-      grupoContas1: "",
-      grupoContas2: "",
-      contaAnalitica: "",
-      valor: "",
-      observacoes: "",
-      competencia: {
-        jan: false,
-        fev: false,
-        mar: false,
-        abr: false,
-        mai: false,
-        jun: false,
-        jul: false,
-        ago: false,
-        set: false,
-        out: false,
-        nov: false,
-        dez: false
-      }
-    });
+    handleDialogChange(false);
   };
-  const handleCloseForm = () => {
-    setShowForm(false);
+
+  const resetFormState = () => {
     setEditingLancamento(null);
-    // Reset form
-    setFormData({
-      empresa: "",
-      ano: new Date().getFullYear().toString(),
-      grupoContas1: "",
-      grupoContas2: "",
-      contaAnalitica: "",
-      valor: "",
-      observacoes: "",
-      competencia: {
-        jan: false,
-        fev: false,
-        mar: false,
-        abr: false,
-        mai: false,
-        jun: false,
-        jul: false,
-        ago: false,
-        set: false,
-        out: false,
-        nov: false,
-        dez: false
-      }
-    });
+    setFormData(createInitialFormData());
+    setAllCostCenters(true);
+    setSelectedCostCenters([]);
+    setUseSupplier(false);
+    setSelectedSupplier("");
+    setUseCollaborator(false);
+    setSelectedCollaborator("");
+    setApplyToAllGroupCompanies(false);
+  };
+  const handleDialogChange = (open: boolean) => {
+    setShowForm(open);
+    if (!open) {
+      resetFormState();
+    }
   };
   return <div className="space-y-6 bg-white min-h-screen">
       <div className="flex justify-between items-center">
@@ -510,7 +548,7 @@ export default function Lancamentos() {
             Registre e acompanhe os lançamentos do orçamento por conta
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="text-white" style={{
+        <Button onClick={() => handleDialogChange(true)} className="text-white" style={{
         backgroundColor: '#0047FF'
       }}>
           <Plus className="h-4 w-4 mr-2" />
@@ -537,7 +575,7 @@ export default function Lancamentos() {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300 z-50">
                   <SelectItem value="all" className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-gray-500">Todas as empresas</SelectItem>
-                  {companyOptions.map(c => (
+                  {allCompanyOptions.map(c => (
                     <SelectItem key={c.id} value={c.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900 text-black">
                       {c.name}
                     </SelectItem>
@@ -642,7 +680,7 @@ export default function Lancamentos() {
       </Card>
 
       {/* Modal de Novo/Editar Lançamento */}
-      <Dialog open={showForm} onOpenChange={handleCloseForm}>
+      <Dialog open={showForm} onOpenChange={handleDialogChange}>
         <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-gray-700">
@@ -654,28 +692,84 @@ export default function Lancamentos() {
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Primeira linha - Empresa */}
-            <div className="grid grid-cols-1">
+            {/* Primeira linha - Grupo e Empresa */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="empresa" className="text-gray-700 font-medium">Empresa *</Label>
-                <Select value={formData.empresa} onValueChange={value => setFormData(prev => ({
-                ...prev,
-                empresa: value
-              }))}>
+                <Label htmlFor="grupo" className="text-gray-700 font-medium">Grupo *</Label>
+                <Select
+                  value={formData.grupo}
+                  onValueChange={value => {
+                    setFormData(prev => ({
+                      ...prev,
+                      grupo: value,
+                      empresa: ""
+                    }));
+                    setApplyToAllGroupCompanies(false);
+                  }}
+                >
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder="Selecione a empresa" />
+                    <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                    {companyOptions.map(c => (
-                      <SelectItem key={c.id} value={c.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                        {c.name}
+                    {companyGroups.map(group => (
+                      <SelectItem
+                        key={group.id}
+                        value={group.id}
+                        className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                      >
+                        {group.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="empresa" className="text-gray-700 font-medium">
+                  Empresa {applyToAllGroupCompanies ? "(todas as empresas do grupo)" : "*"}
+                </Label>
+                <Select
+                  value={formData.empresa}
+                  onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    empresa: value
+                  }))}
+                  disabled={!formData.grupo}
+                >
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                    <SelectValue placeholder={formData.grupo ? "Selecione a empresa" : "Selecione o grupo primeiro"} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-300 z-50">
+                    {modalCompanyOptions.length > 0 ? (
+                      modalCompanyOptions.map(c => (
+                        <SelectItem
+                          key={c.id}
+                          value={c.id}
+                          className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                        >
+                          {c.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="px-2 py-1.5 text-sm text-gray-600">
+                        {formData.grupo ? "Nenhuma empresa dispon�vel para este grupo" : "Selecione um grupo para listar empresas"}
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-2 pt-2">
+                  <Checkbox
+                    id="all-group-companies"
+                    checked={applyToAllGroupCompanies}
+                    disabled={!formData.grupo || !!editingLancamento}
+                    onCheckedChange={handleAllGroupCompaniesToggle}
+                  />
+                  <Label htmlFor="all-group-companies" className="text-sm text-gray-700">
+                    {"Lan\u00E7ar para todas as empresas do grupo"}
+                  </Label>
+                </div>
+              </div>
+            </div>
             {/* Centros de Custo (dependente da empresa) */}
             <div className="space-y-2">
               <Label className="text-gray-700 font-medium">Centros de Custo</Label>
@@ -684,7 +778,7 @@ export default function Lancamentos() {
                   <Checkbox
                     id="cc-all"
                     checked={allCostCenters}
-                    disabled={!formData.empresa}
+                    disabled={!referenceCompanyId}
                     onCheckedChange={(checked) => {
                       setAllCostCenters(!!checked);
                       if (checked) setSelectedCostCenters([]);
@@ -698,7 +792,7 @@ export default function Lancamentos() {
                       <Button
                         type="button"
                         variant="outline"
-                        disabled={!formData.empresa || allCostCenters}
+                        disabled={!referenceCompanyId || allCostCenters}
                         className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                       >
                         {isLoadingCostCenters
@@ -748,7 +842,7 @@ export default function Lancamentos() {
                 <Checkbox
                   id="toggle-supplier"
                   checked={useSupplier}
-                  disabled={!formData.empresa}
+                  disabled={!referenceCompanyId}
                   onCheckedChange={(c) => setUseSupplier(!!c)}
                 />
                 <Label htmlFor="toggle-supplier" className="text-gray-700 font-medium">Fornecedores</Label>
@@ -781,7 +875,7 @@ export default function Lancamentos() {
                 <Checkbox
                   id="toggle-collaborator"
                   checked={useCollaborator}
-                  disabled={!formData.empresa}
+                  disabled={!referenceCompanyId}
                   onCheckedChange={(c) => setUseCollaborator(!!c)}
                 />
                 <Label htmlFor="toggle-collaborator" className="text-gray-700 font-medium">Colaboradores</Label>
@@ -931,7 +1025,7 @@ export default function Lancamentos() {
             </div>
 
             <DialogFooter className="pt-6">
-              <Button type="button" variant="outline" onClick={handleCloseForm} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+              <Button type="button" variant="outline" onClick={() => handleDialogChange(false)} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                 Cancelar
               </Button>
               <Button type="submit" className="text-white" style={{
@@ -965,3 +1059,9 @@ export default function Lancamentos() {
       </AlertDialog>
     </div>;
 }
+
+
+
+
+
+

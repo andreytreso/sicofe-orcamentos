@@ -22,6 +22,13 @@ interface Props {
   onSuccess?: () => void;
 }
 
+const normalizeCode = (value: string) => value
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^A-Za-z0-9]+/g, "_")
+  .replace(/^_+|_+$/g, "")
+  .toUpperCase();
+
 export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
@@ -43,29 +50,49 @@ export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props)
 
     setSaving(true);
     try {
-      // Get current user and their first company
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error("Usu√°rio n√£o autenticado");
+      try {
+        // Get current user and their first company
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user) throw new Error("Usu·rio n„o autenticado");
 
-      const { data: userCompanies, error: companiesError } = await supabase
-        .from('user_company_access')
-        .select('company_id')
-        .eq('user_id', user.id)
-        .limit(1);
+        const { data: userCompanies, error: companiesError } = await supabase
+          .from('user_company_access')
+          .select('company_id')
+          .eq('user_id', user.id)
+          .limit(1);
 
-      if (companiesError) throw companiesError;
-      if (!userCompanies || userCompanies.length === 0) {
-        throw new Error("Usu√°rio n√£o tem acesso a nenhuma empresa");
-      }
+        if (companiesError) throw companiesError;
+        const companyId = userCompanies?.[0]?.company_id;
+        if (!companyId) {
+          throw new Error("Usu·rio n„o tem acesso a nenhuma empresa");
+        }
 
-      const { error } = await supabase.from("account_hierarchy_legacy").insert({
-        ...form,
-        company_id: userCompanies[0].company_id
-      });
-      
-      if (error) throw error;
-      
+        const { data: company, error: companyError } = await supabase
+          .from('companies')
+          .select('group_id')
+          .eq('id', companyId)
+          .single();
+
+        if (companyError) throw companyError;
+        if (!company?.group_id) {
+          throw new Error('Empresa n„o possui grupo vinculado');
+        }
+
+        const payload = {
+          group_id: company.group_id,
+          nome_conta_resultado_s1: form.level_1.trim(),
+          nome_conta_resultado_s2: form.level_2.trim(),
+          nome_conta_resultado_a1: form.analytical_account.trim(),
+          cod_conta_resultado_s1: normalizeCode(form.level_1),
+          cod_conta_resultado_s2: normalizeCode(form.level_2),
+          cod_conta_resultado_a1: normalizeCode(form.analytical_account),
+          status: 'active',
+          type: 'custom',
+        };
+
+        const { error } = await supabase.from('group_chart_of_accounts').insert(payload);
+        if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["account-hierarchy"] });
       toast.success("Conta criada com sucesso!");
       
@@ -124,3 +151,4 @@ export default function NovaContaModal({ open, onOpenChange, onSuccess }: Props)
     </Dialog>
   );
 }
+
