@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -89,7 +89,7 @@ export default function Lancamentos() {
     : formData.empresa;
 
   const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(referenceCompanyId);
-  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(referenceCompanyId);
+  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(referenceCompanyId, formData.grupo || undefined);
   const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCompanyCollaborators(referenceCompanyId);
   const level1Options = useLevel1Options();
   const level2Options = useLevel2Options(formData.grupoContas1);
@@ -97,7 +97,7 @@ export default function Lancamentos() {
 
 
   useEffect(() => {
-    // Ao trocar empresa, reset sele��o de centros de custo
+    // Ao trocar empresa, reset seleção de centros de custo
     setAllCostCenters(true);
     setSelectedCostCenters([]);
     // Reset suppliers/collaborators
@@ -137,7 +137,7 @@ export default function Lancamentos() {
     label: "Fevereiro"
   }, {
     key: "mar",
-    label: "Março"
+    label: "MarÃ§o"
   }, {
     key: "abr",
     label: "Abril"
@@ -167,21 +167,21 @@ export default function Lancamentos() {
     label: "Dezembro"
   }];
 
-  // Função para limpar campos dependentes quando muda o nível superior
+  // FunÃ§Ã£o para limpar campos dependentes quando muda o nÃ­vel superior
   const handleNivel1Change = (value: string) => {
     setFormData(prev => ({
       ...prev,
       grupoContas1: value,
       grupoContas2: "",
-      // limpa nível 2
-      contaAnalitica: "" // limpa conta analítica
+      // limpa nÃ­vel 2
+      contaAnalitica: "" // limpa conta analÃ­tica
     }));
   };
   const handleNivel2Change = (value: string) => {
     setFormData(prev => ({
       ...prev,
       grupoContas2: value,
-      contaAnalitica: "" // limpa conta analítica
+      contaAnalitica: "" // limpa conta analÃ­tica
     }));
   };
 
@@ -197,7 +197,7 @@ export default function Lancamentos() {
   };
   const handleEdit = (transaction: Transaction) => {
     setEditingLancamento(transaction);
-    // Preencher formulário com dados existentes
+    // Preencher formulÃ¡rio com dados existentes
     const yearStr = (transaction.year ?? new Date(transaction.transaction_date).getFullYear()).toString();
     const amountStr = (Math.abs(transaction.amount) || 0).toFixed(2).replace('.', ',');
 
@@ -298,13 +298,13 @@ export default function Lancamentos() {
     }).format(Math.abs(value));
   };
   const formatValueWithThousandSeparator = (value: string) => {
-    // Remove tudo exceto números, vírgula e ponto
+    // Remove tudo exceto nÃºmeros, vÃ­rgula e ponto
     let numericValue = value.replace(/[^\d.,-]/g, '');
 
-    // Substitui vírgula por ponto para processamento
+    // Substitui vÃ­rgula por ponto para processamento
     numericValue = numericValue.replace(',', '.');
 
-    // Remove pontos extras (manter apenas o último como decimal)
+    // Remove pontos extras (manter apenas o Ãºltimo como decimal)
     const parts = numericValue.split('.');
     if (parts.length > 2) {
       numericValue = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
@@ -316,7 +316,7 @@ export default function Lancamentos() {
       numericValue = integerPart + '.' + decimalPart.slice(0, 2);
     }
 
-    // Converte para número para formatação
+    // Converte para nÃºmero para formataÃ§Ã£o
     const numberValue = parseFloat(numericValue);
     if (isNaN(numberValue)) {
       return '';
@@ -348,13 +348,13 @@ export default function Lancamentos() {
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Remove tudo exceto números, vírgula e ponto
+    // Remove tudo exceto nÃºmeros, vÃ­rgula e ponto
     let numericValue = value.replace(/[^\d.,-]/g, '');
 
-    // Substitui vírgula por ponto para processamento interno
+    // Substitui vÃ­rgula por ponto para processamento interno
     numericValue = numericValue.replace(',', '.');
 
-    // Remove pontos extras (manter apenas o último como decimal)
+    // Remove pontos extras (manter apenas o Ãºltimo como decimal)
     const parts = numericValue.split('.');
     if (parts.length > 2) {
       numericValue = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
@@ -386,7 +386,7 @@ export default function Lancamentos() {
   const handleValueFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value) {
-      // Remove formatação para edição (manter apenas números, vírgula e ponto)
+      // Remove formataÃ§Ã£o para ediÃ§Ã£o (manter apenas nÃºmeros, vÃ­rgula e ponto)
       const unformattedValue = value.replace(/\./g, '').replace(',', '.');
       const numberValue = parseFloat(unformattedValue);
       if (!isNaN(numberValue)) {
@@ -404,7 +404,7 @@ export default function Lancamentos() {
     if (!formData.grupo || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
       toast({
         title: "Erro",
-        description: "Todos os campos s�o obrigat�rios.",
+        description: "Todos os campos sï¿½o obrigatï¿½rios.",
         variant: "destructive"
       });
       return;
@@ -422,7 +422,7 @@ export default function Lancamentos() {
     if (applyToAllGroupCompanies && editingLancamento) {
       toast({
         title: "Erro",
-        description: "N�o � poss�vel aplicar para todas as empresas ao editar um lan�amento.",
+        description: "Nï¿½o ï¿½ possï¿½vel aplicar para todas as empresas ao editar um lanï¿½amento.",
         variant: "destructive"
       });
       return;
@@ -436,7 +436,7 @@ export default function Lancamentos() {
     if (mesesSelecionados.length === 0) {
       toast({
         title: "Erro",
-        description: "Selecione pelo menos um m�s de compet�ncia.",
+        description: "Selecione pelo menos um mï¿½s de competï¿½ncia.",
         variant: "destructive"
       });
       return;
@@ -476,7 +476,7 @@ export default function Lancamentos() {
       if (!selectedCompany) {
         toast({
           title: "Erro",
-          description: "Empresa n�o encontrada.",
+          description: "Empresa nï¿½o encontrada.",
           variant: "destructive"
         });
         return;
@@ -543,16 +543,16 @@ export default function Lancamentos() {
         <div>
           <h1 className="text-3xl font-bold" style={{
           color: '#1F2937'
-        }}>Lançamentos Orçamentários</h1>
+        }}>LanÃ§amentos OrÃ§amentÃ¡rios</h1>
           <p className="text-gray-500 mt-2">
-            Registre e acompanhe os lançamentos do orçamento por conta
+            Registre e acompanhe os lanÃ§amentos do orÃ§amento por conta
           </p>
         </div>
         <Button onClick={() => handleDialogChange(true)} className="text-white" style={{
         backgroundColor: '#0047FF'
       }}>
           <Plus className="h-4 w-4 mr-2" />
-          Novo Lançamento
+          Novo LanÃ§amento
         </Button>
       </div>
 
@@ -564,7 +564,7 @@ export default function Lancamentos() {
               <Label htmlFor="search" className="text-gray-700">Buscar</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input id="search" placeholder="Buscar por descrição, conta..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-white border-gray-300 placeholder:text-gray-500 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                <Input id="search" placeholder="Buscar por descriÃ§Ã£o, conta..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-white border-gray-300 placeholder:text-gray-500 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0" />
               </div>
             </div>
             <div>
@@ -584,7 +584,7 @@ export default function Lancamentos() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="filter-periodo" className="text-gray-700">Período</Label>
+              <Label htmlFor="filter-periodo" className="text-gray-700">PerÃ­odo</Label>
               <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
                 <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
                   <SelectValue placeholder="Todos os Meses" />
@@ -613,12 +613,12 @@ export default function Lancamentos() {
         </CardContent>
       </Card>
 
-      {/* Lista de Lançamentos */}
+      {/* Lista de LanÃ§amentos */}
       <Card className="bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader className="bg-white">
           <CardTitle className="text-lg font-semibold" style={{
           color: '#1F2937'
-        }}>Histórico de Lançamentos</CardTitle>
+        }}>HistÃ³rico de LanÃ§amentos</CardTitle>
         </CardHeader>
         <CardContent className="bg-white">
           {isLoadingTransactions ? <div className="flex justify-center py-8">
@@ -631,9 +631,9 @@ export default function Lancamentos() {
                   <TableHead className="text-gray-700">Data</TableHead>
                   <TableHead className="text-gray-700">Empresa</TableHead>
                   <TableHead className="text-gray-700">Conta</TableHead>
-                  <TableHead className="text-gray-700">Descrição</TableHead>
+                  <TableHead className="text-gray-700">DescriÃ§Ã£o</TableHead>
                   <TableHead className="text-right text-gray-700">Valor</TableHead>
-                  <TableHead className="text-center text-gray-700">Ações</TableHead>
+                  <TableHead className="text-center text-gray-700">AÃ§Ãµes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
@@ -679,15 +679,15 @@ export default function Lancamentos() {
         </CardContent>
       </Card>
 
-      {/* Modal de Novo/Editar Lançamento */}
+      {/* Modal de Novo/Editar LanÃ§amento */}
       <Dialog open={showForm} onOpenChange={handleDialogChange}>
         <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-gray-700">
-              {editingLancamento ? 'Editar Lançamento Orçamentário' : 'Novo Lançamento Orçamentário'}
+              {editingLancamento ? 'Editar LanÃ§amento OrÃ§amentÃ¡rio' : 'Novo LanÃ§amento OrÃ§amentÃ¡rio'}
             </DialogTitle>
             <DialogDescription className="text-gray-700">
-              {editingLancamento ? 'Altere os dados abaixo para atualizar o lançamento' : 'Preencha os dados abaixo para criar um novo lançamento'}
+              {editingLancamento ? 'Altere os dados abaixo para atualizar o lanÃ§amento' : 'Preencha os dados abaixo para criar um novo lanÃ§amento'}
             </DialogDescription>
           </DialogHeader>
           
@@ -752,7 +752,7 @@ export default function Lancamentos() {
                       ))
                     ) : (
                       <div className="px-2 py-1.5 text-sm text-gray-600">
-                        {formData.grupo ? "Nenhuma empresa dispon�vel para este grupo" : "Selecione um grupo para listar empresas"}
+                        {formData.grupo ? "Nenhuma empresa disponï¿½vel para este grupo" : "Selecione um grupo para listar empresas"}
                       </div>
                     )}
                   </SelectContent>
@@ -920,9 +920,9 @@ export default function Lancamentos() {
               </Select>
             </div>
 
-            {/* Terceira linha - Competência */}
+            {/* Terceira linha - CompetÃªncia */}
             <div className="space-y-3">
-              <Label htmlFor="competencia" className="text-gray-700 font-medium">Competência *</Label>
+              <Label htmlFor="competencia" className="text-gray-700 font-medium">CompetÃªncia *</Label>
               <div className="border border-gray-300 rounded-lg p-6 bg-gray-50">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {meses.map(mes => <div key={mes.key} className="flex items-center space-x-2">
@@ -940,7 +940,7 @@ export default function Lancamentos() {
             {/* Quarta linha - Grupos de Contas em Cascata */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
+                <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1Âº NÃ­vel *</Label>
                 <Select value={formData.grupoContas1} onValueChange={handleNivel1Change}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione o grupo" />
@@ -960,10 +960,10 @@ export default function Lancamentos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
+                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2Âº NÃ­vel *</Label>
                 <Select value={formData.grupoContas2} onValueChange={handleNivel2Change} disabled={!formData.grupoContas1}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1º nível"} />
+                    <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1Âº nÃ­vel"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                      {level2Options.length > 0
@@ -982,16 +982,16 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Quinta linha - Conta Analítica e Valor */}
+            {/* Quinta linha - Conta AnalÃ­tica e Valor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
+                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta AnalÃ­tica *</Label>
                 <Select value={formData.contaAnalitica} onValueChange={value => setFormData(prev => ({
                 ...prev,
                 contaAnalitica: value
               }))} disabled={!formData.grupoContas2}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                    <SelectValue placeholder={formData.grupoContas2 ? "Selecione a conta analítica" : "Primeiro selecione o 2º nível"} />
+                    <SelectValue placeholder={formData.grupoContas2 ? "Selecione a conta analÃ­tica" : "Primeiro selecione o 2Âº nÃ­vel"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
                      {analyticalOptions.length > 0
@@ -1015,10 +1015,10 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Sexta linha - Observações */}
+            {/* Sexta linha - ObservaÃ§Ãµes */}
             <div className="space-y-2">
-              <Label htmlFor="observacoes" className="text-gray-700 font-medium">Observações</Label>
-              <Textarea id="observacoes" placeholder="Observações adicionais..." rows={4} value={formData.observacoes} onChange={e => setFormData(prev => ({
+              <Label htmlFor="observacoes" className="text-gray-700 font-medium">ObservaÃ§Ãµes</Label>
+              <Textarea id="observacoes" placeholder="ObservaÃ§Ãµes adicionais..." rows={4} value={formData.observacoes} onChange={e => setFormData(prev => ({
               ...prev,
               observacoes: e.target.value
             }))} className="bg-white border-gray-300 focus:ring-blue-300" />
@@ -1031,20 +1031,20 @@ export default function Lancamentos() {
               <Button type="submit" className="text-white" style={{
               backgroundColor: '#0047FF'
             }}>
-                {editingLancamento ? 'Atualizar Lançamento' : 'Salvar Lançamento'}
+                {editingLancamento ? 'Atualizar LanÃ§amento' : 'Salvar LanÃ§amento'}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Alert Dialog para Confirmação de Exclusão */}
+      {/* Alert Dialog para ConfirmaÃ§Ã£o de ExclusÃ£o */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-gray-700">Excluir Lançamento</AlertDialogTitle>
+            <AlertDialogTitle className="text-gray-700">Excluir LanÃ§amento</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-600">
-              Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir este lanÃ§amento? Esta aÃ§Ã£o nÃ£o pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1059,6 +1059,8 @@ export default function Lancamentos() {
       </AlertDialog>
     </div>;
 }
+
+
 
 
 

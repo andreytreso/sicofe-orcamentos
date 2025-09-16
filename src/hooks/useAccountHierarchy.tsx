@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AccountHierarchy {
+  id: string | null;
   level_1: string | null;
   level_2: string | null;
   analytical_account: string | null;
@@ -20,63 +21,18 @@ export interface AccountHierarchyFilters {
   level_2?: string;
   analytical_account?: string;
   companyIds?: string[];
-  includeGlobal?: boolean;
-}
-
-async function resolveCompanyIds(provided?: string[]) {
-  if (provided && provided.length > 0) {
-    return provided.filter(Boolean);
-  }
-
-  const { data: userResult, error: userError } = await supabase.auth.getUser();
-  if (userError) {
-    throw new Error(`Failed to identify user: ${userError.message}`);
-  }
-  const userId = userResult.user?.id;
-  if (!userId) {
-    return [];
-  }
-
-  const { data: accessRows, error: accessError } = await supabase
-    .from('user_company_access')
-    .select('company_id')
-    .eq('user_id', userId);
-
-  if (accessError) {
-    throw new Error(`Failed to resolve accessible companies: ${accessError.message}`);
-  }
-
-  return (accessRows || [])
-    .map((row) => row.company_id)
-    .filter((value): value is string => Boolean(value));
 }
 
 export function useAccountHierarchy(filters?: AccountHierarchyFilters) {
   return useQuery({
     queryKey: ['account-hierarchy', filters],
     queryFn: async (): Promise<AccountHierarchy[]> => {
-      const companyIds = await resolveCompanyIds(filters?.companyIds);
-      const includeGlobal = filters?.includeGlobal ?? true;
-
-      if (!includeGlobal && companyIds.length === 0) {
-        return [];
-      }
-
       let query = supabase
         .from('account_hierarchy')
         .select('*');
 
-      if (companyIds.length > 0) {
-        if (includeGlobal) {
-          const inValues = companyIds.map((id) => `"${id}"`).join(',');
-          const orFilter = [`company_id.in.(${inValues})`];
-          orFilter.push('company_id.is.null');
-          query = query.or(orFilter.join(','));
-        } else {
-          query = query.in('company_id', companyIds);
-        }
-      } else if (includeGlobal) {
-        query = query.is('company_id', null);
+      if (filters?.companyIds && filters.companyIds.length > 0) {
+        query = query.in('company_id', filters.companyIds);
       }
 
       if (filters?.level_1) {
@@ -99,7 +55,7 @@ export function useAccountHierarchy(filters?: AccountHierarchyFilters) {
       }
 
       return data || [];
-    }
+    },
   });
 }
 
