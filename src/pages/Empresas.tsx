@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -93,14 +94,34 @@ export default function Empresas() {
   const activeBudgets = budgets.filter((b) => isActive(b.status)).length;
 
   /* exclusão -------------------------------------------------------------- */
-async function reallyDelete(id: string) {
-  /*  a) não precisamos do objeto { returning: "minimal" }          */
-  /*  b) após sucesso, invalidamos o cache                           */
-  const { error } = await supabase.from("companies").delete().eq("id", id);
-
-  if (error) return alert(error.details ?? error.message);
-  queryClient.invalidateQueries({ queryKey: ["companies"] });
-}
+  async function reallyDelete(id: string) {
+    try {
+      const { error } = await supabase.from("companies").delete().eq("id", id);
+      
+      if (error) {
+        toast({
+          title: "Erro ao excluir",
+          description: error.message || "Não foi possível excluir a empresa",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Sucesso",
+        description: "Empresa excluída com sucesso!",
+        className: "bg-success text-success-foreground",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao excluir empresa",
+        variant: "destructive",
+      });
+    }
+  }
 
 
   /* ---------------------------------------------------------------------- */
