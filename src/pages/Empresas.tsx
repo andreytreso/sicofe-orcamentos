@@ -47,7 +47,7 @@ type Company = {
   id: string;
   name: string;
   status: string | null;
-  grupo: string | null;
+  group_id: string | null;
   created_at: string;
 };
 
@@ -219,7 +219,7 @@ export default function Empresas() {
                     <div>
                       <h3 className="font-semibold">{e.name}</h3>
                       <div className="text-sm text-muted-foreground flex gap-4">
-                        <span>{e.grupo || "Sem grupo"}</span>
+                        <span>{e.group_id || "Sem grupo"}</span>
                         <span>Criada em {created}</span>
                       </div>
                     </div>
@@ -251,7 +251,7 @@ export default function Empresas() {
                               id: e.id,
                               name: e.name,
                               status: isActive(e.status) ? "active" : "inactive",
-                              grupo: e.grupo,
+                              group_id: e.group_id,
                               created_at: e.created_at,
                             });
                             setTimeout(() => setModalOpen(true), 0);
@@ -320,7 +320,7 @@ export default function Empresas() {
             status: editing.status && editing.status.toLowerCase() === "active"
               ? "active"
               : "inactive",
-            grupo: editing.grupo,
+            group_id: editing.group_id,
           }
         }
         open={modalOpen}

@@ -25,7 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 type CompanyForm = {
   id?: string;
   name: string;
-  grupo: string | null;
+  group_id: string | null;
   status: "active" | "inactive";
 };
 
@@ -49,7 +49,7 @@ export default function NovaEmpresaModal({
   const [form, setForm] = useState<CompanyForm>({
     id: initialData?.id,
     name: initialData?.name ?? "",
-    grupo: initialData?.grupo ?? "",
+    group_id: initialData?.group_id ?? null,
     status: initialData?.status ?? "active",
   });
   const [saving, setSaving] = useState(false);
@@ -60,7 +60,7 @@ export default function NovaEmpresaModal({
       setForm({
         id: initialData.id,
         name: initialData.name,
-        grupo: initialData.grupo,
+        group_id: initialData.group_id,
         status: initialData.status,
       });
     }
@@ -127,11 +127,12 @@ export default function NovaEmpresaModal({
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="grupo">Grupo</Label>
+              <Label htmlFor="group_id">Grupo</Label>
               <Input
-                id="grupo"
-                value={form.grupo || ""}
-                onChange={(e) => handleChange("grupo", e.target.value)}
+                id="group_id"
+                value={form.group_id || ""}
+                onChange={(e) => handleChange("group_id", e.target.value)}
+                placeholder="ID do grupo (opcional)"
               />
             </div>
             <div>
