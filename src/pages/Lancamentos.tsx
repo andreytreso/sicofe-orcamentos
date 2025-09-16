@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCompanies } from '@/hooks/useCompanies';
 import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from '@/hooks/useAccountHierarchy';
-import { useTransactions, TransactionFilters } from '@/hooks/useTransactions';
+import { useTransactions, TransactionFilters, Transaction } from '@/hooks/useTransactions';
+import { useCostCenters } from '@/hooks/useCostCenters';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCompanySuppliers } from '@/hooks/useSuppliers';
+import { useCompanyCollaborators } from '@/hooks/useCollaborators';
 interface Lancamento {
   id: string;
   data: string;
@@ -30,7 +34,7 @@ export default function Lancamentos() {
     toast
   } = useToast();
   const [showForm, setShowForm] = useState(false);
-  const [editingLancamento, setEditingLancamento] = useState<any>(null);
+  const [editingLancamento, setEditingLancamento] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState("all");
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
@@ -63,9 +67,31 @@ export default function Lancamentos() {
   const {
     data: companies = []
   } = useCompanies();
+  const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(formData.empresa);
+  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(formData.empresa);
+  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCompanyCollaborators(formData.empresa);
   const level1Options = useLevel1Options();
   const level2Options = useLevel2Options(formData.grupoContas1);
   const analyticalOptions = useAnalyticalAccountOptions(formData.grupoContas1, formData.grupoContas2);
+  
+  // Centros de custo (multi seleção)
+  const [allCostCenters, setAllCostCenters] = useState(true);
+  const [selectedCostCenters, setSelectedCostCenters] = useState<string[]>([]);
+  const [useSupplier, setUseSupplier] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("");
+  const [useCollaborator, setUseCollaborator] = useState(false);
+  const [selectedCollaborator, setSelectedCollaborator] = useState<string>("");
+
+  useEffect(() => {
+    // Ao trocar empresa, reset seleção de centros de custo
+    setAllCostCenters(true);
+    setSelectedCostCenters([]);
+    // Reset suppliers/collaborators
+    setUseSupplier(false);
+    setSelectedSupplier("");
+    setUseCollaborator(false);
+    setSelectedCollaborator("");
+  }, [formData.empresa]);
   const filters: TransactionFilters = {
     companyId: selectedEmpresa || undefined,
     period: selectedPeriodo || undefined,
@@ -151,8 +177,49 @@ export default function Lancamentos() {
     // Data is already filtered by the useTransactions hook
     // This function is kept for button compatibility but doesn't do anything
   };
-  const handleEdit = (transaction: any) => {
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedEmpresa("all");
+    setSelectedPeriodo("");
+  };
+  const handleEdit = (transaction: Transaction) => {
     setEditingLancamento(transaction);
+    // Preencher formulário com dados existentes
+    const yearStr = (transaction.year ?? new Date(transaction.transaction_date).getFullYear()).toString();
+    const amountStr = (Math.abs(transaction.amount) || 0).toFixed(2).replace('.', ',');
+
+    const months = {
+      jan: false, fev: false, mar: false, abr: false, mai: false, jun: false,
+      jul: false, ago: false, set: false, out: false, nov: false, dez: false
+    } as Record<string, boolean>;
+    (transaction.competency_months || []).forEach((m: string) => {
+      if (m in months) months[m as keyof typeof months] = true;
+    });
+
+    setFormData({
+      empresa: transaction.company_id,
+      ano: yearStr,
+      grupoContas1: transaction.level_1_group,
+      grupoContas2: transaction.level_2_group,
+      contaAnalitica: transaction.analytical_account,
+      valor: amountStr,
+      observacoes: transaction.observations || '',
+      competencia: months as typeof formData.competencia
+    });
+
+    const isAll = !!transaction.all_cost_centers;
+    setAllCostCenters(isAll);
+    const selected = (transaction.transaction_cost_centers ?? []).map((tcc) => tcc.cost_center_id);
+    setSelectedCostCenters(isAll ? [] : selected);
+
+    // Prefill supplier/collaborator
+    const supplierId = transaction.supplier_id ?? undefined;
+    const collaboratorId = transaction.collaborator_id ?? undefined;
+    setUseSupplier(!!supplierId);
+    setSelectedSupplier(supplierId || "");
+    setUseCollaborator(!!collaboratorId);
+    setSelectedCollaborator(collaboratorId || "");
+
     setShowForm(true);
   };
   const handleDelete = (id: string) => {
@@ -176,10 +243,9 @@ export default function Lancamentos() {
     }));
   };
   const handleSelectAllCompetencia = (checked: boolean) => {
-    const newCompetencia = Object.keys(formData.competencia).reduce((acc, mes) => {
-      (acc as any)[mes] = checked;
-      return acc;
-    }, {} as typeof formData.competencia);
+    const newCompetencia = Object.fromEntries(
+      Object.keys(formData.competencia).map((mes) => [mes, checked])
+    ) as typeof formData.competencia;
     setFormData(prev => ({
       ...prev,
       competencia: newCompetencia
@@ -345,6 +411,16 @@ export default function Lancamentos() {
       return;
     }
 
+    // Centros de custo: exigir seleção quando não for "Todos"
+    if (!allCostCenters && selectedCostCenters.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Selecione pelo menos um centro de custo ou marque 'Todos os centros'.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Create transaction data for each selected month
     mesesSelecionados.forEach(mes => {
       const transactionData = {
@@ -357,6 +433,10 @@ export default function Lancamentos() {
         observations: formData.observacoes,
         competency_months: [mes],
         transaction_date: `${formData.ano}-${monthMap[mes]}-01`,
+        all_cost_centers: allCostCenters,
+        cost_center_ids: allCostCenters ? [] : selectedCostCenters,
+        ...(useSupplier && selectedSupplier ? { supplier_id: selectedSupplier } : {}),
+        ...(useCollaborator && selectedCollaborator ? { collaborator_id: selectedCollaborator } : {}),
       };
       if (editingLancamento) {
         updateTransaction(editingLancamento.id, transactionData);
@@ -483,6 +563,14 @@ export default function Lancamentos() {
               {isLoadingTransactions ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Filter className="h-4 w-4 mr-2" />}
               Filtrar
             </Button>
+            <Button 
+              variant="outline" 
+              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              onClick={handleClearFilters}
+              disabled={isLoadingTransactions}
+            >
+              Limpar
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -520,7 +608,19 @@ export default function Lancamentos() {
                       <TableCell className="text-sm">{new Date(transaction.transaction_date).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell className="text-sm">{companyName}</TableCell>
                       <TableCell className="text-sm">{transaction.analytical_account}</TableCell>
-                      <TableCell className="text-sm">{transaction.description}</TableCell>
+                      <TableCell className="text-sm">
+                        <div className="text-xs text-gray-600">
+                          Centros: {transaction.all_cost_centers ? (
+                            'Todos'
+                          ) : (
+                            (transaction.transaction_cost_centers || [])
+                              .map((tcc) => tcc.cost_centers?.name || '')
+                              .filter(Boolean)
+                              .join(', ') || '-'
+                          )}
+                        </div>
+                        <div>{transaction.description}</div>
+                      </TableCell>
                       <TableCell className={`text-sm text-right font-medium ${colorClass}`}>
                         {isPositive ? '' : '-'}{formatCurrency(value)}
                       </TableCell>
@@ -576,6 +676,138 @@ export default function Lancamentos() {
               </div>
             </div>
 
+            {/* Centros de Custo (dependente da empresa) */}
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-medium">Centros de Custo</Label>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="cc-all"
+                    checked={allCostCenters}
+                    disabled={!formData.empresa}
+                    onCheckedChange={(checked) => {
+                      setAllCostCenters(!!checked);
+                      if (checked) setSelectedCostCenters([]);
+                    }}
+                  />
+                  <Label htmlFor="cc-all" className="text-sm text-gray-700">Todos os centros</Label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!formData.empresa || allCostCenters}
+                        className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        {isLoadingCostCenters
+                          ? 'Carregando...'
+                          : selectedCostCenters.length > 0
+                            ? `${selectedCostCenters.length} selecionado(s)`
+                            : 'Selecionar centros'}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-72">
+                      <DropdownMenuLabel>
+                        {isLoadingCostCenters ? 'Carregando...' : 'Selecione centros'}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {!isLoadingCostCenters && costCenters.length === 0 && (
+                        <div className="px-2 py-1.5 text-sm text-gray-600">Nenhum centro de custo para esta empresa</div>
+                      )}
+                      {costCenters.map((cc) => (
+                        <DropdownMenuCheckboxItem
+                          key={cc.id}
+                          checked={selectedCostCenters.includes(cc.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedCostCenters((prev) => {
+                              if (checked) return Array.from(new Set([...prev, cc.id]));
+                              return prev.filter((id) => id !== cc.id);
+                            });
+                          }}
+                          disabled={allCostCenters}
+                        >
+                          {cc.code ? `${cc.code} - ${cc.name}` : cc.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {!allCostCenters && selectedCostCenters.length > 0 && (
+                    <span className="text-xs text-gray-600">
+                      {selectedCostCenters.length} selecionado(s)
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Fornecedores (opcional, dependente da empresa) */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="toggle-supplier"
+                  checked={useSupplier}
+                  disabled={!formData.empresa}
+                  onCheckedChange={(c) => setUseSupplier(!!c)}
+                />
+                <Label htmlFor="toggle-supplier" className="text-gray-700 font-medium">Fornecedores</Label>
+              </div>
+              {useSupplier && (
+                <div className="space-y-2">
+                  <Label className="text-gray-700">Selecionar fornecedor</Label>
+                  <Select
+                    value={selectedSupplier}
+                    onValueChange={(v) => setSelectedSupplier(v)}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 h-11">
+                      <SelectValue placeholder={isLoadingSuppliers ? "Carregando..." : "Selecione o fornecedor"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-300 z-50">
+                      {suppliers.map(s => (
+                        <SelectItem key={s.id} value={s.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Colaboradores (opcional, dependente da empresa) */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="toggle-collaborator"
+                  checked={useCollaborator}
+                  disabled={!formData.empresa}
+                  onCheckedChange={(c) => setUseCollaborator(!!c)}
+                />
+                <Label htmlFor="toggle-collaborator" className="text-gray-700 font-medium">Colaboradores</Label>
+              </div>
+              {useCollaborator && (
+                <div className="space-y-2">
+                  <Label className="text-gray-700">Selecionar colaborador</Label>
+                  <Select
+                    value={selectedCollaborator}
+                    onValueChange={(v) => setSelectedCollaborator(v)}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 h-11">
+                      <SelectValue placeholder={isLoadingCollaborators ? "Carregando..." : "Selecione o colaborador"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-300 z-50">
+                      {collaborators.map(col => (
+                        <SelectItem key={col.id} value={col.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {col.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
             {/* Segunda linha - Ano */}
             <div className="space-y-2">
               <Label htmlFor="ano" className="text-gray-700 font-medium">Ano *</Label>
@@ -620,9 +852,15 @@ export default function Lancamentos() {
                     <SelectValue placeholder="Selecione o grupo" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                     {level1Options.map(grupo => <SelectItem key={grupo || ""} value={grupo || ""} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                     {level1Options.map((grupo, i) => (
+                       <SelectItem
+                         key={`l1-${i}`}
+                         value={grupo || ""}
+                         className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                       >
                          {grupo}
-                       </SelectItem>)}
+                       </SelectItem>
+                     ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -634,9 +872,17 @@ export default function Lancamentos() {
                     <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                     {level2Options.length > 0 ? level2Options.map(grupo => <SelectItem key={grupo || ""} value={grupo || ""} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                           {grupo}
-                         </SelectItem>) : null}
+                     {level2Options.length > 0
+                       ? level2Options.map((grupo, i) => (
+                           <SelectItem
+                             key={`l2-${i}`}
+                             value={grupo || ""}
+                             className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                           >
+                             {grupo}
+                           </SelectItem>
+                         ))
+                       : null}
                   </SelectContent>
                 </Select>
               </div>
@@ -654,9 +900,17 @@ export default function Lancamentos() {
                     <SelectValue placeholder={formData.grupoContas2 ? "Selecione a conta analítica" : "Primeiro selecione o 2º nível"} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-300 z-50">
-                     {analyticalOptions.length > 0 ? analyticalOptions.map(conta => <SelectItem key={conta || ""} value={conta || ""} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                           {conta}
-                         </SelectItem>) : null}
+                     {analyticalOptions.length > 0
+                       ? analyticalOptions.map((conta, i) => (
+                           <SelectItem
+                             key={`a-${i}`}
+                             value={conta || ""}
+                             className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900"
+                           >
+                             {conta}
+                           </SelectItem>
+                         ))
+                       : null}
                   </SelectContent>
                 </Select>
               </div>

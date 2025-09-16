@@ -65,8 +65,8 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess, initia
     }
   }, [open, initialData]);
 
-  const handleChange = (field: keyof typeof form, value: string | boolean) =>
-    setForm((prev) => ({ ...prev, [field]: value as any }));
+  const handleChange = <K extends keyof typeof form>(field: K, value: (typeof form)[K]) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
@@ -153,6 +153,7 @@ export default function NovoUsuarioModal({ open, onOpenChange, onSuccess, initia
         title: "Usuário criado",
         description: "O usuário receberá um e-mail para confirmar o cadastro.",
       });
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       let description = err?.message || "Erro ao salvar usuário.";
       const lower = String(description).toLowerCase();

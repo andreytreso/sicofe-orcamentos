@@ -45,7 +45,7 @@ export function NovoOrcamentoModal({
   const [endDate, setEndDate] = useState<Date>();
   const {
     data: companies
-  } = useSupabaseTable('companies', {
+  } = useSupabaseTable<{ id: string; name: string }>('companies', {
     filter: {
       column: 'status',
       value: 'active'
@@ -106,7 +106,7 @@ export function NovoOrcamentoModal({
                   <SelectValue placeholder="Selecione uma empresa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {companies.map((company: any) => <SelectItem key={company.id} value={company.id}>
+                  {companies.map((company) => <SelectItem key={company.id} value={company.id}>
                       {company.name}
                     </SelectItem>)}
                 </SelectContent>

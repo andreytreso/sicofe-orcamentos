@@ -16,11 +16,22 @@ export interface Transaction {
   amount: number;
   observations: string | null;
   competency_months: string[];
+  all_cost_centers?: boolean;
+  supplier_id?: string | null;
+  collaborator_id?: string | null;
   created_at: string;
   updated_at: string;
   companies?: {
     name: string;
   };
+  transaction_cost_centers?: Array<{
+    cost_center_id: string;
+    cost_centers?: {
+      id: string;
+      name: string | null;
+      code: string | null;
+    } | null;
+  }>;
 }
 
 export interface TransactionFilters {
@@ -39,6 +50,10 @@ export interface TransactionFormData {
   observations: string;
   competency_months: string[];
   transaction_date?: string; // optional: allows aligning period with date
+  all_cost_centers?: boolean; // if false, use cost_center_ids below
+  cost_center_ids?: string[]; // optional list when not applying to all
+  supplier_id?: string; // optional
+  collaborator_id?: string; // optional
 }
 
 export function useTransactions(filters: TransactionFilters) {
@@ -52,7 +67,13 @@ export function useTransactions(filters: TransactionFilters) {
         .from('transactions')
         .select(`
           *,
-          companies(name)
+          companies(name),
+          suppliers:supplier_id(id, name),
+          collaborators:collaborator_id(id, name),
+          transaction_cost_centers(
+            cost_center_id,
+            cost_centers(id, name, code)
+          )
         `)
         .order('transaction_date', { ascending: false });
 
@@ -110,6 +131,7 @@ export function useTransactions(filters: TransactionFilters) {
         .from('transactions')
         .insert([{
           ...data,
+          all_cost_centers: data.all_cost_centers ?? true,
           user_id: user.user.id,
           transaction_date: data.transaction_date ?? new Date().toISOString().split('T')[0],
           description: data.observations || ''
@@ -119,6 +141,18 @@ export function useTransactions(filters: TransactionFilters) {
 
       if (error) {
         throw new Error(`Failed to create transaction: ${error.message}`);
+      }
+
+      // Persist cost centers mapping when not all
+      const ids = (data.cost_center_ids || []).filter(Boolean);
+      if ((data.all_cost_centers === false) && ids.length > 0) {
+        const payload = ids.map((id) => ({ transaction_id: result.id, cost_center_id: id }));
+        const { error: tccError } = await supabase
+          .from('transaction_cost_centers')
+          .insert(payload);
+        if (tccError) {
+          throw new Error(`Failed to set transaction cost centers: ${tccError.message}`);
+        }
       }
 
       return result;
@@ -143,13 +177,38 @@ export function useTransactions(filters: TransactionFilters) {
     mutationFn: async ({ id, data }: { id: string; data: Partial<TransactionFormData> }) => {
       const { data: result, error } = await supabase
         .from('transactions')
-        .update(data)
+        .update({
+          ...data,
+          all_cost_centers: data.all_cost_centers,
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) {
         throw new Error(`Failed to update transaction: ${error.message}`);
+      }
+
+      // If cost centers provided, replace mapping accordingly
+      if (Array.isArray(data.cost_center_ids)) {
+        // Clear existing
+        const { error: delError } = await supabase
+          .from('transaction_cost_centers')
+          .delete()
+          .eq('transaction_id', id);
+        if (delError) {
+          throw new Error(`Failed to clear cost centers: ${delError.message}`);
+        }
+
+        if (data.all_cost_centers === false && data.cost_center_ids.length > 0) {
+          const payload = data.cost_center_ids.map((ccid) => ({ transaction_id: id, cost_center_id: ccid }));
+          const { error: insError } = await supabase
+            .from('transaction_cost_centers')
+            .insert(payload);
+          if (insError) {
+            throw new Error(`Failed to set cost centers: ${insError.message}`);
+          }
+        }
       }
 
       return result;

@@ -35,7 +35,7 @@ export default function HealthCheck() {
       for (const t of TABLES) {
         try {
           const { data, error, count } = await supabase
-            .from(t.table as any)
+            .from(t.table)
             .select('*', { count: 'exact' })
             .limit(1);
           

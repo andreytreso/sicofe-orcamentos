@@ -43,11 +43,17 @@ const formatCurrency = (value: number): string => {
   }
   return `R$ ${value.toLocaleString('pt-BR')}`;
 };
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ payload: ChartDataPoint }>;
+  label?: string;
+};
+
 const CustomTooltip = ({
   active,
   payload,
   label
-}: any) => {
+}: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return <div className="bg-white border border-gray-200 shadow-lg rounded-lg p-3 text-sm">

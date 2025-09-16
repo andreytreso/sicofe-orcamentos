@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUserCompanies } from "@/hooks/useCompanies";
+import { useCostCenters } from "@/hooks/useCostCenters";
 
 interface Props {
   open: boolean;
@@ -23,19 +24,18 @@ interface Props {
   onSuccess?: () => void;
 }
 
-export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: Props) {
+export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: Props) {
   const queryClient = useQueryClient();
   const { data: companies = [] } = useUserCompanies();
 
   const [form, setForm] = useState({
     name: "",
-    cnpj: "",
-    email: "",
-    phone: "",
-    address: "",
-    status: "ativo" as "ativo" | "inativo",
+    group_name: "",
+    status: "active" as "active" | "inactive",
     company_id: "",
+    cost_center_id: "",
   });
+  const { data: costCenters = [] } = useCostCenters(form.company_id);
   const [saving, setSaving] = useState(false);
 
   const handleChange = (field: keyof typeof form, value: string) =>
@@ -49,14 +49,21 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("suppliers").insert(form);
+      const payload = {
+        name: form.name.trim(),
+        group_name: form.group_name || null,
+        status: form.status,
+        company_id: form.company_id,
+        cost_center_id: form.cost_center_id || null,
+      };
+      const { error } = await supabase.from("collaborators").insert(payload);
       if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["collaborators"] });
       onSuccess?.();
       onOpenChange(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      alert(message || "Erro ao criar fornecedor.");
+      alert(message || "Erro ao criar colaborador.");
     } finally {
       setSaving(false);
     }
@@ -66,9 +73,9 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
-          <DialogTitle className="modal-title">Novo Fornecedor</DialogTitle>
+          <DialogTitle className="modal-title">Novo Colaborador</DialogTitle>
           <DialogDescription className="modal-desc">
-            Preencha os dados do fornecedor
+            Preencha os dados do colaborador
           </DialogDescription>
         </DialogHeader>
 
@@ -80,23 +87,20 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="cnpj">CNPJ</Label>
-              <Input id="cnpj" value={form.cnpj} onChange={(e) => handleChange("cnpj", e.target.value)} />
+              <Label htmlFor="group">Grupo</Label>
+              <Input id="group" value={form.group_name} onChange={(e) => handleChange("group_name", e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} />
-            </div>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="phone">Telefone</Label>
-              <Input id="phone" value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="address">Endereço</Label>
-              <Input id="address" value={form.address} onChange={(e) => handleChange("address", e.target.value)} />
+              <Label>Status</Label>
+              <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Ativo</SelectItem>
+                  <SelectItem value="inactive">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -115,14 +119,15 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
               </Select>
             </div>
             <div>
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
+              <Label>Centro de Custo</Label>
+              <Select value={form.cost_center_id} onValueChange={(v) => handleChange("cost_center_id", v)} disabled={!form.company_id}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={form.company_id ? "Selecione o centro de custo" : "Selecione a empresa primeiro"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ativo">Ativo</SelectItem>
-                  <SelectItem value="inativo">Inativo</SelectItem>
+                  {costCenters.map((cc) => (
+                    <SelectItem key={cc.id} value={cc.id}>{cc.code ? `${cc.code} - ${cc.name}` : cc.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

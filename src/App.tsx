@@ -13,6 +13,7 @@ import Lancamentos from "./pages/Lancamentos";
 import Aprovacoes from "./pages/Aprovacoes";
 import PlanoContas from "./pages/PlanoContas";
 import Fornecedores from "./pages/Fornecedores";
+import Colaboradores from "./pages/Colaboradores";
 import CentrosCusto from "./pages/CentrosCusto";
 import Usuarios from "./pages/Usuarios";
 import HealthCheck from "./pages/HealthCheck";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/aprovacoes" element={<Aprovacoes />} />
                 <Route path="/cadastros/plano-contas" element={<PlanoContas />} />
                 <Route path="/cadastros/fornecedores" element={<Fornecedores />} />
+                <Route path="/cadastros/colaboradores" element={<Colaboradores />} />
                 <Route path="/cadastros/centros-custo" element={<CentrosCusto />} />
                 <Route path="/cadastros/usuarios" element={<Usuarios />} />
                 <Route path="/dev/health" element={<HealthCheck />} />
