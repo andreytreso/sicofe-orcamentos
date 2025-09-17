@@ -93,6 +93,16 @@ export function useCompanySuppliers(companyId?: string, groupId?: string) {
         return [];
       }
 
+      // Debug logs to help troubleshoot why queries may return empty results
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[useCompanySuppliers] companyIds:', companyIds);
+        // eslint-disable-next-line no-console
+        console.debug('[useCompanySuppliers] explicit groupId:', groupId, 'resolved groupIds:', groupIds);
+      } catch (e) {
+        // ignore
+      }
+
       let query = supabase
         .from('suppliers_with_details')
         .select('id, name, status, company_id, company_name, group_id');
@@ -107,11 +117,16 @@ export function useCompanySuppliers(companyId?: string, groupId?: string) {
         orFilters.push(`group_id.in.(${groupFilter})`);
       }
       if (orFilters.length > 0) {
-        query = query.or(orFilters.join(','));
+        const orString = orFilters.join(',');
+        // eslint-disable-next-line no-console
+        console.debug('[useCompanySuppliers] orFilters:', orString);
+        query = query.or(orString);
       }
 
       const { data, error } = await query.order('name', { ascending: true });
 
+      // eslint-disable-next-line no-console
+      console.debug('[useCompanySuppliers] fetched suppliers count:', (data || []).length);
       if (error) {
         throw new Error(`Failed to fetch suppliers: ${error.message}`);
       }
@@ -125,5 +140,49 @@ export function useCompanySuppliers(companyId?: string, groupId?: string) {
 
       return Array.from(unique.values());
     },
+  });
+}
+
+export function useSuppliersByCompanyIds(companyIds?: string[]) {
+  return useQuery({
+    queryKey: ['suppliers-by-companies', companyIds],
+    queryFn: async (): Promise<Supplier[]> => {
+      if (!companyIds || companyIds.length === 0) return [];
+
+      // debug
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[useSuppliersByCompanyIds] requested companyIds:', companyIds);
+      } catch (e) {}
+
+      let query = supabase
+        .from('suppliers_with_details')
+        .select('id, name, status, company_id, company_name, group_id');
+
+      const idsFilter = companyIds.map((id) => `"${id}"`).join(',');
+      query = query.in('company_id', companyIds);
+
+      const { data, error } = await query.order('name', { ascending: true });
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error('[useSuppliersByCompanyIds] fetch error:', error.message || error);
+      }
+
+      // eslint-disable-next-line no-console
+      console.debug('[useSuppliersByCompanyIds] fetched suppliers count:', (data || []).length);
+      if (error) {
+        throw new Error(`Failed to fetch suppliers by companies: ${error.message}`);
+      }
+
+      const unique = new Map<string, Supplier>();
+      (data || []).forEach((supplier) => {
+        if ((supplier as any).id && !unique.has((supplier as any).id)) {
+          unique.set((supplier as any).id, supplier as Supplier);
+        }
+      });
+
+      return Array.from(unique.values());
+    },
+    enabled: !!companyIds && companyIds.length > 0,
   });
 }

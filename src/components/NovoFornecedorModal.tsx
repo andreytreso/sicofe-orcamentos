@@ -14,12 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUserCompanies } from "@/hooks/useCompanies";
 import { useCompanyGroups, useCompaniesByGroup } from "@/hooks/useCompanyGroups";
 import { toast } from "sonner";
 
 type SupplierStatus = "ativo" | "inativo";
-type SupplierScope = "company" | "group";
 
 interface Props {
   open: boolean;
@@ -45,8 +43,6 @@ interface FormState {
   phone: string;
   address: string;
   status: SupplierStatus;
-  scope: SupplierScope;
-  company_id: string;
   group_id: string;
 }
 
@@ -57,22 +53,17 @@ const defaultForm: FormState = {
   phone: "",
   address: "",
   status: "ativo",
-  scope: "company",
-  company_id: "",
   group_id: "",
 };
 
 export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, initialData }: Props) {
   const queryClient = useQueryClient();
-  const { data: companies = [] } = useUserCompanies();
   const { data: companyGroups = [] } = useCompanyGroups();
 
   const [form, setForm] = useState<FormState>(defaultForm);
   const [saving, setSaving] = useState(false);
 
-  const { data: companiesInGroup = [] } = useCompaniesByGroup(
-    form.scope === "group" ? form.group_id : null
-  );
+  const { data: companiesInGroup = [] } = useCompaniesByGroup(form.group_id || null);
 
   const isEditing = Boolean(initialData?.id);
 
@@ -84,7 +75,6 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, ini
     }
 
     if (initialData) {
-      const scope: SupplierScope = initialData.group_id && !initialData.company_id ? "group" : "company";
       setForm({
         name: initialData.name ?? "",
         cnpj: initialData.cnpj ?? "",
@@ -92,8 +82,6 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, ini
         phone: initialData.phone ?? "",
         address: initialData.address ?? "",
         status: (initialData.status === "inativo" ? "inativo" : "ativo"),
-        scope,
-        company_id: initialData.company_id ?? "",
         group_id: initialData.group_id ?? "",
       });
     } else {
@@ -101,28 +89,20 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, ini
     }
   }, [open, initialData]);
 
-  const handleChange = (field: keyof FormState, value: string | SupplierStatus | SupplierScope) => {
+  const handleChange = (field: keyof FormState, value: string | SupplierStatus) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (field === "scope") {
-      if (value === "group") {
-        setForm((prev) => ({ ...prev, company_id: "", group_id: "" }));
-      } else if (value === "company") {
-        setForm((prev) => ({ ...prev, group_id: "" }));
-      }
-    }
   };
 
   const canSubmit = useMemo(() => {
     if (!form.name.trim()) return false;
-    if (form.scope === "company" && !form.company_id) return false;
-    if (form.scope === "group" && !form.group_id) return false;
+    if (!form.group_id) return false;
     return true;
-  }, [form.name, form.scope, form.company_id, form.group_id]);
+  }, [form.name, form.group_id]);
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!canSubmit) {
-      toast.error("Nome e empresa/grupo são obrigatórios.");
+      toast.error("Nome e grupo são obrigatórios.");
       return;
     }
 
@@ -140,26 +120,44 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, ini
       if (isEditing && initialData?.id) {
         const payload = {
           ...basePayload,
-          company_id: form.scope === "company" ? form.company_id : null,
-          group_id: form.scope === "group" ? form.group_id : null,
+          company_id: initialData.company_id ?? null,
+          group_id: form.group_id || null,
         };
 
         const { error } = await supabase
           .from('suppliers')
-          .update(payload)
+          .update(payload as any)
           .eq('id', initialData.id);
         if (error) throw error;
         toast.success('Fornecedor atualizado com sucesso!');
       } else {
-        const payload = {
-          ...basePayload,
-          company_id: form.scope === "company" ? form.company_id : null,
-          group_id: form.scope === "group" ? form.group_id : null,
-        };
+        // Creating: insert one supplier per company in the selected group to satisfy RLS
+        if (!form.group_id) {
+          // Shouldn't happen because canSubmit requires group_id, but keep a fallback
+          const payload = {
+            ...basePayload,
+            company_id: null,
+            group_id: null,
+          };
+          const { error } = await supabase.from('suppliers').insert(payload as any);
+          if (error) throw error;
+          toast.success('Fornecedor criado com sucesso!');
+        } else {
+          if (companiesInGroup.length === 0) {
+            toast.error('Nenhuma empresa encontrada no grupo selecionado.');
+            return;
+          }
 
-        const { error } = await supabase.from('suppliers').insert(payload);
-        if (error) throw error;
-        toast.success('Fornecedor criado com sucesso!');
+          const payloads = companiesInGroup.map((companyId) => ({
+            ...basePayload,
+            company_id: companyId,
+            group_id: form.group_id || null,
+          }));
+
+          const { error } = await supabase.from('suppliers').insert(payloads as any);
+          if (error) throw error;
+          toast.success(`Fornecedor criado para ${companiesInGroup.length} empresa(s) do grupo!`);
+        }
       }
 
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
@@ -167,7 +165,27 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, ini
       onSuccess?.();
       onOpenChange(false);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      // Log completo para inspeção no console
+      console.error('Erro ao salvar fornecedor:', err);
+
+      // Extrai mensagem útil de objetos retornados pelo Supabase ou outros erros
+      let message = 'Erro ao salvar fornecedor.';
+      try {
+        if (err instanceof Error) {
+          message = err.message;
+        } else if (typeof err === 'string') {
+          message = err;
+        } else if (err && typeof err === 'object') {
+          // Suporta varias formas de objeto de erro ({ message }, { error, message }, { msg })
+          // @ts-expect-error - acesso a propriedades de objeto de erro genérico
+          message = err.message || err.error || err.msg || JSON.stringify(err);
+        } else {
+          message = String(err);
+        }
+      } catch (ex) {
+        message = String(err);
+      }
+
       toast.error(message || 'Erro ao salvar fornecedor.');
     } finally {
       setSaving(false);
@@ -219,69 +237,30 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, ini
             </div>
           </div>
 
-          {!isEditing && (
-            <div>
-              <Label>Disponibilidade *</Label>
-              <Select value={form.scope} onValueChange={(value) => handleChange('scope', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="company">Empresa individual</SelectItem>
-                  <SelectItem value="group">Grupo de empresas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          { (isEditing ? initialData?.company_id !== null : form.scope === "company") && (
-            <div>
-              <Label>Empresa *</Label>
-              <Select
-                value={form.company_id}
-                onValueChange={(value) => handleChange('company_id', value)}
-                disabled={isEditing && initialData?.company_id === null}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {(isEditing ? initialData?.company_id === null : form.scope === "group") && (
-            <div>
-              <Label>Grupo *</Label>
-              <Select
-                value={form.group_id}
-                onValueChange={(value) => handleChange('group_id', value)}
-                disabled={isEditing && !initialData?.group_id}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o grupo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companyGroups.map((group) => (
-                    <SelectItem key={group.id} value={group.id}>
-                      {group.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.scope === "group" && form.group_id && companiesInGroup.length > 0 && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Disponível para {companiesInGroup.length} empresa(s) do grupo.
-                </p>
-              )}
-            </div>
-          )}
+          <div>
+            <Label>Grupo *</Label>
+            <Select
+              value={form.group_id}
+              onValueChange={(value) => handleChange('group_id', value)}
+              disabled={isEditing && !initialData?.group_id}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o grupo" />
+              </SelectTrigger>
+              <SelectContent>
+                {companyGroups.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {form.group_id && companiesInGroup.length > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Disponível para {companiesInGroup.length} empresa(s) do grupo.
+              </p>
+            )}
+          </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
