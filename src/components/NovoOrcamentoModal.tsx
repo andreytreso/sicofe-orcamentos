@@ -45,7 +45,7 @@ export function NovoOrcamentoModal({
   const [endDate, setEndDate] = useState<Date>();
   const {
     data: companies
-  } = useSupabaseTable<{ id: string; name: string }>('companies', {
+  } = useSupabaseTable('companies', {
     filter: {
       column: 'status',
       value: 'active'

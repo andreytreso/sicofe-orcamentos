@@ -17,12 +17,12 @@ export function useCompanyCollaborators(companyId?: string) {
     queryFn: async (): Promise<Collaborator[]> => {
       if (!companyId) return [];
       const { data, error } = await supabase
-        .from('collaborators')
+        .from('collaborators' as any)
         .select('id, name, group_name, status, company_id, cost_center_id')
         .eq('company_id', companyId)
         .order('name', { ascending: true });
       if (error) throw new Error(`Failed to fetch collaborators: ${error.message}`);
-      return (data || []) as Collaborator[];
+      return (data || []) as any;
     }
   });
 }

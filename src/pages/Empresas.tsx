@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -46,7 +47,7 @@ type Company = {
   id: string;
   name: string;
   status: string | null;
-  grupo: string | null;
+  group_id: string | null;
   created_at: string;
 };
 
@@ -89,18 +90,38 @@ export default function Empresas() {
     : "";
 
   const totalCompanies = companies.length;
-  const activeCompanies = companies.filter((c) => isActive(c.status)).length;
-  const activeBudgets = budgets.filter((b) => isActive(b.status)).length;
+  const activeCompanies = companies.filter((c: any) => isActive(c.status)).length;
+  const activeBudgets = budgets.filter((b: any) => isActive(b.status)).length;
 
   /* exclusão -------------------------------------------------------------- */
-async function reallyDelete(id: string) {
-  /*  a) não precisamos do objeto { returning: "minimal" }          */
-  /*  b) após sucesso, invalidamos o cache                           */
-  const { error } = await supabase.from("companies").delete().eq("id", id);
-
-  if (error) return alert(error.details ?? error.message);
-  queryClient.invalidateQueries({ queryKey: ["companies"] });
-}
+  async function reallyDelete(id: string) {
+    try {
+      const { error } = await supabase.from("companies").delete().eq("id", id);
+      
+      if (error) {
+        toast({
+          title: "Erro ao excluir",
+          description: error.message || "Não foi possível excluir a empresa",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Sucesso",
+        description: "Empresa excluída com sucesso!",
+        className: "bg-success text-success-foreground",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao excluir empresa",
+        variant: "destructive",
+      });
+    }
+  }
 
 
   /* ---------------------------------------------------------------------- */
@@ -173,7 +194,7 @@ async function reallyDelete(id: string) {
               Nenhuma empresa encontrada.
             </p>
           ) : (
-            companies.map((e) => {
+            companies.map((e: any) => {
               const created = (() => {
                 try {
                   const d = parseISO(e.created_at);
@@ -198,7 +219,7 @@ async function reallyDelete(id: string) {
                     <div>
                       <h3 className="font-semibold">{e.name}</h3>
                       <div className="text-sm text-muted-foreground flex gap-4">
-                        <span>{e.grupo || "Sem grupo"}</span>
+                        <span>{e.group_id || "Sem grupo"}</span>
                         <span>Criada em {created}</span>
                       </div>
                     </div>
@@ -227,8 +248,11 @@ async function reallyDelete(id: string) {
                         <DropdownMenuItem
                           onClick={() => {
                             setEditing({
-                              ...e,
+                              id: e.id,
+                              name: e.name,
                               status: isActive(e.status) ? "active" : "inactive",
+                              group_id: e.group_id,
+                              created_at: e.created_at,
                             });
                             setTimeout(() => setModalOpen(true), 0);
                           }}
@@ -240,7 +264,7 @@ async function reallyDelete(id: string) {
 
                         <DropdownMenuItem
                           className="text-destructive"
-                          onClick={() => setTimeout(() => setToDelete(e), 0)}
+                          onClick={() => setTimeout(() => setToDelete(e as any), 0)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
@@ -291,10 +315,12 @@ async function reallyDelete(id: string) {
       <NovaEmpresaModal
         initialData={
           editing && {
-            ...editing,
+            id: editing.id,
+            name: editing.name,
             status: editing.status && editing.status.toLowerCase() === "active"
               ? "active"
               : "inactive",
+            group_id: editing.group_id,
           }
         }
         open={modalOpen}

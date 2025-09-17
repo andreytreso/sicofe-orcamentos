@@ -104,7 +104,6 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess, in
         if (error) throw error;
         toast.success("Colaborador criado com sucesso!");
       }
-
       queryClient.invalidateQueries({ queryKey: ["collaborators"] });
       queryClient.invalidateQueries({ queryKey: ["collaborators_with_details"] });
       onSuccess?.();

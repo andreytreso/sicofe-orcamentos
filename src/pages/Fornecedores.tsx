@@ -44,11 +44,11 @@ export default function Fornecedores() {
   const [supplierToDelete, setSupplierToDelete] = useState<SupplierRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data = [], isLoading } = useSupabaseTable<SupplierRow>('suppliers_with_details', {
+  const { data = [], isLoading } = useSupabaseTable('suppliers_with_details', {
     orderBy: { column: 'name', ascending: true },
   });
 
-  const suppliers = useMemo(() => data ?? [], [data]);
+  const suppliers = useMemo(() => (data as SupplierRow[]) ?? [], [data]);
 
   const openCreateModal = () => {
     setEditingSupplier(null);

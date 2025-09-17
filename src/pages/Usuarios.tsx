@@ -28,7 +28,7 @@ export default function Usuarios() {
   const [toDelete, setToDelete] = useState<Profile | undefined>();
   const { toast } = useToast();
 
-  const { data: users, isLoading, refetch } = useSupabaseTable<Profile>("profiles", {
+  const { data: users, isLoading, refetch } = useSupabaseTable("profiles", {
     select: "id, user_id, first_name, last_name, role, status, cargo, aprovador, pacoteiro, created_at",
     orderBy: { column: "first_name", ascending: true },
   });

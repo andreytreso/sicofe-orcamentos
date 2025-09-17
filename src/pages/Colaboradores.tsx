@@ -43,11 +43,11 @@ export default function Colaboradores() {
   const [collaboratorToDelete, setCollaboratorToDelete] = useState<CollaboratorRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data = [], isLoading } = useSupabaseTable<CollaboratorRow>('collaborators_with_details', {
+  const { data = [], isLoading } = useSupabaseTable('collaborators_with_details', {
     orderBy: { column: 'name', ascending: true },
   });
 
-  const collaborators = useMemo(() => data ?? [], [data]);
+  const collaborators = useMemo(() => (data as CollaboratorRow[]) ?? [], [data]);
 
   const openCreateModal = () => {
     setEditingCollaborator(null);
