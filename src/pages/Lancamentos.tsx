@@ -137,7 +137,7 @@ export default function Lancamentos() {
     label: "Fevereiro"
   }, {
     key: "mar",
-    label: "MarÃ§o"
+    label: "Março"
   }, {
     key: "abr",
     label: "Abril"
@@ -167,14 +167,14 @@ export default function Lancamentos() {
     label: "Dezembro"
   }];
 
-  // FunÃ§Ã£o para limpar campos dependentes quando muda o nÃ­vel superior
+  // Função para limpar campos dependentes quando muda o nível superior
   const handleNivel1Change = (value: string) => {
     setFormData(prev => ({
       ...prev,
       grupoContas1: value,
       grupoContas2: "",
-      // limpa nÃ­vel 2
-      contaAnalitica: "" // limpa conta analÃ­tica
+      // limpa nível 2
+      contaAnalitica: "" // limpa conta analítica
     }));
   };
   const handleNivel2Change = (value: string) => {
@@ -197,7 +197,7 @@ export default function Lancamentos() {
   };
   const handleEdit = (transaction: Transaction) => {
     setEditingLancamento(transaction);
-    // Preencher formulÃ¡rio com dados existentes
+  // Preencher formulário com dados existentes
     const yearStr = (transaction.year ?? new Date(transaction.transaction_date).getFullYear()).toString();
     const amountStr = (Math.abs(transaction.amount) || 0).toFixed(2).replace('.', ',');
 
@@ -298,13 +298,13 @@ export default function Lancamentos() {
     }).format(Math.abs(value));
   };
   const formatValueWithThousandSeparator = (value: string) => {
-    // Remove tudo exceto nÃºmeros, vÃ­rgula e ponto
+  // Remove tudo exceto números, vírgula e ponto
     let numericValue = value.replace(/[^\d.,-]/g, '');
 
-    // Substitui vÃ­rgula por ponto para processamento
+  // Substitui vírgula por ponto para processamento
     numericValue = numericValue.replace(',', '.');
 
-    // Remove pontos extras (manter apenas o Ãºltimo como decimal)
+  // Remove pontos extras (manter apenas o último como decimal)
     const parts = numericValue.split('.');
     if (parts.length > 2) {
       numericValue = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
@@ -316,7 +316,7 @@ export default function Lancamentos() {
       numericValue = integerPart + '.' + decimalPart.slice(0, 2);
     }
 
-    // Converte para nÃºmero para formataÃ§Ã£o
+  // Converte para número para formatação
     const numberValue = parseFloat(numericValue);
     if (isNaN(numberValue)) {
       return '';
@@ -348,19 +348,19 @@ export default function Lancamentos() {
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Remove tudo exceto nÃºmeros, vÃ­rgula e ponto
+  // Remove tudo exceto números, vírgula e ponto
     let numericValue = value.replace(/[^\d.,-]/g, '');
 
-    // Substitui vÃ­rgula por ponto para processamento interno
+  // Substitui vírgula por ponto para processamento interno
     numericValue = numericValue.replace(',', '.');
 
-    // Remove pontos extras (manter apenas o Ãºltimo como decimal)
+  // Remove pontos extras (manter apenas o último como decimal)
     const parts = numericValue.split('.');
     if (parts.length > 2) {
       numericValue = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
     }
 
-    // Se tem parte decimal, limita a 2 casas
+  // Se tem parte decimal, limita a 2 casas
     if (numericValue.includes('.')) {
       const [integerPart, decimalPart] = numericValue.split('.');
       numericValue = integerPart + '.' + decimalPart.slice(0, 2);
@@ -386,7 +386,7 @@ export default function Lancamentos() {
   const handleValueFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value) {
-      // Remove formataÃ§Ã£o para ediÃ§Ã£o (manter apenas nÃºmeros, vÃ­rgula e ponto)
+  // Remove formatação para edição (manter apenas números, vírgula e ponto)
       const unformattedValue = value.replace(/\./g, '').replace(',', '.');
       const numberValue = parseFloat(unformattedValue);
       if (!isNaN(numberValue)) {
@@ -404,7 +404,7 @@ export default function Lancamentos() {
     if (!formData.grupo || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
       toast({
         title: "Erro",
-        description: "Todos os campos sï¿½o obrigatï¿½rios.",
+        description: "Todos os campos são obrigatórios.",
         variant: "destructive"
       });
       return;
@@ -422,7 +422,7 @@ export default function Lancamentos() {
     if (applyToAllGroupCompanies && editingLancamento) {
       toast({
         title: "Erro",
-        description: "Nï¿½o ï¿½ possï¿½vel aplicar para todas as empresas ao editar um lanï¿½amento.",
+        description: "Não é possível aplicar para todas as empresas ao editar um lançamento.",
         variant: "destructive"
       });
       return;
@@ -436,7 +436,7 @@ export default function Lancamentos() {
     if (mesesSelecionados.length === 0) {
       toast({
         title: "Erro",
-        description: "Selecione pelo menos um mï¿½s de competï¿½ncia.",
+        description: "Selecione pelo menos um mês de competência.",
         variant: "destructive"
       });
       return;
@@ -476,7 +476,7 @@ export default function Lancamentos() {
       if (!selectedCompany) {
         toast({
           title: "Erro",
-          description: "Empresa nï¿½o encontrada.",
+          description: "Empresa não encontrada.",
           variant: "destructive"
         });
         return;
@@ -543,16 +543,16 @@ export default function Lancamentos() {
         <div>
           <h1 className="text-3xl font-bold" style={{
           color: '#1F2937'
-        }}>LanÃ§amentos OrÃ§amentÃ¡rios</h1>
+        }}>Lançamentos Orçamentários</h1>
           <p className="text-gray-500 mt-2">
-            Registre e acompanhe os lanÃ§amentos do orÃ§amento por conta
+            Registre e acompanhe os lançamentos do orçamento por conta
           </p>
         </div>
         <Button onClick={() => handleDialogChange(true)} className="text-white" style={{
         backgroundColor: '#0047FF'
       }}>
           <Plus className="h-4 w-4 mr-2" />
-          Novo LanÃ§amento
+          Novo Lançamento
         </Button>
       </div>
 
@@ -564,7 +564,7 @@ export default function Lancamentos() {
               <Label htmlFor="search" className="text-gray-700">Buscar</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input id="search" placeholder="Buscar por descriÃ§Ã£o, conta..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-white border-gray-300 placeholder:text-gray-500 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                <Input id="search" placeholder="Buscar por descrição, conta..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-white border-gray-300 placeholder:text-gray-500 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0" />
               </div>
             </div>
             <div>
@@ -584,7 +584,7 @@ export default function Lancamentos() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="filter-periodo" className="text-gray-700">PerÃ­odo</Label>
+              <Label htmlFor="filter-periodo" className="text-gray-700">Período</Label>
               <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
                 <SelectTrigger className="w-48 bg-white border-gray-300 focus:ring-blue-300">
                   <SelectValue placeholder="Todos os Meses" />
@@ -613,12 +613,12 @@ export default function Lancamentos() {
         </CardContent>
       </Card>
 
-      {/* Lista de LanÃ§amentos */}
+  {/* Lista de Lançamentos */}
       <Card className="bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardHeader className="bg-white">
           <CardTitle className="text-lg font-semibold" style={{
           color: '#1F2937'
-        }}>HistÃ³rico de LanÃ§amentos</CardTitle>
+  }}>Histórico de Lançamentos</CardTitle>
         </CardHeader>
         <CardContent className="bg-white">
           {isLoadingTransactions ? <div className="flex justify-center py-8">
@@ -631,9 +631,9 @@ export default function Lancamentos() {
                   <TableHead className="text-gray-700">Data</TableHead>
                   <TableHead className="text-gray-700">Empresa</TableHead>
                   <TableHead className="text-gray-700">Conta</TableHead>
-                  <TableHead className="text-gray-700">DescriÃ§Ã£o</TableHead>
+                  <TableHead className="text-gray-700">Descrição</TableHead>
                   <TableHead className="text-right text-gray-700">Valor</TableHead>
-                  <TableHead className="text-center text-gray-700">AÃ§Ãµes</TableHead>
+                  <TableHead className="text-center text-gray-700">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
@@ -679,15 +679,15 @@ export default function Lancamentos() {
         </CardContent>
       </Card>
 
-      {/* Modal de Novo/Editar LanÃ§amento */}
+  {/* Modal de Novo/Editar Lançamento */}
       <Dialog open={showForm} onOpenChange={handleDialogChange}>
         <DialogContent className="bg-white max-w-5xl max-h-[90vh] overflow-y-auto border-0 shadow-lg">
           <DialogHeader>
             <DialogTitle className="text-gray-700">
-              {editingLancamento ? 'Editar LanÃ§amento OrÃ§amentÃ¡rio' : 'Novo LanÃ§amento OrÃ§amentÃ¡rio'}
+              {editingLancamento ? 'Editar Lançamento Orçamentário' : 'Novo Lançamento Orçamentário'}
             </DialogTitle>
             <DialogDescription className="text-gray-700">
-              {editingLancamento ? 'Altere os dados abaixo para atualizar o lanÃ§amento' : 'Preencha os dados abaixo para criar um novo lanÃ§amento'}
+              {editingLancamento ? 'Altere os dados abaixo para atualizar o lançamento' : 'Preencha os dados abaixo para criar um novo lançamento'}
             </DialogDescription>
           </DialogHeader>
           
@@ -752,7 +752,7 @@ export default function Lancamentos() {
                       ))
                     ) : (
                       <div className="px-2 py-1.5 text-sm text-gray-600">
-                        {formData.grupo ? "Nenhuma empresa disponï¿½vel para este grupo" : "Selecione um grupo para listar empresas"}
+                        {formData.grupo ? "Nenhuma empresa disponível para este grupo" : "Selecione um grupo para listar empresas"}
                       </div>
                     )}
                   </SelectContent>
@@ -940,7 +940,7 @@ export default function Lancamentos() {
             {/* Quarta linha - Grupos de Contas em Cascata */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1Âº NÃ­vel *</Label>
+                    <Label htmlFor="grupo-contas-1" className="text-gray-700 font-medium">Grupo de Contas 1º Nível *</Label>
                 <Select value={formData.grupoContas1} onValueChange={handleNivel1Change}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder="Selecione o grupo" />
@@ -960,7 +960,7 @@ export default function Lancamentos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2Âº NÃ­vel *</Label>
+                <Label htmlFor="grupo-contas-2" className="text-gray-700 font-medium">Grupo de Contas 2º Nível *</Label>
                 <Select value={formData.grupoContas2} onValueChange={handleNivel2Change} disabled={!formData.grupoContas1}>
                   <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
                     <SelectValue placeholder={formData.grupoContas1 ? "Selecione o grupo" : "Primeiro selecione o 1Âº nÃ­vel"} />
@@ -982,10 +982,10 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Quinta linha - Conta AnalÃ­tica e Valor */}
+            {/* Quinta linha - Conta Analítica e Valor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta AnalÃ­tica *</Label>
+                <Label htmlFor="conta-analitica" className="text-gray-700 font-medium">Conta Analítica *</Label>
                 <Select value={formData.contaAnalitica} onValueChange={value => setFormData(prev => ({
                 ...prev,
                 contaAnalitica: value
@@ -1015,10 +1015,10 @@ export default function Lancamentos() {
               </div>
             </div>
 
-            {/* Sexta linha - ObservaÃ§Ãµes */}
+            {/* Sexta linha - Observações */}
             <div className="space-y-2">
-              <Label htmlFor="observacoes" className="text-gray-700 font-medium">ObservaÃ§Ãµes</Label>
-              <Textarea id="observacoes" placeholder="ObservaÃ§Ãµes adicionais..." rows={4} value={formData.observacoes} onChange={e => setFormData(prev => ({
+              <Label htmlFor="observacoes" className="text-gray-700 font-medium">Observações</Label>
+              <Textarea id="observacoes" placeholder="Observações adicionais..." rows={4} value={formData.observacoes} onChange={e => setFormData(prev => ({
               ...prev,
               observacoes: e.target.value
             }))} className="bg-white border-gray-300 focus:ring-blue-300" />
@@ -1031,20 +1031,20 @@ export default function Lancamentos() {
               <Button type="submit" className="text-white" style={{
               backgroundColor: '#0047FF'
             }}>
-                {editingLancamento ? 'Atualizar LanÃ§amento' : 'Salvar LanÃ§amento'}
+                {editingLancamento ? 'Atualizar Lançamento' : 'Salvar Lançamento'}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Alert Dialog para ConfirmaÃ§Ã£o de ExclusÃ£o */}
+  {/* Alert Dialog para Confirmação de Exclusão */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-gray-700">Excluir LanÃ§amento</AlertDialogTitle>
+            <AlertDialogTitle className="text-gray-700">Excluir Lançamento</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-600">
-              Tem certeza que deseja excluir este lanÃ§amento? Esta aÃ§Ã£o nÃ£o pode ser desfeita.
+              Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

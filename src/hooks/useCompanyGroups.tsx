@@ -14,31 +14,21 @@ export function useCompanyGroups() {
     queryKey: ['company-groups'],
     queryFn: async (): Promise<CompanyGroup[]> => {
       const { data, error } = await supabase
-        .from('companies_with_group')
-        .select('group_id, group_name, group_code')
-        .not('group_id', 'is', null)
-        .order('group_name');
+        .from('company_groups')
+        .select('id, name, code, created_at, updated_at')
+        .order('name');
 
       if (error) {
         throw new Error(`Failed to fetch company groups: ${error.message}`);
       }
 
-      // Remove duplicates based on group_id
-      const uniqueGroups = (data || []).reduce((acc, current) => {
-        const exists = acc.find(item => item.id === current.group_id);
-        if (!exists) {
-          acc.push({
-            id: current.group_id!,
-            name: current.group_name!,
-            code: current.group_code || null,
-            created_at: '',
-            updated_at: ''
-          });
-        }
-        return acc;
-      }, [] as CompanyGroup[]);
-
-      return uniqueGroups;
+      return (data || []).map((group) => ({
+        id: group.id,
+        name: group.name,
+        code: group.code ?? null,
+        created_at: group.created_at ?? '',
+        updated_at: group.updated_at ?? '',
+      }));
     }
   });
 }
@@ -58,7 +48,7 @@ export function useCompaniesByGroup(groupId: string | null) {
         throw new Error(`Failed to fetch companies by group: ${error.message}`);
       }
 
-      return (data || []).map(c => c.id!).filter(Boolean);
+      return (data || []).map((c) => c.id!).filter(Boolean);
     },
     enabled: !!groupId
   });

@@ -5,8 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { X, Filter } from "lucide-react";
 import { useLevel1Options, useLevel2Options, useAnalyticalAccountOptions } from "@/hooks/useAccountHierarchy";
+import { useCompanyGroups } from "@/hooks/useCompanyGroups";
 
 interface Filters {
+  groupId?: string;
   level_1?: string;
   level_2?: string;
   analytical_account?: string;
@@ -19,14 +21,15 @@ interface PlanoContasFiltrosProps {
 
 export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoContasFiltrosProps) {
   const [localFilters, setLocalFilters] = useState<Filters>(filters);
-  
-  const level1Options = useLevel1Options();
-  const level2Options = useLevel2Options(localFilters.level_1);
-  const analyticalOptions = useAnalyticalAccountOptions(localFilters.level_1, localFilters.level_2);
+  const { data: companyGroups = [] } = useCompanyGroups();
+
+  const level1Options = useLevel1Options(localFilters.groupId);
+  const level2Options = useLevel2Options(localFilters.level_1, localFilters.groupId);
+  const analyticalOptions = useAnalyticalAccountOptions(localFilters.level_1, localFilters.level_2, localFilters.groupId);
 
   const handleFilterChange = (key: keyof Filters, value?: string) => {
     const newFilters = { ...localFilters };
-    
+
     if (value) {
       newFilters[key] = value;
     } else {
@@ -34,10 +37,14 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
     }
 
     // Clear dependent filters when parent changes
-    if (key === 'level_1') {
+    if (key === "groupId") {
+      delete newFilters.level_1;
       delete newFilters.level_2;
       delete newFilters.analytical_account;
-    } else if (key === 'level_2') {
+    } else if (key === "level_1") {
+      delete newFilters.level_2;
+      delete newFilters.analytical_account;
+    } else if (key === "level_2") {
       delete newFilters.analytical_account;
     }
 
@@ -54,6 +61,9 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
   };
 
   const hasActiveFilters = Object.keys(filters).length > 0;
+  const selectedGroupName = filters.groupId
+    ? companyGroups.find((group) => group.id === filters.groupId)?.name ?? "Selecionado"
+    : undefined;
 
   return (
     <Card>
@@ -64,9 +74,9 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
             Filtros
           </CardTitle>
           {hasActiveFilters && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={clearFilters}
               className="text-xs"
             >
@@ -77,65 +87,86 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Nível 1 (Grupo)</label>
-            <Select 
-              value={localFilters.level_1 || "all"} 
-              onValueChange={(value) => handleFilterChange('level_1', value === "all" ? undefined : value)}
+            <label className="text-sm font-medium">Grupo</label>
+            <Select
+              value={localFilters.groupId || "all"}
+              onValueChange={(value) => handleFilterChange("groupId", value === "all" ? undefined : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecionar grupo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os grupos</SelectItem>
-                 {level1Options.map((option) => (
-                   <SelectItem key={option || ""} value={option || ""}>
-                     {option}
-                   </SelectItem>
-                 ))}
+                {companyGroups.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Nível 2 (Subgrupo)</label>
-            <Select 
-              value={localFilters.level_2 || "all"} 
-              onValueChange={(value) => handleFilterChange('level_2', value === "all" ? undefined : value)}
-              disabled={!localFilters.level_1}
+            <label className="text-sm font-medium">NÃƒÂ­vel 1 (Grupo)</label>
+            <Select
+              value={localFilters.level_1 || "all"}
+              onValueChange={(value) => handleFilterChange("level_1", value === "all" ? undefined : value)}
+              disabled={localFilters.groupId ? level1Options.length === 0 : false}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecionar nÃƒÂ­vel 1" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os nÃƒÂ­veis 1</SelectItem>
+                {level1Options.map((option) => (
+                  <SelectItem key={option || ""} value={option || ""}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">NÃƒÂ­vel 2 (Subgrupo)</label>
+            <Select
+              value={localFilters.level_2 || "all"}
+              onValueChange={(value) => handleFilterChange("level_2", value === "all" ? undefined : value)}
+              disabled={!localFilters.level_1 || level2Options.length === 0}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecionar subgrupo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os subgrupos</SelectItem>
-                 {level2Options.map((option) => (
-                   <SelectItem key={option || ""} value={option || ""}>
-                     {option}
-                   </SelectItem>
-                 ))}
+                {level2Options.map((option) => (
+                  <SelectItem key={option || ""} value={option || ""}>
+                    {option}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Conta Analítica</label>
-            <Select 
-              value={localFilters.analytical_account || "all"} 
-              onValueChange={(value) => handleFilterChange('analytical_account', value === "all" ? undefined : value)}
-              disabled={!localFilters.level_2}
+            <label className="text-sm font-medium">Conta AnalÃƒÂ­tica</label>
+            <Select
+              value={localFilters.analytical_account || "all"}
+              onValueChange={(value) => handleFilterChange("analytical_account", value === "all" ? undefined : value)}
+              disabled={!localFilters.level_2 || analyticalOptions.length === 0}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecionar conta" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as contas</SelectItem>
-                 {analyticalOptions.map((option) => (
-                   <SelectItem key={option || ""} value={option || ""}>
-                     {option}
-                   </SelectItem>
-                 ))}
+                {analyticalOptions.map((option) => (
+                  <SelectItem key={option || ""} value={option || ""}>
+                    {option}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -143,11 +174,22 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
 
         <div className="flex items-center justify-between pt-2">
           <div className="flex flex-wrap gap-2">
+            {filters.groupId && (
+              <Badge variant="secondary" className="text-xs">
+                Grupo: {selectedGroupName}
+                <button
+                  onClick={() => handleFilterChange("groupId")}
+                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
             {filters.level_1 && (
               <Badge variant="secondary" className="text-xs">
-                Grupo: {filters.level_1}
-                <button 
-                  onClick={() => handleFilterChange('level_1')}
+                NÃƒÂ­vel 1: {filters.level_1}
+                <button
+                  onClick={() => handleFilterChange("level_1")}
                   className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -157,8 +199,8 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
             {filters.level_2 && (
               <Badge variant="secondary" className="text-xs">
                 Subgrupo: {filters.level_2}
-                <button 
-                  onClick={() => handleFilterChange('level_2')}
+                <button
+                  onClick={() => handleFilterChange("level_2")}
                   className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -168,8 +210,8 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
             {filters.analytical_account && (
               <Badge variant="secondary" className="text-xs">
                 Conta: {filters.analytical_account}
-                <button 
-                  onClick={() => handleFilterChange('analytical_account')}
+                <button
+                  onClick={() => handleFilterChange("analytical_account")}
                   className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -177,7 +219,7 @@ export default function PlanoContasFiltros({ filters, onFiltersChange }: PlanoCo
               </Badge>
             )}
           </div>
-          
+
           <Button onClick={applyFilters} size="sm">
             Aplicar Filtros
           </Button>
