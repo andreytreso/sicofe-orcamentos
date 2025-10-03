@@ -21,7 +21,8 @@ export function useApprovals(filters: ApprovalFilter) {
         .from('approval_items')
         .select(`
           *,
-          companies(name)
+          companies(name),
+          transactions(observations)
         `)
         .order('created_at', { ascending: false });
 
@@ -61,6 +62,7 @@ export function useApprovals(filters: ApprovalFilter) {
                item.status === 'APPROVED' ? 'APROVADO' : 'REPROVADO',
         empresaId: item.company_id,
         periodo: item.period,
+        observacoes: item.transactions?.[0]?.observations || '',
         level: item.approval_level as 1 | 2 | 3
       }));
     },

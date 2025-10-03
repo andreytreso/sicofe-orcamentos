@@ -10,6 +10,7 @@ export interface ApprovalItem {
   status: 'PENDENTE' | 'APROVADO' | 'REPROVADO';
   empresaId: string;
   periodo: string;
+  observacoes?: string;
   children?: ApprovalItem[];
   isExpanded?: boolean;
   level: 1 | 2 | 3; // 1: grupo 1º nível, 2: grupo 2º nível, 3: conta analítica

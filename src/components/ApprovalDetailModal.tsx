@@ -97,6 +97,16 @@ export function ApprovalDetailModal({
             </div>
           </div>
 
+          {approval.observacoes && (
+            <>
+              <Separator />
+              <div>
+                <label className="text-sm font-medium text-gray-600">Observações</label>
+                <p className="font-medium text-gray-900">{approval.observacoes}</p>
+              </div>
+            </>
+          )}
+
           <Separator />
 
           {/* Histórico */}
