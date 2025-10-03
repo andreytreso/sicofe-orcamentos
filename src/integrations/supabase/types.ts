@@ -14,48 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      account_hierarchy_legacy: {
-        Row: {
-          analytical_account: string
-          company_id: string
-          created_at: string
-          id: string
-          level_1: string
-          level_2: string
-        }
-        Insert: {
-          analytical_account: string
-          company_id: string
-          created_at?: string
-          id?: string
-          level_1: string
-          level_2: string
-        }
-        Update: {
-          analytical_account?: string
-          company_id?: string
-          created_at?: string
-          id?: string
-          level_1?: string
-          level_2?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_account_hierarchy_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_account_hierarchy_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       approval_history: {
         Row: {
           action: string
@@ -145,6 +103,13 @@ export type Database = {
             foreignKeyName: "approval_items_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "approval_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -213,6 +178,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
           {
             foreignKeyName: "budgets_company_id_fkey"
             columns: ["company_id"]
@@ -340,13 +312,6 @@ export type Database = {
             foreignKeyName: "companies_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["group_id"]
-          },
-          {
-            foreignKeyName: "companies_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
             referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
@@ -408,6 +373,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cost_centers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
           {
             foreignKeyName: "cost_centers_company_id_fkey"
             columns: ["company_id"]
@@ -527,13 +499,6 @@ export type Database = {
             foreignKeyName: "group_chart_of_accounts_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "account_hierarchy"
-            referencedColumns: ["group_id"]
-          },
-          {
-            foreignKeyName: "group_chart_of_accounts_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
             referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
@@ -624,9 +589,10 @@ export type Database = {
         Row: {
           address: string | null
           cnpj: string | null
-          company_id: string
+          company_id: string | null
           created_at: string | null
           email: string | null
+          group_id: string | null
           id: string
           name: string
           phone: string | null
@@ -636,9 +602,10 @@ export type Database = {
         Insert: {
           address?: string | null
           cnpj?: string | null
-          company_id: string
+          company_id?: string | null
           created_at?: string | null
           email?: string | null
+          group_id?: string | null
           id?: string
           name: string
           phone?: string | null
@@ -648,9 +615,10 @@ export type Database = {
         Update: {
           address?: string | null
           cnpj?: string | null
-          company_id?: string
+          company_id?: string | null
           created_at?: string | null
           email?: string | null
+          group_id?: string | null
           id?: string
           name?: string
           phone?: string | null
@@ -662,6 +630,13 @@ export type Database = {
             foreignKeyName: "fk_suppliers_company_id"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -676,6 +651,13 @@ export type Database = {
             foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -684,6 +666,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies_with_group"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -729,6 +718,7 @@ export type Database = {
           all_cost_centers: boolean
           amount: number
           analytical_account: string
+          collaborator_id: string | null
           company_id: string
           competency_months: string[]
           created_at: string
@@ -737,6 +727,7 @@ export type Database = {
           level_1_group: string
           level_2_group: string
           observations: string | null
+          supplier_id: string | null
           transaction_date: string
           updated_at: string
           user_id: string
@@ -746,6 +737,7 @@ export type Database = {
           all_cost_centers?: boolean
           amount: number
           analytical_account: string
+          collaborator_id?: string | null
           company_id: string
           competency_months?: string[]
           created_at?: string
@@ -754,6 +746,7 @@ export type Database = {
           level_1_group: string
           level_2_group: string
           observations?: string | null
+          supplier_id?: string | null
           transaction_date: string
           updated_at?: string
           user_id: string
@@ -763,6 +756,7 @@ export type Database = {
           all_cost_centers?: boolean
           amount?: number
           analytical_account?: string
+          collaborator_id?: string | null
           company_id?: string
           competency_months?: string[]
           created_at?: string
@@ -771,12 +765,34 @@ export type Database = {
           level_1_group?: string
           level_2_group?: string
           observations?: string | null
+          supplier_id?: string | null
           transaction_date?: string
           updated_at?: string
           user_id?: string
           year?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_collaborator_id_fkey"
+            columns: ["collaborator_id"]
+            isOneToOne: false
+            referencedRelation: "collaborators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_collaborator_id_fkey"
+            columns: ["collaborator_id"]
+            isOneToOne: false
+            referencedRelation: "collaborators_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
           {
             foreignKeyName: "transactions_company_id_fkey"
             columns: ["company_id"]
@@ -789,6 +805,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies_with_group"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -820,6 +850,13 @@ export type Database = {
             foreignKeyName: "user_company_access_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -843,6 +880,7 @@ export type Database = {
           company_id: string | null
           created_at: string | null
           group_id: string | null
+          id: string | null
           level_1: string | null
           level_2: string | null
           status: string | null
@@ -850,20 +888,29 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_account_hierarchy_company_id"
-            columns: ["company_id"]
+            foreignKeyName: "group_chart_of_accounts_group_id_fkey"
+            columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_account_hierarchy_company_id"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies_with_group"
+            referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
         ]
+      }
+      collaborators_with_details: {
+        Row: {
+          company_id: string | null
+          company_name: string | null
+          cost_center_code: string | null
+          cost_center_id: string | null
+          cost_center_name: string | null
+          created_at: string | null
+          group_name: string | null
+          id: string | null
+          name: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Relationships: []
       }
       companies_with_group: {
         Row: {
@@ -889,14 +936,66 @@ export type Database = {
             foreignKeyName: "companies_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers_with_details: {
+        Row: {
+          address: string | null
+          cnpj: string | null
+          company_id: string | null
+          company_name: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          phone: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "account_hierarchy"
-            referencedColumns: ["group_id"]
+            referencedColumns: ["company_id"]
           },
           {
-            foreignKeyName: "companies_group_id_fkey"
-            columns: ["group_id"]
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "company_groups"
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
         ]
