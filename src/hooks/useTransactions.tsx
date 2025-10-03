@@ -127,10 +127,13 @@ export function useTransactions(filters: TransactionFilters) {
         throw new Error('User not authenticated');
       }
 
+      // Exclude cost_center_ids from insert (it's not a column in transactions table)
+      const { cost_center_ids, ...transactionData } = data;
+      
       const { data: result, error } = await supabase
         .from('transactions')
         .insert([{
-          ...data,
+          ...transactionData,
           all_cost_centers: data.all_cost_centers ?? true,
           user_id: user.user.id,
           transaction_date: data.transaction_date ?? new Date().toISOString().split('T')[0],
@@ -175,10 +178,13 @@ export function useTransactions(filters: TransactionFilters) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<TransactionFormData> }) => {
+      // Exclude cost_center_ids from update (it's not a column in transactions table)
+      const { cost_center_ids, ...transactionData } = data;
+      
       const { data: result, error } = await supabase
         .from('transactions')
         .update({
-          ...data,
+          ...transactionData,
           all_cost_centers: data.all_cost_centers,
         })
         .eq('id', id)
