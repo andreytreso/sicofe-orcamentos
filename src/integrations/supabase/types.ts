@@ -59,6 +59,7 @@ export type Database = {
           id: string
           level_1_group: string
           level_2_group: string
+          observations: string | null
           period: string
           requester: string
           status: string
@@ -75,6 +76,7 @@ export type Database = {
           id?: string
           level_1_group: string
           level_2_group: string
+          observations?: string | null
           period: string
           requester: string
           status?: string
@@ -91,6 +93,7 @@ export type Database = {
           id?: string
           level_1_group?: string
           level_2_group?: string
+          observations?: string | null
           period?: string
           requester?: string
           status?: string
