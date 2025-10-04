@@ -18,9 +18,11 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCompanyGroups } from "@/hooks/useCompanyGroups";
+import { toast } from "@/hooks/use-toast";
 
 type CompanyForm = {
   id?: string;
@@ -45,6 +47,7 @@ export default function NovaEmpresaModal({
   onSuccess,
 }: Props) {
   const queryClient = useQueryClient();
+  const { data: groups = [], isLoading: loadingGroups } = useCompanyGroups();
 
   const [form, setForm] = useState<CompanyForm>({
     id: initialData?.id,
@@ -53,6 +56,10 @@ export default function NovaEmpresaModal({
     status: initialData?.status ?? "active",
   });
   const [saving, setSaving] = useState(false);
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupCode, setNewGroupCode] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
 
   /* se abrir para editar, popula o formulário */
   useEffect(() => {
@@ -74,11 +81,62 @@ export default function NovaEmpresaModal({
   const handleChange = (field: keyof CompanyForm, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  /* criar novo grupo ------------------------------------------------------- */
+
+  async function handleCreateGroup() {
+    if (!newGroupName.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome do grupo é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCreatingGroup(true);
+    try {
+      const { data, error } = await supabase
+        .from("company_groups")
+        .insert({ name: newGroupName, code: newGroupCode || null })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["company-groups"] });
+      setForm((prev) => ({ ...prev, group_id: data.id }));
+      setShowNewGroup(false);
+      setNewGroupName("");
+      setNewGroupCode("");
+      
+      toast({
+        title: "Sucesso",
+        description: "Grupo criado com sucesso!",
+        className: "bg-success text-success-foreground",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: toMessage(err),
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingGroup(false);
+    }
+  }
+
   /* submit ----------------------------------------------------------------- */
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!form.name.trim()) return alert("Nome é obrigatório.");
+    if (!form.name.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setSaving(true);
     try {
@@ -91,10 +149,21 @@ export default function NovaEmpresaModal({
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["user-companies"] });
       onSuccess?.();
       onOpenChange(false);
+      
+      toast({
+        title: "Sucesso",
+        description: id ? "Empresa atualizada com sucesso!" : "Empresa criada com sucesso!",
+        className: "bg-success text-success-foreground",
+      });
     } catch (err) {
-      alert(toMessage(err));
+      toast({
+        title: "Erro",
+        description: toMessage(err),
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -125,33 +194,101 @@ export default function NovaEmpresaModal({
             />
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="group_id">Grupo</Label>
-              <Input
-                id="group_id"
-                value={form.group_id || ""}
-                onChange={(e) => handleChange("group_id", e.target.value)}
-                placeholder="ID do grupo (opcional)"
-              />
-            </div>
-            <div>
-              <Label>Status</Label>
-              <Select
-                value={form.status}
-                onValueChange={(v) =>
-                  handleChange("status", v as "active" | "inactive")
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Ativa</SelectItem>
-                  <SelectItem value="inactive">Inativa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <Label>Grupo</Label>
+            {showNewGroup ? (
+              <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                <div>
+                  <Label htmlFor="new_group_name" className="text-xs">Nome do Grupo *</Label>
+                  <Input
+                    id="new_group_name"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    placeholder="Digite o nome do grupo"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="new_group_code" className="text-xs">Código (opcional)</Label>
+                  <Input
+                    id="new_group_code"
+                    value={newGroupCode}
+                    onChange={(e) => setNewGroupCode(e.target.value)}
+                    placeholder="Digite o código"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleCreateGroup}
+                    disabled={creatingGroup}
+                  >
+                    {creatingGroup && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Criar Grupo
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setShowNewGroup(false);
+                      setNewGroupName("");
+                      setNewGroupCode("");
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Select
+                  value={form.group_id || "none"}
+                  onValueChange={(v) => handleChange("group_id", v === "none" ? "" : v)}
+                  disabled={loadingGroups}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um grupo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem grupo</SelectItem>
+                    {groups.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name} {group.code ? `(${group.code})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowNewGroup(true)}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Novo Grupo
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <Label>Status</Label>
+            <Select
+              value={form.status}
+              onValueChange={(v) =>
+                handleChange("status", v as "active" | "inactive")
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Ativa</SelectItem>
+                <SelectItem value="inactive">Inativa</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter className="modal-footer">

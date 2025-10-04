@@ -24,7 +24,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import NovaEmpresaModal from "@/components/NovaEmpresaModal";
-import { useCompaniesTable, useBudgetsTable } from "@/hooks/useSupabaseTable";
+import { useBudgetsTable } from "@/hooks/useSupabaseTable";
+import { useUserCompanies } from "@/hooks/useCompanies";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, isValid } from "date-fns";
@@ -48,6 +49,7 @@ type Company = {
   name: string;
   status: string | null;
   group_id: string | null;
+  group_name: string | null;
   created_at: string;
 };
 
@@ -74,7 +76,7 @@ export default function Empresas() {
     data: companies = [],
     isLoading: loadingCompanies,
     error: errCompanies,
-  } = useCompaniesTable();
+  } = useUserCompanies();
 
   const {
     data: budgets = [],
@@ -219,7 +221,7 @@ export default function Empresas() {
                     <div>
                       <h3 className="font-semibold">{e.name}</h3>
                       <div className="text-sm text-muted-foreground flex gap-4">
-                        <span>{e.group_id || "Sem grupo"}</span>
+                        <span>{e.group_name || "Sem grupo"}</span>
                         <span>Criada em {created}</span>
                       </div>
                     </div>
