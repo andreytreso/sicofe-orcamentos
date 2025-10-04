@@ -58,7 +58,6 @@ export default function NovaEmpresaModal({
   const [saving, setSaving] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupCode, setNewGroupCode] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   /* se abrir para editar, popula o formulário */
@@ -97,7 +96,7 @@ export default function NovaEmpresaModal({
     try {
       const { data, error } = await supabase
         .from("company_groups")
-        .insert({ name: newGroupName, code: newGroupCode || null })
+        .insert({ name: newGroupName })
         .select()
         .single();
 
@@ -107,7 +106,6 @@ export default function NovaEmpresaModal({
       setForm((prev) => ({ ...prev, group_id: data.id }));
       setShowNewGroup(false);
       setNewGroupName("");
-      setNewGroupCode("");
       
       toast({
         title: "Sucesso",
@@ -207,15 +205,6 @@ export default function NovaEmpresaModal({
                     placeholder="Digite o nome do grupo"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="new_group_code" className="text-xs">Código (opcional)</Label>
-                  <Input
-                    id="new_group_code"
-                    value={newGroupCode}
-                    onChange={(e) => setNewGroupCode(e.target.value)}
-                    placeholder="Digite o código"
-                  />
-                </div>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -233,7 +222,6 @@ export default function NovaEmpresaModal({
                     onClick={() => {
                       setShowNewGroup(false);
                       setNewGroupName("");
-                      setNewGroupCode("");
                     }}
                   >
                     Cancelar
