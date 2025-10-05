@@ -14,6 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useSupabaseTable } from '@/hooks/useSupabaseTable';
+import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
   company_id: z.string().min(1, 'Empresa é obrigatória'),
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -73,17 +74,7 @@ export function NovoOrcamentoModal({
   const watchedStatus = watch('status');
   const onSubmit = async (data: FormData) => {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
       const { data: userData } = await supabase.auth.getUser();
-      
-      console.log('Criando orçamento com dados:', {
-        company_id: data.company_id,
-        name: data.name,
-        status: data.status,
-        description: data.description,
-        period_start: data.start_date,
-        period_end: data.end_date,
-      });
       
       await insertBudget({
         company_id: data.company_id,
@@ -97,14 +88,13 @@ export function NovoOrcamentoModal({
         user_id: userData.user?.id
       });
       
-      console.log('Orçamento criado com sucesso!');
       reset();
       setStartDate(undefined);
       setEndDate(undefined);
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      console.error('ERRO REAL ao criar orçamento:', error);
+      console.error('Erro ao criar orçamento:', error);
     }
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
