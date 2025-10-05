@@ -76,6 +76,15 @@ export function NovoOrcamentoModal({
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: userData } = await supabase.auth.getUser();
       
+      console.log('Criando orçamento com dados:', {
+        company_id: data.company_id,
+        name: data.name,
+        status: data.status,
+        description: data.description,
+        period_start: data.start_date,
+        period_end: data.end_date,
+      });
+      
       await insertBudget({
         company_id: data.company_id,
         name: data.name,
@@ -87,13 +96,15 @@ export function NovoOrcamentoModal({
         actual_amount: 0,
         user_id: userData.user?.id
       });
+      
+      console.log('Orçamento criado com sucesso!');
       reset();
       setStartDate(undefined);
       setEndDate(undefined);
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      console.error('Erro ao criar orçamento:', error);
+      console.error('ERRO REAL ao criar orçamento:', error);
     }
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
