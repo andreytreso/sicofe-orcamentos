@@ -51,10 +51,12 @@ export type Database = {
       }
       approval_items: {
         Row: {
+          all_cost_centers: boolean
           amount: number
           analytical_account: string
           approval_level: number
           company_id: string
+          cost_center_names: string | null
           created_at: string
           id: string
           level_1_group: string
@@ -68,10 +70,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          all_cost_centers?: boolean
           amount: number
           analytical_account: string
           approval_level?: number
           company_id: string
+          cost_center_names?: string | null
           created_at?: string
           id?: string
           level_1_group: string
@@ -85,10 +89,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          all_cost_centers?: boolean
           amount?: number
           analytical_account?: string
           approval_level?: number
           company_id?: string
+          cost_center_names?: string | null
           created_at?: string
           id?: string
           level_1_group?: string

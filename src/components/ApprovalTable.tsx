@@ -77,6 +77,7 @@ export function ApprovalTable({
             <TableHead className="text-gray-700 font-medium">Grupo 1º Nível</TableHead>
             <TableHead className="text-gray-700 font-medium">Grupo 2º Nível</TableHead>
             <TableHead className="text-gray-700 font-medium">Conta Analítica</TableHead>
+            <TableHead className="text-gray-700 font-medium">Centro de Custo</TableHead>
             <TableHead className="text-right text-gray-700 font-medium">Valor</TableHead>
             <TableHead className="text-gray-700 font-medium">Solicitante</TableHead>
             <TableHead className="text-gray-700 font-medium">Status</TableHead>
@@ -85,7 +86,7 @@ export function ApprovalTable({
         <TableBody>
           {approvals.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={10} className="text-center py-8 text-gray-500">
                 Nenhum item encontrado
               </TableCell>
             </TableRow>
@@ -122,6 +123,9 @@ export function ApprovalTable({
                 <TableCell className="text-gray-700">{approval.grupo1Nivel}</TableCell>
                 <TableCell className="text-gray-700">{approval.grupo2Nivel}</TableCell>
                 <TableCell className="text-gray-700">{approval.contaAnalitica}</TableCell>
+                <TableCell className="text-gray-700 text-sm">
+                  {approval.allCostCenters ? 'Todos' : (approval.costCenterNames || '-')}
+                </TableCell>
                 <TableCell className="text-right font-medium text-gray-900">
                   {approval.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </TableCell>

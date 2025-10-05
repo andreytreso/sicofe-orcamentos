@@ -593,6 +593,7 @@ export default function Lancamentos() {
                   <TableHead className="text-gray-700">Data</TableHead>
                   <TableHead className="text-gray-700">Empresa</TableHead>
                   <TableHead className="text-gray-700">Conta</TableHead>
+                  <TableHead className="text-gray-700">Centro de Custo</TableHead>
                   <TableHead className="text-gray-700">Descrição</TableHead>
                   <TableHead className="text-right text-gray-700">Valor</TableHead>
                   <TableHead className="text-center text-gray-700">Ações</TableHead>
@@ -608,18 +609,18 @@ export default function Lancamentos() {
                       <TableCell className="text-sm">{new Date(transaction.transaction_date).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell className="text-sm">{companyName}</TableCell>
                       <TableCell className="text-sm">{transaction.analytical_account}</TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {transaction.all_cost_centers ? (
+                          'Todos'
+                        ) : (
+                          (transaction.transaction_cost_centers || [])
+                            .map((tcc) => tcc.cost_centers?.name || '')
+                            .filter(Boolean)
+                            .join(', ') || '-'
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm">
-                        <div className="text-xs text-gray-600">
-                          Centros: {transaction.all_cost_centers ? (
-                            'Todos'
-                          ) : (
-                            (transaction.transaction_cost_centers || [])
-                              .map((tcc) => tcc.cost_centers?.name || '')
-                              .filter(Boolean)
-                              .join(', ') || '-'
-                          )}
-                        </div>
-                        <div>{transaction.description}</div>
+                        {transaction.description}
                       </TableCell>
                       <TableCell className={`text-sm text-right font-medium ${colorClass}`}>
                         {isPositive ? '' : '-'}{formatCurrency(value)}

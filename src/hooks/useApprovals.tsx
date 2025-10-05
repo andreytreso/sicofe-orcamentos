@@ -62,7 +62,9 @@ export function useApprovals(filters: ApprovalFilter) {
         empresaId: item.company_id,
         periodo: item.period,
         observacoes: item.observations || '',
-        level: item.approval_level as 1 | 2 | 3
+        level: item.approval_level as 1 | 2 | 3,
+        allCostCenters: item.all_cost_centers ?? true,
+        costCenterNames: item.cost_center_names || undefined
       }));
     },
     enabled: hasSearched // Só executa a query após busca manual
