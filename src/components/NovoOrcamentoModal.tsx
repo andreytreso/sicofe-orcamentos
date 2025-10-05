@@ -17,7 +17,6 @@ import { useSupabaseTable } from '@/hooks/useSupabaseTable';
 const formSchema = z.object({
   company_id: z.string().min(1, 'Empresa é obrigatória'),
   name: z.string().min(1, 'Nome é obrigatório'),
-  planned_amount: z.number().min(0, 'Valor deve ser positivo'),
   start_date: z.date({
     required_error: 'Data de início é obrigatória'
   }),
@@ -79,6 +78,7 @@ export function NovoOrcamentoModal({
       
       await insertBudget({
         ...data,
+        planned_amount: 0,
         actual_amount: 0,
         user_id: userData.user?.id
       });
@@ -121,29 +121,19 @@ export function NovoOrcamentoModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="planned_amount">Valor Planejado *</Label>
-              <Input type="number" step="0.01" {...register('planned_amount', {
-                valueAsNumber: true
-              })} placeholder="0,00" className="bg-white" />
-              {errors.planned_amount && <p className="text-sm text-destructive mt-1">{errors.planned_amount.message}</p>}
-            </div>
-
-            <div>
-              <Label htmlFor="status">Status *</Label>
-              <Select value={watchedStatus} onValueChange={(value: 'rascunho' | 'ativo' | 'fechado') => setValue('status', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rascunho">Rascunho</SelectItem>
-                  <SelectItem value="ativo" className="bg-white text-sicofe-gray">Ativo</SelectItem>
-                  <SelectItem value="fechado">Fechado</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
-            </div>
+          <div>
+            <Label htmlFor="status">Status *</Label>
+            <Select value={watchedStatus} onValueChange={(value: 'rascunho' | 'ativo' | 'fechado') => setValue('status', value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rascunho">Rascunho</SelectItem>
+                <SelectItem value="ativo" className="bg-white text-sicofe-gray">Ativo</SelectItem>
+                <SelectItem value="fechado">Fechado</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
