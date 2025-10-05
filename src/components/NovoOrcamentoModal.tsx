@@ -77,7 +77,12 @@ export function NovoOrcamentoModal({
       const { data: userData } = await supabase.auth.getUser();
       
       await insertBudget({
-        ...data,
+        company_id: data.company_id,
+        name: data.name,
+        status: data.status,
+        description: data.description,
+        period_start: data.start_date,
+        period_end: data.end_date,
         planned_amount: 0,
         actual_amount: 0,
         user_id: userData.user?.id
