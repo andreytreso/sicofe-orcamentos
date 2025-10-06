@@ -54,7 +54,7 @@ export function DashboardFilters({ filters, onChange, className = "" }: Dashboar
             value={filters.groupId || 'all'} 
             onValueChange={handleGroupChange}
           >
-            <SelectTrigger className="w-40 h-9 text-sm border-gray-300 bg-white">
+            <SelectTrigger className="w-52 h-9 text-sm border-gray-300 bg-white">
               <Building2 className="h-4 w-4 text-sicofe-gray mr-2" />
               <SelectValue placeholder="Todos os grupos" />
             </SelectTrigger>
@@ -85,7 +85,7 @@ export function DashboardFilters({ filters, onChange, className = "" }: Dashboar
           value={filters.companyId || 'all'} 
           onValueChange={handleCompanyChange}
         >
-          <SelectTrigger className="w-40 h-9 text-sm border-gray-300 bg-white">
+          <SelectTrigger className="w-52 h-9 text-sm border-gray-300 bg-white">
             <Building className="h-4 w-4 text-sicofe-gray mr-2" />
             <SelectValue placeholder="Todas as empresas" />
           </SelectTrigger>
