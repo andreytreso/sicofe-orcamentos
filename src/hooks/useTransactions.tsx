@@ -19,6 +19,7 @@ export interface Transaction {
   all_cost_centers?: boolean;
   supplier_id?: string | null;
   collaborator_id?: string | null;
+  budget_id?: string | null;
   created_at: string;
   updated_at: string;
   companies?: {
@@ -54,6 +55,7 @@ export interface TransactionFormData {
   cost_center_ids?: string[]; // optional list when not applying to all
   supplier_id?: string; // optional
   collaborator_id?: string; // optional
+  budget_id: string; // required: orçamento associado
 }
 
 export function useTransactions(filters: TransactionFilters) {

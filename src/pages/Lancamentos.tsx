@@ -18,6 +18,7 @@ import { useCostCenters } from '@/hooks/useCostCenters';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCompanySuppliers } from '@/hooks/useSuppliers';
 import { useCompanyCollaborators } from '@/hooks/useCollaborators';
+import { useBudgets } from '@/hooks/useBudgets';
 interface Lancamento {
   id: string;
   data: string;
@@ -42,6 +43,7 @@ export default function Lancamentos() {
   const [lancamentoToDelete, setLancamentoToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     empresa: "",
+    orcamento: "",
     ano: new Date().getFullYear().toString(),
     grupoContas1: "",
     grupoContas2: "",
@@ -67,6 +69,7 @@ export default function Lancamentos() {
   const {
     data: companies = []
   } = useCompanies();
+  const { data: budgets = [], isLoading: isLoadingBudgets } = useBudgets();
   const { data: costCenters = [], isLoading: isLoadingCostCenters } = useCostCenters(formData.empresa);
   const { data: suppliers = [], isLoading: isLoadingSuppliers } = useCompanySuppliers(formData.empresa);
   const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCompanyCollaborators(formData.empresa);
@@ -198,6 +201,7 @@ export default function Lancamentos() {
 
     setFormData({
       empresa: transaction.company_id,
+      orcamento: transaction.budget_id || "",
       ano: yearStr,
       grupoContas1: transaction.level_1_group,
       grupoContas2: transaction.level_2_group,
@@ -362,10 +366,10 @@ export default function Lancamentos() {
     e.preventDefault();
 
     // Validação dos campos obrigatórios
-    if (!formData.empresa || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
+    if (!formData.empresa || !formData.orcamento || !formData.grupoContas1 || !formData.grupoContas2 || !formData.contaAnalitica || !formData.valor) {
       toast({
         title: "Erro",
-        description: "Todos os campos são obrigatórios.",
+        description: "Todos os campos são obrigatórios, incluindo o orçamento.",
         variant: "destructive"
       });
       return;
@@ -425,6 +429,7 @@ export default function Lancamentos() {
     mesesSelecionados.forEach(mes => {
       const transactionData = {
         company_id: selectedCompany.id,
+        budget_id: formData.orcamento,
         year: parseInt(formData.ano),
         level_1_group: formData.grupoContas1,
         level_2_group: formData.grupoContas2,
@@ -450,6 +455,7 @@ export default function Lancamentos() {
     // Reset form
     setFormData({
       empresa: "",
+      orcamento: "",
       ano: new Date().getFullYear().toString(),
       grupoContas1: "",
       grupoContas2: "",
@@ -478,6 +484,7 @@ export default function Lancamentos() {
     // Reset form
     setFormData({
       empresa: "",
+      orcamento: "",
       ano: new Date().getFullYear().toString(),
       grupoContas1: "",
       grupoContas2: "",
@@ -675,6 +682,31 @@ export default function Lancamentos() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Campo Orçamento - Obrigatório */}
+            <div className="space-y-2">
+              <Label htmlFor="orcamento" className="text-gray-700 font-medium">Orçamento *</Label>
+              <Select 
+                value={formData.orcamento} 
+                onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  orcamento: value
+                }))}
+              >
+                <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                  <SelectValue placeholder={isLoadingBudgets ? "Carregando..." : "Selecione o orçamento"} />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-300 z-50">
+                  {budgets
+                    .filter(b => !formData.empresa || b.company_id === formData.empresa)
+                    .map(budget => (
+                      <SelectItem key={budget.id} value={budget.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                        {budget.name} {budget.companies?.name ? `- ${budget.companies.name}` : ''}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Centros de Custo (dependente da empresa) */}
