@@ -24,7 +24,7 @@ const formSchema = z.object({
   end_date: z.date({
     required_error: 'Data de fim é obrigatória'
   }),
-  status: z.enum(['rascunho', 'ativo', 'fechado']),
+  status: z.enum(['active', 'completed', 'cancelled']),
   description: z.string().optional()
 }).refine(data => data.end_date >= data.start_date, {
   message: "Data de fim deve ser maior ou igual à data de início",
@@ -67,7 +67,7 @@ export function NovoOrcamentoModal({
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: 'rascunho'
+      status: 'active'
     }
   });
   const watchedCompanyId = watch('company_id');
@@ -129,14 +129,14 @@ export function NovoOrcamentoModal({
 
           <div>
             <Label htmlFor="status">Status *</Label>
-            <Select value={watchedStatus} onValueChange={(value: 'rascunho' | 'ativo' | 'fechado') => setValue('status', value)}>
+            <Select value={watchedStatus} onValueChange={(value: 'active' | 'completed' | 'cancelled') => setValue('status', value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="rascunho">Rascunho</SelectItem>
-                <SelectItem value="ativo" className="bg-white text-sicofe-gray">Ativo</SelectItem>
-                <SelectItem value="fechado">Fechado</SelectItem>
+                <SelectItem value="active">Ativo</SelectItem>
+                <SelectItem value="completed">Concluído</SelectItem>
+                <SelectItem value="cancelled">Cancelado</SelectItem>
               </SelectContent>
             </Select>
             {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
