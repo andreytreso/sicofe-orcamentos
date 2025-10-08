@@ -12,14 +12,15 @@ interface CollaboratorRow {
   status: string;
   company_id: string;
   cost_center_id: string | null;
-  companies?: { name?: string | null } | null;
-  cost_centers?: { code?: string | null; name?: string | null } | null;
+  company_name?: string | null;
+  cost_center_code?: string | null;
+  cost_center_name?: string | null;
 }
 
 export default function Colaboradores() {
   const [showModal, setShowModal] = useState(false);
-  const { data, isLoading } = useSupabaseTable('collaborators', {
-    select: `*, companies(name), cost_centers(code, name)`,
+  const { data, isLoading } = useSupabaseTable('collaborators_with_details', {
+    select: '*',
     orderBy: { column: 'name', ascending: true }
   });
 
@@ -54,8 +55,8 @@ export default function Colaboradores() {
                     <CardTitle className="text-lg">{col.name}</CardTitle>
                     <CardDescription>
                       {(col.group_name || '')}
-                      {col.companies?.name ? ` | Empresa: ${col.companies?.name}` : ''}
-                      {col.cost_centers?.name ? ` | CC: ${col.cost_centers?.code ? col.cost_centers?.code + ' - ' : ''}${col.cost_centers?.name}` : ''}
+                      {col.company_name ? ` | Empresa: ${col.company_name}` : ''}
+                      {col.cost_center_name ? ` | CC: ${col.cost_center_code ? col.cost_center_code + ' - ' : ''}${col.cost_center_name}` : ''}
                       {col.status ? ` | Status: ${col.status}` : ''}
                     </CardDescription>
                   </div>
