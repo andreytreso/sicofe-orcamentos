@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,9 +22,17 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSuccess?: () => void;
+  initialData?: {
+    id: string;
+    name: string;
+    group_name: string | null;
+    status: string;
+    company_id: string;
+    cost_center_id: string | null;
+  };
 }
 
-export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: Props) {
+export default function NovoColaboradorModal({ open, onOpenChange, onSuccess, initialData }: Props) {
   const queryClient = useQueryClient();
   const { data: companies = [] } = useUserCompanies();
 
@@ -37,6 +45,26 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: 
   });
   const { data: costCenters = [] } = useCostCenters(form.company_id);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name || "",
+        group_name: initialData.group_name || "",
+        status: (initialData.status as "active" | "inactive") || "active",
+        company_id: initialData.company_id || "",
+        cost_center_id: initialData.cost_center_id || "",
+      });
+    } else {
+      setForm({
+        name: "",
+        group_name: "",
+        status: "active",
+        company_id: "",
+        cost_center_id: "",
+      });
+    }
+  }, [initialData, open]);
 
   const handleChange = (field: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -56,14 +84,25 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: 
         company_id: form.company_id,
         cost_center_id: form.cost_center_id || null,
       };
-      const { error } = await supabase.from("collaborators" as any).insert(payload);
-      if (error) throw error;
+      
+      if (initialData) {
+        const { error } = await supabase
+          .from("collaborators" as any)
+          .update(payload)
+          .eq("id", initialData.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("collaborators" as any).insert(payload);
+        if (error) throw error;
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["collaborators"] });
+      queryClient.invalidateQueries({ queryKey: ["collaborators_with_details"] });
       onSuccess?.();
       onOpenChange(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      alert(message || "Erro ao criar colaborador.");
+      alert(message || "Erro ao salvar colaborador.");
     } finally {
       setSaving(false);
     }
@@ -73,9 +112,11 @@ export default function NovoColaboradorModal({ open, onOpenChange, onSuccess }: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
-          <DialogTitle className="modal-title">Novo Colaborador</DialogTitle>
+          <DialogTitle className="modal-title">
+            {initialData ? "Editar Colaborador" : "Novo Colaborador"}
+          </DialogTitle>
           <DialogDescription className="modal-desc">
-            Preencha os dados do colaborador
+            {initialData ? "Altere os dados do colaborador" : "Preencha os dados do colaborador"}
           </DialogDescription>
         </DialogHeader>
 

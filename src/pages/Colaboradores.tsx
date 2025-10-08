@@ -1,8 +1,26 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, MoreVertical, Edit, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { useSupabaseTable } from "@/hooks/useSupabaseTable";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import NovoColaboradorModal from "@/components/NovoColaboradorModal";
 
 interface CollaboratorRow {
@@ -18,11 +36,25 @@ interface CollaboratorRow {
 }
 
 export default function Colaboradores() {
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<CollaboratorRow | undefined>();
+  const [toDelete, setToDelete] = useState<CollaboratorRow | undefined>();
   const { data, isLoading } = useSupabaseTable('collaborators_with_details', {
     select: '*',
     orderBy: { column: 'name', ascending: true }
   });
+
+  async function handleDelete(id: string) {
+    const { error } = await supabase.from("collaborators").delete().eq("id", id);
+    
+    if (error) {
+      alert(error.details ?? error.message);
+      return;
+    }
+    
+    queryClient.invalidateQueries({ queryKey: ["collaborators_with_details"] });
+  }
 
   if (isLoading) {
     return (
@@ -40,7 +72,13 @@ export default function Colaboradores() {
             <h1 className="text-3xl font-bold tracking-tight text-sicofe-navy">Colaboradores</h1>
             <p className="text-sicofe-gray">Gerencie os colaboradores das empresas</p>
           </div>
-          <Button onClick={() => setShowModal(true)} className="text-white bg-sicofe-blue">
+          <Button 
+            onClick={() => {
+              setEditing(undefined);
+              setShowModal(true);
+            }} 
+            className="text-white bg-sicofe-blue"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Novo Colaborador
           </Button>
@@ -51,7 +89,7 @@ export default function Colaboradores() {
             <Card key={col.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-1">
                     <CardTitle className="text-lg">{col.name}</CardTitle>
                     <CardDescription>
                       {(col.group_name || '')}
@@ -60,6 +98,34 @@ export default function Colaboradores() {
                       {col.status ? ` | Status: ${col.status}` : ''}
                     </CardDescription>
                   </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    
+                    <DropdownMenuContent align="end" className="bg-white z-50">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setEditing(col);
+                          setTimeout(() => setShowModal(true), 0);
+                        }}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => setTimeout(() => setToDelete(col), 0)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </CardHeader>
             </Card>
@@ -75,7 +141,49 @@ export default function Colaboradores() {
         )}
       </div>
 
-      <NovoColaboradorModal open={showModal} onOpenChange={setShowModal} />
+      <AlertDialog
+        open={!!toDelete}
+        onOpenChange={(o) => {
+          if (!o) setToDelete(undefined);
+        }}
+      >
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Deseja excluir o colaborador
+              <b> {toDelete?.name}</b>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (toDelete) {
+                  handleDelete(toDelete.id);
+                }
+                setToDelete(undefined);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <NovoColaboradorModal 
+        open={showModal} 
+        onOpenChange={(v) => {
+          if (!v) setEditing(undefined);
+          setShowModal(v);
+        }}
+        initialData={editing}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["collaborators_with_details"] });
+          setEditing(undefined);
+        }}
+      />
     </>
   );
 }

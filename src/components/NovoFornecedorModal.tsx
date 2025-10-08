@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,9 +21,19 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSuccess?: () => void;
+  initialData?: {
+    id: string;
+    name: string;
+    cnpj?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    status: string;
+    company_id: string;
+  };
 }
 
-export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: Props) {
+export default function NovoFornecedorModal({ open, onOpenChange, onSuccess, initialData }: Props) {
   const queryClient = useQueryClient();
   const { data: companies = [] } = useUserCompanies();
 
@@ -38,6 +48,30 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
   });
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name || "",
+        cnpj: initialData.cnpj || "",
+        email: initialData.email || "",
+        phone: initialData.phone || "",
+        address: initialData.address || "",
+        status: (initialData.status as "ativo" | "inativo") || "ativo",
+        company_id: initialData.company_id || "",
+      });
+    } else {
+      setForm({
+        name: "",
+        cnpj: "",
+        email: "",
+        phone: "",
+        address: "",
+        status: "ativo",
+        company_id: "",
+      });
+    }
+  }, [initialData, open]);
+
   const handleChange = (field: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -49,14 +83,23 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("suppliers").insert(form);
-      if (error) throw error;
+      if (initialData) {
+        const { error } = await supabase
+          .from("suppliers")
+          .update(form)
+          .eq("id", initialData.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("suppliers").insert(form);
+        if (error) throw error;
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
       onSuccess?.();
       onOpenChange(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      alert(message || "Erro ao criar fornecedor.");
+      alert(message || "Erro ao salvar fornecedor.");
     } finally {
       setSaving(false);
     }
@@ -66,9 +109,11 @@ export default function NovoFornecedorModal({ open, onOpenChange, onSuccess }: P
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-wrapper">
         <DialogHeader className="modal-header">
-          <DialogTitle className="modal-title">Novo Fornecedor</DialogTitle>
+          <DialogTitle className="modal-title">
+            {initialData ? "Editar Fornecedor" : "Novo Fornecedor"}
+          </DialogTitle>
           <DialogDescription className="modal-desc">
-            Preencha os dados do fornecedor
+            {initialData ? "Altere os dados do fornecedor" : "Preencha os dados do fornecedor"}
           </DialogDescription>
         </DialogHeader>
 
