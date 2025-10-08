@@ -662,8 +662,8 @@ export default function Lancamentos() {
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Primeira linha - Empresa */}
-            <div className="grid grid-cols-1">
+            {/* Primeira linha - Empresa e Orçamento lado a lado */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="empresa" className="text-gray-700 font-medium">Empresa *</Label>
                 <Select value={formData.empresa} onValueChange={value => setFormData(prev => ({
@@ -682,31 +682,30 @@ export default function Lancamentos() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            {/* Campo Orçamento - Obrigatório */}
-            <div className="space-y-2">
-              <Label htmlFor="orcamento" className="text-gray-700 font-medium">Orçamento *</Label>
-              <Select 
-                value={formData.orcamento} 
-                onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  orcamento: value
-                }))}
-              >
-                <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
-                  <SelectValue placeholder={isLoadingBudgets ? "Carregando..." : "Selecione o orçamento"} />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-300 z-50">
-                  {budgets
-                    .filter(b => !formData.empresa || b.company_id === formData.empresa)
-                    .map(budget => (
-                      <SelectItem key={budget.id} value={budget.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
-                        {budget.name} {budget.companies?.name ? `- ${budget.companies.name}` : ''}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="orcamento" className="text-gray-700 font-medium">Orçamento *</Label>
+                <Select 
+                  value={formData.orcamento} 
+                  onValueChange={value => setFormData(prev => ({
+                    ...prev,
+                    orcamento: value
+                  }))}
+                >
+                  <SelectTrigger className="bg-white border-gray-300 focus:ring-blue-300 h-11">
+                    <SelectValue placeholder={isLoadingBudgets ? "Carregando..." : "Selecione o orçamento"} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-300 z-50">
+                    {budgets
+                      .filter(b => !formData.empresa || b.company_id === formData.empresa)
+                      .map(budget => (
+                        <SelectItem key={budget.id} value={budget.id} className="bg-white hover:bg-blue-100 focus:bg-blue-100 focus:text-blue-900">
+                          {budget.name} {budget.companies?.name ? `- ${budget.companies.name}` : ''}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Centros de Custo (dependente da empresa) */}
