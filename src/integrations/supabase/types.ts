@@ -126,6 +126,13 @@ export type Database = {
             foreignKeyName: "approval_items_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies_limited"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
@@ -199,6 +206,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_limited"
             referencedColumns: ["id"]
           },
           {
@@ -394,6 +408,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_limited"
             referencedColumns: ["id"]
           },
           {
@@ -653,6 +674,13 @@ export type Database = {
             foreignKeyName: "fk_suppliers_company_id"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies_limited"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
@@ -668,6 +696,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_limited"
             referencedColumns: ["id"]
           },
           {
@@ -727,6 +762,7 @@ export type Database = {
           all_cost_centers: boolean
           amount: number
           analytical_account: string
+          budget_id: string | null
           collaborator_id: string | null
           company_id: string
           competency_months: string[]
@@ -746,6 +782,7 @@ export type Database = {
           all_cost_centers?: boolean
           amount: number
           analytical_account: string
+          budget_id?: string | null
           collaborator_id?: string | null
           company_id: string
           competency_months?: string[]
@@ -765,6 +802,7 @@ export type Database = {
           all_cost_centers?: boolean
           amount?: number
           analytical_account?: string
+          budget_id?: string | null
           collaborator_id?: string | null
           company_id?: string
           competency_months?: string[]
@@ -781,6 +819,13 @@ export type Database = {
           year?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_collaborator_id_fkey"
             columns: ["collaborator_id"]
@@ -807,6 +852,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_limited"
             referencedColumns: ["id"]
           },
           {
@@ -873,6 +925,69 @@ export type Database = {
             foreignKeyName: "user_company_access_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies_limited"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_with_group"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          company_id: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_hierarchy"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_limited"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
@@ -920,6 +1035,44 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: []
+      }
+      companies_limited: {
+        Row: {
+          cnpj: string | null
+          created_at: string | null
+          group_id: string | null
+          id: string | null
+          name: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string | null
+          group_id?: string | null
+          id?: string | null
+          name?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string | null
+          group_id?: string | null
+          id?: string | null
+          name?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       companies_with_group: {
         Row: {
@@ -983,6 +1136,13 @@ export type Database = {
             foreignKeyName: "fk_suppliers_company_id"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies_limited"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_suppliers_company_id"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
@@ -1004,6 +1164,13 @@ export type Database = {
             foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies_limited"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies_with_group"
             referencedColumns: ["id"]
           },
@@ -1011,6 +1178,13 @@ export type Database = {
       }
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: {
         Args: { uid: string }
         Returns: boolean
@@ -1021,7 +1195,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user" | "aprovador" | "pacoteiro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1148,6 +1322,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user", "aprovador", "pacoteiro"],
+    },
   },
 } as const
